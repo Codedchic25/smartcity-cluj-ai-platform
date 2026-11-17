@@ -60,7 +60,10 @@ class GroqProvider:
     """Manages secure communication lifecycles targeting Groq Cloud endpoints."""
 
     FALLBACK_MODELS: Final[tuple[str, ...]] = (
+        "llama-3.3-70b-versatile",
+        "llama-3.1-8b-instant",
         "openai/gpt-oss-120b",
+        "openai/gpt-oss-20b",
         "qwen/qwen3.8-27b",
     )
 
@@ -75,7 +78,7 @@ class GroqProvider:
     def __init__(
         self,
         api_key_env_var: str = "GROQ_API_KEY",
-        model_target: str = "openai/gpt-oss-20b",
+        model_target: str = "llama-3.3-70b-versatile",
     ) -> None:
         """Initialize the provider fetching credentials from secrets or environment."""
         self._api_keys: tuple[str, ...] = self._collect_api_keys(api_key_env_var)
@@ -268,7 +271,7 @@ class GroqProvider:
                             "model": candidate_model,
                             "messages": messages,
                             "temperature": 0.2,
-                            "max_tokens": 2048,
+                            "max_tokens": 800,
                             "top_p": 0.9,
                             "stream": False,
                         }
