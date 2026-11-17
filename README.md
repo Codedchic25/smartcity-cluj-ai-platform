@@ -9,8 +9,7 @@
 
 If you are a Recruiter, Technical Manager, or System Auditor, you do not need to clone the repository or configure Python locally to evaluate this platform.
 
-You can access the live, fully production-hardened cloud environment instantly: 👉 **[Launch Smart City Cluj-Napoca Live Dashboard](https://cluj-smartcity-iot-platform-secure-sha256-app-and-app-json-met.streamlit.app/)**
-
+You can access the live, fully production-hardened cloud environment instantly: 👉 **[https://smartcity-cluj-ai-platform.streamlit.app/](https://smartcity-cluj-ai-platform.streamlit.app/)**
 * **Authorized Username:** `admin`
 * **Plaintext Access Key:** `cluj2026`
 
