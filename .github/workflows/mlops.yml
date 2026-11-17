@@ -1,0 +1,85 @@
+name: Smart City LLMOps Evaluation
+
+'on':
+  workflow_dispatch:
+  schedule:
+    - cron: "0 6 * * 1"
+  push:
+    branches: [main]
+    paths:
+      - app/ai/**
+      - .github/workflows/mlops.yml
+      - ai_tests/**
+  pull_request:
+    branches: [main]
+    paths:
+      - app/ai/**
+      - .github/workflows/mlops.yml
+      - ai_tests/**
+
+permissions:
+  contents: read
+
+jobs:
+  llm-evaluation:
+    name: LLM and Python guardrail evaluations
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          version: latest
+
+      - name: Install dependencies
+        run: uv sync --frozen --all-groups
+
+      - name: Check Groq API key availability
+        id: groq_secret
+        shell: bash
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          GROQ_API_KEY_1: ${{ secrets.GROQ_API_KEY_1 }}
+          GROQ_API_KEY_2: ${{ secrets.GROQ_API_KEY_2 }}
+          GROQ_API_KEYS: ${{ secrets.GROQ_API_KEYS }}
+        run: |
+          if [[ -n "$GROQ_API_KEY" || -n "$GROQ_API_KEY_1" || -n "$GROQ_API_KEY_2" || -n "$GROQ_API_KEYS" ]]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Skip external evaluations without Groq credentials
+        if: steps.groq_secret.outputs.available != 'true'
+        run: echo "::notice::LLM evaluations skipped because GROQ_API_KEY is not configured (for example, on forked pull requests)."
+
+      - name: Run native RAG guardrail evaluation
+        run: uv run python ai_tests/run_guardrail_eval.py
+
+      - name: Run Python LLM evaluation
+        if: steps.groq_secret.outputs.available == 'true'
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          GROQ_API_KEY_1: ${{ secrets.GROQ_API_KEY_1 }}
+          GROQ_API_KEY_2: ${{ secrets.GROQ_API_KEY_2 }}
+          GROQ_API_KEYS: ${{ secrets.GROQ_API_KEYS }}
+        run: uv run python ai_tests/run_llm_eval.py
+
+      - name: Upload LLM evaluation reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: llmops-evaluation-reports
+          path: |
+            ai_tests/llm_eval_report.json
+            ai_tests/rag_guardrails_report.json
+          if-no-files-found: warn
