@@ -52,6 +52,13 @@ This document centralizes common operational errors, infrastructure bottlenecks,
 * **Fail-Safe Mechanism:** The application rotates through `GROQ_API_KEY`, `GROQ_API_KEY_1`, `GROQ_API_KEY_2` (or the comma-separated `GROQ_API_KEYS` list) upon receiving HTTP 401, 429, or 5xx responses. Keys can be configured in `.env` or Streamlit Cloud Secrets. If all keys are exhausted, the UI displays a controlled error message.
 * **Impact:** The rest of the platform remains **100% functional and locally isolated**. SQLite telemetry collection, NumPy Pearson correlation matrix rendering, Plotly chart generation, and cooldown-throttled alert logging in `security_alerts.log` continue running uninterrupted and completely offline.
 
+### 🚨 Issue: `Received an empty message context response` or `0.0%` LLM Scenario Compliance on reasoning models
+* **Cause:** Reasoning-capable models (such as `openai/gpt-oss-20b`, `openai/gpt-oss-120b`, `qwen3`, or `deepseek-r1`) allocate completion tokens to internal chain-of-thought reasoning before emitting the final JSON payload. If `max_tokens` is set too low (e.g., `800`), the model exhausts its token budget during internal reasoning and returns an empty `message.content` string (`""`), causing UI recommendations to appear blank and scenario evaluations to fail.
+* **Resolution:**
+  1. Ensure `GroqProvider` (`app/ai/groq_provider.py`) dynamically allocates an expanded token budget (`max_tokens=2048`) for reasoning models while preserving `max_tokens=800` for standard instruction models (`llama-3.3-70b-versatile`, `llama-3.1-8b-instant`).
+  2. Treat empty `message.content` responses as a retryable model failure so the gateway automatically falls back to the next candidate model in `FALLBACK_MODELS` instead of returning early.
+  3. Isolate the per-attempt message history (`list(base_messages)`) so grounding validation retries do not leak correction prompts into subsequent fallback models.
+
 ---
 
 ## 4. Automated Testing and Reporting Desynchronizations

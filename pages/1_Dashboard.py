@@ -118,8 +118,6 @@ class DashboardRepository:
         except (sqlite3.Error, ValidationError):
             return []
 
-
-
     def get_historical_telemetry(self, sensor_id: int, limit: int = 20) -> list[TelemetryReading]:
         """Retrieve and validate recent sensory readings safely within an isolated context.
 
@@ -165,6 +163,8 @@ class DashboardRepository:
                 )
             )
         return synthetic_readings
+
+
 class VisualizationEngine:
     """Generates analytical time-series graphs using multi-panel Plotly dark templates."""
 

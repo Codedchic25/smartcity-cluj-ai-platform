@@ -1,6 +1,6 @@
 {
-    "created": 1794917166.2010834,
-    "duration": 9.377387523651123,
+    "created": 1794989385.4323702,
+    "duration": 3.791529893875122,
     "exitcode": 0,
     "root": "C:\\Users\\user\\Documents\\SmartCity-Audit",
     "environment": {},
@@ -309,13 +309,13 @@
                 ""
             ],
             "setup": {
-                "duration": 0.0012784999998984858,
+                "duration": 0.0010339000000385568,
                 "outcome": "passed"
             },
             "call": {
-                "duration": 0.010692299998481758,
+                "duration": 0.0029061999957775697,
                 "outcome": "passed",
-                "stderr": "2026-11-17 14:06:00.134 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n2026-11-17 14:06:00.134 WARNING streamlit.runtime.state.session_state_proxy: Session state does not function when running a script without `streamlit run`\n",
+                "stderr": "2026-11-18 10:09:43.004 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n2026-11-18 10:09:43.004 WARNING streamlit.runtime.state.session_state_proxy: Session state does not function when running a script without `streamlit run`\n",
                 "log": [
                     {
                         "name": "app.ai.groq_provider",
@@ -329,21 +329,21 @@
                         "exc_info": null,
                         "exc_text": null,
                         "stack_info": null,
-                        "lineno": 351,
+                        "lineno": 481,
                         "funcName": "generate_completion",
-                        "created": 1794917160.1363244,
-                        "msecs": 136.0,
-                        "relativeCreated": 4263.362884521484,
-                        "thread": 7664,
+                        "created": 1794989383.0048308,
+                        "msecs": 4.0,
+                        "relativeCreated": 1796.6232299804688,
+                        "thread": 5444,
                         "threadName": "MainThread",
                         "processName": "MainProcess",
-                        "process": 16088,
+                        "process": 2312,
                         "taskName": null
                     }
                 ]
             },
             "teardown": {
-                "duration": 0.0019534999955794774,
+                "duration": 0.0007936000038171187,
                 "outcome": "passed"
             }
         },
@@ -362,13 +362,13 @@
                 ""
             ],
             "setup": {
-                "duration": 0.0016640000030747615,
+                "duration": 0.0010231000051135197,
                 "outcome": "passed"
             },
             "call": {
-                "duration": 0.004471300002478529,
+                "duration": 0.0019696000090334564,
                 "outcome": "passed",
-                "stderr": "2026-11-17 14:06:00.146 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n",
+                "stderr": "2026-11-18 10:09:43.012 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n",
                 "log": [
                     {
                         "name": "app.ai.groq_provider",
@@ -382,21 +382,21 @@
                         "exc_info": null,
                         "exc_text": null,
                         "stack_info": null,
-                        "lineno": 351,
+                        "lineno": 481,
                         "funcName": "generate_completion",
-                        "created": 1794917160.1467721,
-                        "msecs": 146.0,
-                        "relativeCreated": 4273.810625076294,
-                        "thread": 7664,
+                        "created": 1794989383.012868,
+                        "msecs": 12.0,
+                        "relativeCreated": 1804.6603202819824,
+                        "thread": 5444,
                         "threadName": "MainThread",
                         "processName": "MainProcess",
-                        "process": 16088,
+                        "process": 2312,
                         "taskName": null
                     }
                 ]
             },
             "teardown": {
-                "duration": 0.003736799997568596,
+                "duration": 0.0008582000009482726,
                 "outcome": "passed"
             }
         },
@@ -415,13 +415,13 @@
                 ""
             ],
             "setup": {
-                "duration": 0.0025558999986969866,
+                "duration": 0.0005923999997321516,
                 "outcome": "passed"
             },
             "call": {
-                "duration": 0.004222999996272847,
+                "duration": 0.0009000999998534098,
                 "outcome": "passed",
-                "stderr": "2026-11-17 14:06:00.156 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n",
+                "stderr": "2026-11-18 10:09:43.015 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n",
                 "log": [
                     {
                         "name": "app.ai.groq_provider",
@@ -435,21 +435,21 @@
                         "exc_info": null,
                         "exc_text": null,
                         "stack_info": null,
-                        "lineno": 351,
+                        "lineno": 481,
                         "funcName": "generate_completion",
-                        "created": 1794917160.1629646,
-                        "msecs": 162.0,
-                        "relativeCreated": 4290.003061294556,
-                        "thread": 7664,
+                        "created": 1794989383.0157003,
+                        "msecs": 15.0,
+                        "relativeCreated": 1807.492733001709,
+                        "thread": 5444,
                         "threadName": "MainThread",
                         "processName": "MainProcess",
-                        "process": 16088,
+                        "process": 2312,
                         "taskName": null
                     }
                 ]
             },
             "teardown": {
-                "duration": 0.001865199999883771,
+                "duration": 0.000338700003339909,
                 "outcome": "passed"
             }
         },
@@ -465,15 +465,15 @@
                 ""
             ],
             "setup": {
-                "duration": 0.0020432000019354746,
+                "duration": 0.0005101000133436173,
                 "outcome": "passed"
             },
             "call": {
-                "duration": 0.0025300000052084215,
+                "duration": 0.003287400002591312,
                 "outcome": "passed"
             },
             "teardown": {
-                "duration": 0.0012854000015067868,
+                "duration": 0.0009148999961325899,
                 "outcome": "passed"
             }
         },
@@ -489,16 +489,16 @@
                 ""
             ],
             "setup": {
-                "duration": 0.0007553000032203272,
+                "duration": 0.0005181999877095222,
                 "outcome": "passed"
             },
             "call": {
-                "duration": 0.003352600004291162,
+                "duration": 0.001058500012732111,
                 "outcome": "passed",
-                "stderr": "2026-11-17 14:06:00.177 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n"
+                "stderr": "2026-11-18 10:09:43.024 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n"
             },
             "teardown": {
-                "duration": 0.0019945000021834858,
+                "duration": 0.0006025999900884926,
                 "outcome": "passed"
             }
         },
@@ -514,16 +514,16 @@
                 ""
             ],
             "setup": {
-                "duration": 0.0014245999991544522,
+                "duration": 0.0004287999909138307,
                 "outcome": "passed"
             },
             "call": {
-                "duration": 0.0028021000034641474,
+                "duration": 0.0006231000006664544,
                 "outcome": "passed",
                 "log": [
                     {
                         "name": "app.ai.groq_provider",
-                        "msg": "Groq model 'openai/gpt-oss-20b' rejected JSON mode; retrying with JSON prompt.",
+                        "msg": "Groq model 'llama-3.3-70b-versatile' rejected JSON mode; retrying without it.",
                         "args": null,
                         "levelname": "WARNING",
                         "levelno": 30,
@@ -533,21 +533,21 @@
                         "exc_info": null,
                         "exc_text": null,
                         "stack_info": null,
-                        "lineno": 287,
-                        "funcName": "generate_completion",
-                        "created": 1794917160.1860209,
-                        "msecs": 186.0,
-                        "relativeCreated": 4313.059329986572,
-                        "thread": 7664,
+                        "lineno": 304,
+                        "funcName": "_request_completion",
+                        "created": 1794989383.0285978,
+                        "msecs": 28.0,
+                        "relativeCreated": 1820.390224456787,
+                        "thread": 5444,
                         "threadName": "MainThread",
                         "processName": "MainProcess",
-                        "process": 16088,
+                        "process": 2312,
                         "taskName": null
                     }
                 ]
             },
             "teardown": {
-                "duration": 0.0028634000045713037,
+                "duration": 0.001445000001695007,
                 "outcome": "passed"
             }
         },
@@ -563,17 +563,17 @@
                 ""
             ],
             "setup": {
-                "duration": 0.0013000999970245175,
+                "duration": 0.0006488999933935702,
                 "outcome": "passed"
             },
             "call": {
-                "duration": 0.00320099999953527,
+                "duration": 0.0019159000075887889,
                 "outcome": "passed",
-                "stderr": "2026-11-17 14:06:00.194 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n",
+                "stderr": "2026-11-18 10:09:43.032 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n",
                 "log": [
                     {
                         "name": "app.ai.groq_provider",
-                        "msg": "Groq model 'openai/gpt-oss-20b' rejected JSON mode; retrying with JSON prompt.",
+                        "msg": "Groq model 'llama-3.3-70b-versatile' rejected JSON mode; retrying without it.",
                         "args": null,
                         "levelname": "WARNING",
                         "levelno": 30,
@@ -583,20 +583,20 @@
                         "exc_info": null,
                         "exc_text": null,
                         "stack_info": null,
-                        "lineno": 287,
-                        "funcName": "generate_completion",
-                        "created": 1794917160.1945517,
-                        "msecs": 194.0,
-                        "relativeCreated": 4321.590185165405,
-                        "thread": 7664,
+                        "lineno": 304,
+                        "funcName": "_request_completion",
+                        "created": 1794989383.0328603,
+                        "msecs": 32.0,
+                        "relativeCreated": 1824.6526718139648,
+                        "thread": 5444,
                         "threadName": "MainThread",
                         "processName": "MainProcess",
-                        "process": 16088,
+                        "process": 2312,
                         "taskName": null
                     },
                     {
                         "name": "app.ai.groq_provider",
-                        "msg": "Groq model 'openai/gpt-oss-20b' failed JSON/availability check; trying the next model.",
+                        "msg": "Groq model 'llama-3.3-70b-versatile' is unavailable; trying the next model.",
                         "args": null,
                         "levelname": "WARNING",
                         "levelno": 30,
@@ -606,20 +606,20 @@
                         "exc_info": null,
                         "exc_text": null,
                         "stack_info": null,
-                        "lineno": 344,
+                        "lineno": 473,
                         "funcName": "generate_completion",
-                        "created": 1794917160.1945517,
-                        "msecs": 194.0,
-                        "relativeCreated": 4321.590185165405,
-                        "thread": 7664,
+                        "created": 1794989383.0328603,
+                        "msecs": 32.0,
+                        "relativeCreated": 1824.6526718139648,
+                        "thread": 5444,
                         "threadName": "MainThread",
                         "processName": "MainProcess",
-                        "process": 16088,
+                        "process": 2312,
                         "taskName": null
                     },
                     {
                         "name": "app.ai.groq_provider",
-                        "msg": "Groq model 'openai/gpt-oss-120b' rejected JSON mode; retrying with JSON prompt.",
+                        "msg": "Groq model 'llama-3.1-8b-instant' rejected JSON mode; retrying without it.",
                         "args": null,
                         "levelname": "WARNING",
                         "levelno": 30,
@@ -629,20 +629,20 @@
                         "exc_info": null,
                         "exc_text": null,
                         "stack_info": null,
-                        "lineno": 287,
-                        "funcName": "generate_completion",
-                        "created": 1794917160.1945517,
-                        "msecs": 194.0,
-                        "relativeCreated": 4321.590185165405,
-                        "thread": 7664,
+                        "lineno": 304,
+                        "funcName": "_request_completion",
+                        "created": 1794989383.0328603,
+                        "msecs": 32.0,
+                        "relativeCreated": 1824.6526718139648,
+                        "thread": 5444,
                         "threadName": "MainThread",
                         "processName": "MainProcess",
-                        "process": 16088,
+                        "process": 2312,
                         "taskName": null
                     },
                     {
                         "name": "app.ai.groq_provider",
-                        "msg": "Groq model 'openai/gpt-oss-120b' failed JSON/availability check; trying the next model.",
+                        "msg": "Groq model 'llama-3.1-8b-instant' is unavailable; trying the next model.",
                         "args": null,
                         "levelname": "WARNING",
                         "levelno": 30,
@@ -652,20 +652,20 @@
                         "exc_info": null,
                         "exc_text": null,
                         "stack_info": null,
-                        "lineno": 344,
+                        "lineno": 473,
                         "funcName": "generate_completion",
-                        "created": 1794917160.1945517,
-                        "msecs": 194.0,
-                        "relativeCreated": 4321.590185165405,
-                        "thread": 7664,
+                        "created": 1794989383.0328603,
+                        "msecs": 32.0,
+                        "relativeCreated": 1824.6526718139648,
+                        "thread": 5444,
                         "threadName": "MainThread",
                         "processName": "MainProcess",
-                        "process": 16088,
+                        "process": 2312,
                         "taskName": null
                     },
                     {
                         "name": "app.ai.groq_provider",
-                        "msg": "Groq model 'qwen/qwen3.8-27b' rejected JSON mode; retrying with JSON prompt.",
+                        "msg": "Groq model 'openai/gpt-oss-120b' rejected JSON mode; retrying without it.",
                         "args": null,
                         "levelname": "WARNING",
                         "levelno": 30,
@@ -675,20 +675,20 @@
                         "exc_info": null,
                         "exc_text": null,
                         "stack_info": null,
-                        "lineno": 287,
-                        "funcName": "generate_completion",
-                        "created": 1794917160.1945517,
-                        "msecs": 194.0,
-                        "relativeCreated": 4321.590185165405,
-                        "thread": 7664,
+                        "lineno": 304,
+                        "funcName": "_request_completion",
+                        "created": 1794989383.0328603,
+                        "msecs": 32.0,
+                        "relativeCreated": 1824.6526718139648,
+                        "thread": 5444,
                         "threadName": "MainThread",
                         "processName": "MainProcess",
-                        "process": 16088,
+                        "process": 2312,
                         "taskName": null
                     },
                     {
                         "name": "app.ai.groq_provider",
-                        "msg": "Groq model 'qwen/qwen3.8-27b' failed JSON/availability check; trying the next model.",
+                        "msg": "Groq model 'openai/gpt-oss-120b' is unavailable; trying the next model.",
                         "args": null,
                         "levelname": "WARNING",
                         "levelno": 30,
@@ -698,21 +698,113 @@
                         "exc_info": null,
                         "exc_text": null,
                         "stack_info": null,
-                        "lineno": 344,
+                        "lineno": 473,
                         "funcName": "generate_completion",
-                        "created": 1794917160.1945517,
-                        "msecs": 194.0,
-                        "relativeCreated": 4321.590185165405,
-                        "thread": 7664,
+                        "created": 1794989383.0328603,
+                        "msecs": 32.0,
+                        "relativeCreated": 1824.6526718139648,
+                        "thread": 5444,
                         "threadName": "MainThread",
                         "processName": "MainProcess",
-                        "process": 16088,
+                        "process": 2312,
+                        "taskName": null
+                    },
+                    {
+                        "name": "app.ai.groq_provider",
+                        "msg": "Groq model 'openai/gpt-oss-20b' rejected JSON mode; retrying without it.",
+                        "args": null,
+                        "levelname": "WARNING",
+                        "levelno": 30,
+                        "pathname": "C:\\Users\\user\\Documents\\SmartCity-Audit\\app\\ai\\groq_provider.py",
+                        "filename": "groq_provider.py",
+                        "module": "groq_provider",
+                        "exc_info": null,
+                        "exc_text": null,
+                        "stack_info": null,
+                        "lineno": 304,
+                        "funcName": "_request_completion",
+                        "created": 1794989383.0328603,
+                        "msecs": 32.0,
+                        "relativeCreated": 1824.6526718139648,
+                        "thread": 5444,
+                        "threadName": "MainThread",
+                        "processName": "MainProcess",
+                        "process": 2312,
+                        "taskName": null
+                    },
+                    {
+                        "name": "app.ai.groq_provider",
+                        "msg": "Groq model 'openai/gpt-oss-20b' is unavailable; trying the next model.",
+                        "args": null,
+                        "levelname": "WARNING",
+                        "levelno": 30,
+                        "pathname": "C:\\Users\\user\\Documents\\SmartCity-Audit\\app\\ai\\groq_provider.py",
+                        "filename": "groq_provider.py",
+                        "module": "groq_provider",
+                        "exc_info": null,
+                        "exc_text": null,
+                        "stack_info": null,
+                        "lineno": 473,
+                        "funcName": "generate_completion",
+                        "created": 1794989383.0328603,
+                        "msecs": 32.0,
+                        "relativeCreated": 1824.6526718139648,
+                        "thread": 5444,
+                        "threadName": "MainThread",
+                        "processName": "MainProcess",
+                        "process": 2312,
+                        "taskName": null
+                    },
+                    {
+                        "name": "app.ai.groq_provider",
+                        "msg": "Groq model 'qwen/qwen3.8-27b' rejected JSON mode; retrying without it.",
+                        "args": null,
+                        "levelname": "WARNING",
+                        "levelno": 30,
+                        "pathname": "C:\\Users\\user\\Documents\\SmartCity-Audit\\app\\ai\\groq_provider.py",
+                        "filename": "groq_provider.py",
+                        "module": "groq_provider",
+                        "exc_info": null,
+                        "exc_text": null,
+                        "stack_info": null,
+                        "lineno": 304,
+                        "funcName": "_request_completion",
+                        "created": 1794989383.0328603,
+                        "msecs": 32.0,
+                        "relativeCreated": 1824.6526718139648,
+                        "thread": 5444,
+                        "threadName": "MainThread",
+                        "processName": "MainProcess",
+                        "process": 2312,
+                        "taskName": null
+                    },
+                    {
+                        "name": "app.ai.groq_provider",
+                        "msg": "Groq model 'qwen/qwen3.8-27b' is unavailable; trying the next model.",
+                        "args": null,
+                        "levelname": "WARNING",
+                        "levelno": 30,
+                        "pathname": "C:\\Users\\user\\Documents\\SmartCity-Audit\\app\\ai\\groq_provider.py",
+                        "filename": "groq_provider.py",
+                        "module": "groq_provider",
+                        "exc_info": null,
+                        "exc_text": null,
+                        "stack_info": null,
+                        "lineno": 473,
+                        "funcName": "generate_completion",
+                        "created": 1794989383.0328603,
+                        "msecs": 32.0,
+                        "relativeCreated": 1824.6526718139648,
+                        "thread": 5444,
+                        "threadName": "MainThread",
+                        "processName": "MainProcess",
+                        "process": 2312,
                         "taskName": null
                     }
                 ]
             },
             "teardown": {
-                "duration": 0.0012597000022651628,
+                "duration": 0.0006736000068485737,
                 "outcome": "passed"
             }
         },
@@ -728,15 +820,15 @@
                 ""
             ],
             "setup": {
-                "duration": 0.0016975999969872646,
+                "duration": 0.0004793999978573993,
                 "outcome": "passed"
             },
             "call": {
-                "duration": 0.0019965000028605573,
+                "duration": 0.0010424999927636236,
                 "outcome": "passed"
             },
             "teardown": {
-                "duration": 0.0015457999979844317,
+                "duration": 0.001850799992098473,
                 "outcome": "passed"
             }
         },
@@ -752,15 +844,15 @@
                 ""
             ],
             "setup": {
-                "duration": 0.0019340999933774583,
+                "duration": 0.0012153999996371567,
                 "outcome": "passed"
             },
             "call": {
-                "duration": 0.49893339999835007,
+                "duration": 0.43699060000653844,
                 "outcome": "passed"
             },
             "teardown": {
-                "duration": 0.0022173999968799762,
+                "duration": 0.0004647999885492027,
                 "outcome": "passed"
             }
         },
@@ -776,15 +868,15 @@
                 ""
             ],
             "setup": {
-                "duration": 0.002272500001708977,
+                "duration": 0.000506000011228025,
                 "outcome": "passed"
             },
             "call": {
-                "duration": 0.0026188999981968664,
+                "duration": 0.0006293000042205676,
                 "outcome": "passed"
             },
             "teardown": {
-                "duration": 0.0034461999966879375,
+                "duration": 0.0003403000009711832,
                 "outcome": "passed"
             }
         },
@@ -800,15 +892,15 @@
                 ""
             ],
             "setup": {
-                "duration": 0.0017499000023235567,
+                "duration": 0.0003446000046096742,
                 "outcome": "passed"
             },
             "call": {
-                "duration": 0.0023886999988462776,
+                "duration": 0.0012907000054838136,
                 "outcome": "passed"
             },
             "teardown": {
-                "duration": 0.0011128000041935593,
+                "duration": 0.0005596999981207773,
                 "outcome": "passed"
             }
         },
@@ -824,15 +916,15 @@
                 ""
             ],
             "setup": {
-                "duration": 0.0011153000014019199,
+                "duration": 0.0006436999974539503,
                 "outcome": "passed"
             },
             "call": {
-                "duration": 0.0023359999977401458,
+                "duration": 0.0023249000078067183,
                 "outcome": "passed"
             },
             "teardown": {
-                "duration": 0.0012671000004047528,
+                "duration": 0.0005439999949885532,
                 "outcome": "passed"
             }
         },
@@ -848,15 +940,15 @@
                 ""
             ],
             "setup": {
-                "duration": 0.0032807000025059097,
+                "duration": 0.0004206000012345612,
                 "outcome": "passed"
             },
             "call": {
-                "duration": 0.0020770999981323257,
+                "duration": 0.0005169999931240454,
                 "outcome": "passed"
             },
             "teardown": {
-                "duration": 0.0013312000010046177,
+                "duration": 0.0002933000068878755,
                 "outcome": "passed"
             }
         },
@@ -872,15 +964,15 @@
                 ""
             ],
             "setup": {
-                "duration": 0.0012253999957465567,
+                "duration": 0.00044410000555217266,
                 "outcome": "passed"
             },
             "call": {
-                "duration": 0.004354299999249633,
+                "duration": 0.0012944000045536086,
                 "outcome": "passed"
             },
             "teardown": {
-                "duration": 0.0024307999992743134,
+                "duration": 0.0004642999992938712,
                 "outcome": "passed"
             }
         },
@@ -896,15 +988,15 @@
                 ""
             ],
             "setup": {
-                "duration": 0.024731699995754752,
+                "duration": 0.019085899999481626,
                 "outcome": "passed"
             },
             "call": {
-                "duration": 2.2007652999964193,
+                "duration": 0.7492959999945015,
                 "outcome": "passed"
             },
             "teardown": {
-                "duration": 0.0022405999989132397,
+                "duration": 0.00047300000733230263,
                 "outcome": "passed"
             }
         },
@@ -920,15 +1012,15 @@
                 ""
             ],
             "setup": {
-                "duration": 0.011409000006096903,
+                "duration": 0.003064999997150153,
                 "outcome": "passed"
             },
             "call": {
-                "duration": 0.031834599998546764,
+                "duration": 0.02503039999282919,
                 "outcome": "passed"
             },
             "teardown": {
-                "duration": 0.0011983000003965572,
+                "duration": 0.0004413999995449558,
                 "outcome": "passed"
             }
         },
@@ -944,15 +1036,15 @@
                 ""
             ],
             "setup": {
-                "duration": 0.001392399994074367,
+                "duration": 0.0006953999982215464,
                 "outcome": "passed"
             },
             "call": {
-                "duration": 0.001152400000137277,
+                "duration": 0.0005147000047145411,
                 "outcome": "passed"
             },
             "teardown": {
-                "duration": 0.0005023999983677641,
+                "duration": 0.002354600001126528,
                 "outcome": "passed"
             }
         },
@@ -971,15 +1063,15 @@
                 ""
             ],
             "setup": {
-                "duration": 0.0036703999940073118,
+                "duration": 0.0014195999974617735,
                 "outcome": "passed"
             },
             "call": {
-                "duration": 0.0018847000028472394,
+                "duration": 0.0006859999994048849,
                 "outcome": "passed"
             },
             "teardown": {
-                "duration": 0.0012712000025203452,
+                "duration": 0.001811099995393306,
                 "outcome": "passed"
             }
         },
@@ -998,15 +1090,15 @@
                 ""
             ],
             "setup": {
-                "duration": 0.0034273999990546145,
+                "duration": 0.0013161000097170472,
                 "outcome": "passed"
             },
             "call": {
-                "duration": 0.0010676000019884668,
+                "duration": 0.0003429999924264848,
                 "outcome": "passed"
             },
             "teardown": {
-                "duration": 0.0013795000049867667,
+                "duration": 0.0006024000031175092,
                 "outcome": "passed"
             }
         },
@@ -1025,15 +1117,15 @@
                 ""
             ],
             "setup": {
-                "duration": 0.0022948999976506457,
+                "duration": 0.0005796999903395772,
                 "outcome": "passed"
             },
             "call": {
-                "duration": 0.002072099996439647,
+                "duration": 0.0005450000026030466,
                 "outcome": "passed"
             },
             "teardown": {
-                "duration": 0.0017579000050318427,
+                "duration": 0.0007768999930704013,
                 "outcome": "passed"
             }
         },
@@ -1052,15 +1144,15 @@
                 ""
             ],
             "setup": {
-                "duration": 0.002387300002737902,
+                "duration": 0.0023825999960536137,
                 "outcome": "passed"
             },
             "call": {
-                "duration": 0.00103750000562286,
+                "duration": 0.0003825000021606684,
                 "outcome": "passed"
             },
             "teardown": {
-                "duration": 0.001174400000309106,
+                "duration": 0.000519299996085465,
                 "outcome": "passed"
             }
         },
@@ -1079,15 +1171,15 @@
                 ""
             ],
             "setup": {
-                "duration": 0.0016928999975789338,
+                "duration": 0.002777700006845407,
                 "outcome": "passed"
             },
             "call": {
-                "duration": 0.000880300001881551,
+                "duration": 0.0009043000027304515,
                 "outcome": "passed"
             },
             "teardown": {
-                "duration": 0.0017967000021599233,
+                "duration": 0.00039110000943765044,
                 "outcome": "passed"
             }
         },
@@ -1106,15 +1198,15 @@
                 ""
             ],
             "setup": {
-                "duration": 0.002860399996279739,
+                "duration": 0.0012717000063275918,
                 "outcome": "passed"
             },
             "call": {
-                "duration": 0.0018597999951452948,
+                "duration": 0.0006382999999914318,
                 "outcome": "passed"
             },
             "teardown": {
-                "duration": 0.0011479000022518449,
+                "duration": 0.00033260000054724514,
                 "outcome": "passed"
             }
         },
@@ -1133,15 +1225,15 @@
                 ""
             ],
             "setup": {
-                "duration": 0.002722700002777856,
+                "duration": 0.0024627999955555424,
                 "outcome": "passed"
             },
             "call": {
-                "duration": 0.0017231000019819476,
+                "duration": 0.0003766000008909032,
                 "outcome": "passed"
             },
             "teardown": {
-                "duration": 0.0014437999998335727,
+                "duration": 0.0008156999974744394,
                 "outcome": "passed"
             }
         },
@@ -1160,15 +1252,15 @@
                 ""
             ],
             "setup": {
-                "duration": 0.0032071999958134256,
+                "duration": 0.0009883999882731587,
                 "outcome": "passed"
             },
             "call": {
-                "duration": 0.0018196000019088387,
+                "duration": 0.0003564999933587387,
                 "outcome": "passed"
             },
             "teardown": {
-                "duration": 0.0012580000038724393,
+                "duration": 0.0006704999977955595,
                 "outcome": "passed"
             }
         },
@@ -1184,15 +1276,15 @@
                 ""
             ],
             "setup": {
-                "duration": 0.00105749999784166,
+                "duration": 0.0018059999856632203,
                 "outcome": "passed"
             },
             "call": {
-                "duration": 0.014392500001122244,
+                "duration": 0.01896590000251308,
                 "outcome": "passed"
             },
             "teardown": {
-                "duration": 0.001111799996579066,
+                "duration": 0.0004782999894814566,
                 "outcome": "passed"
             }
         },
@@ -1208,15 +1300,15 @@
                 ""
             ],
             "setup": {
-                "duration": 0.0009919000003719702,
+                "duration": 0.0006787000020267442,
                 "outcome": "passed"
             },
             "call": {
-                "duration": 0.0010620999964885414,
+                "duration": 0.0024110000085784122,
                 "outcome": "passed"
             },
             "teardown": {
-                "duration": 0.0018525999985286035,
+                "duration": 0.0007043000077828765,
                 "outcome": "passed"
             }
         },
@@ -1232,15 +1324,15 @@
                 ""
             ],
             "setup": {
-                "duration": 0.007360499999776948,
+                "duration": 0.002307000002474524,
                 "outcome": "passed"
             },
             "call": {
-                "duration": 0.06949819999863394,
+                "duration": 0.045049699998344295,
                 "outcome": "passed"
             },
             "teardown": {
-                "duration": 0.0020130000048084185,
+                "duration": 0.00047250000352505594,
                 "outcome": "passed"
             }
         },
@@ -1256,16 +1348,16 @@
                 ""
             ],
             "setup": {
-                "duration": 0.0031945000009727664,
+                "duration": 0.0006571999983862042,
                 "outcome": "passed"
             },
             "call": {
-                "duration": 2.526739799999632,
+                "duration": 0.7840571999986423,
                 "outcome": "passed",
-                "stderr": "2026-11-17 14:06:05.722 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n2026-11-17 14:06:05.727 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n"
+                "stderr": "2026-11-18 10:09:45.191 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n2026-11-18 10:09:45.201 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n"
             },
             "teardown": {
-                "duration": 0.0013197000007494353,
+                "duration": 0.0004172999906586483,
                 "outcome": "passed"
             }
         },
@@ -1281,16 +1373,16 @@
                 ""
             ],
             "setup": {
-                "duration": 0.0008069999967119657,
+                "duration": 0.0004850999976042658,
                 "outcome": "passed"
             },
             "call": {
-                "duration": 0.014494199996988755,
+                "duration": 0.006750799992005341,
                 "outcome": "passed",
-                "stderr": "2026-11-17 14:06:05.747 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n"
+                "stderr": "2026-11-18 10:09:45.208 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n"
             },
             "teardown": {
-                "duration": 0.0018613000065670349,
+                "duration": 0.0007327999919652939,
                 "outcome": "passed"
             }
         },
@@ -1306,16 +1398,16 @@
                 ""
             ],
             "setup": {
-                "duration": 0.003538299999490846,
+                "duration": 0.0006967999943299219,
                 "outcome": "passed"
             },
             "call": {
-                "duration": 0.2692428000009386,
+                "duration": 0.1417519000096945,
                 "outcome": "passed",
-                "stderr": "2026-11-17 14:06:06.022 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n"
+                "stderr": "2026-11-18 10:09:45.355 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n"
             },
             "teardown": {
-                "duration": 0.0017861000014818273,
+                "duration": 0.0004496000037761405,
                 "outcome": "passed"
             }
         },
@@ -1331,15 +1423,15 @@
                 ""
             ],
             "setup": {
-                "duration": 0.009384400000271853,
+                "duration": 0.0020512000046437606,
                 "outcome": "passed"
             },
             "call": {
-                "duration": 0.05569200000172714,
+                "duration": 0.029494599992176518,
                 "outcome": "passed"
             },
             "teardown": {
-                "duration": 0.0021808999954373576,
+                "duration": 0.000975500006461516,
                 "outcome": "passed"
             }
         },
@@ -1355,11 +1447,11 @@
                 ""
             ],
             "setup": {
-                "duration": 0.009279600002628285,
+                "duration": 0.003256700001657009,
                 "outcome": "passed"
             },
             "call": {
-                "duration": 0.07393299999966985,
+                "duration": 0.036771800005226396,
                 "outcome": "passed",
                 "log": [
                     {
@@ -1376,19 +1468,19 @@
                         "stack_info": null,
                         "lineno": 97,
                         "funcName": "seed_relational_infrastructure",
-                        "created": 1794917166.1572392,
-                        "msecs": 157.0,
-                        "relativeCreated": 10284.27767753601,
-                        "thread": 7664,
+                        "created": 1794989385.424051,
+                        "msecs": 424.0,
+                        "relativeCreated": 4215.843439102173,
+                        "thread": 5444,
                         "threadName": "MainThread",
                         "processName": "MainProcess",
-                        "process": 16088,
+                        "process": 2312,
                         "taskName": null
                     }
                 ]
             },
             "teardown": {
-                "duration": 0.0025726000021677464,
+                "duration": 0.0007163999980548397,
                 "outcome": "passed"
             }
         },
@@ -1404,15 +1496,15 @@
                 ""
             ],
             "setup": {
-                "duration": 0.006144899998616893,
+                "duration": 0.0021173999994061887,
                 "outcome": "passed"
             },
             "call": {
-                "duration": 0.0019606999994721264,
+                "duration": 0.0005688999954145402,
                 "outcome": "passed"
             },
             "teardown": {
-                "duration": 0.0017249999946216121,
+                "duration": 0.0003772999916691333,
                 "outcome": "passed"
             }
         }

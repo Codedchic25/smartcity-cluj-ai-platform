@@ -1,10 +1,10 @@
 {
-    "execution_timestamp": "2026-11-17 14:02:06",
+    "execution_timestamp": "2026-11-18 09:52:37",
     "model_deployed": "openai/gpt-oss-20b",
     "total_evaluated_scenarios": 7,
-    "successful_compliance_count": 6,
-    "failed_compliance_count": 1,
-    "success_rate_percentage": 85.7,
+    "successful_compliance_count": 7,
+    "failed_compliance_count": 0,
+    "success_rate_percentage": 100.0,
     "detailed_metrics": [
         {
             "scenario_name": "1. Temperature Heatwave",
@@ -23,8 +23,8 @@
                 "temperatura"
             ],
             "assessment_present": true,
-            "payload_length": 1049,
-            "model_response": "**Assessment:**\nTelemetria curentă indică o temperatură ambientală de 38.5 °C, înregistrată simultan cu o umiditate a solului de 45.0 % în zona de monitorizare. Analizând aceste două metrici împreună, se observă o co-ocurență între condițiile termice și starea solului, deși un singur instantaneu nu permite stabilirea unei relații cauzale sau a unei tendințe de uscare. De asemenea, citirile de trafic (45.0 %) și nivel de zgomot (58.0 dB) pot fi revizuite ca indicatori de mediu urban, fără a se putea afirma că traficul a cauzat nivelul de zgomot măsurat. Datele disponibile nu includ praguri operaționale de referință, astfel încât nu se poate determina dacă valorile depășesc limitele de siguranță sau conformitate.\n\n\n**Recommended Actions:**\nContinuarea monitorizării telemetriei pentru a observa persistența valorilor. Verificarea integrității surselor de date în cazul în care anomaliile persistă.\n\n\n**Data Limitations:**\nNu au fost furnizate praguri de referință aplicabile pentru evaluarea conformității sau a siguranței valorilor curente."
+            "payload_length": 1128,
+            "model_response": "Operational Recommendation (Cluj-Napoca):\nStatus: NORMAL\nTelemetry Assessment\n- Temperature: 38.5 °C\n- PM2.5: 25.0 µg/m³\n- Noise Level: 58.0 dB\n- Traffic Load: 45.0 %\n- Soil Moisture: 45.0 %\n\n**Assessment:**\nObservația curentă indică o temperatură ambientală de 38.5 °C, un nivel de zgomot de 58.0 dB, o încărcătură a traficului de 45.0 %, o concentrație PM2.5 de 25.0 µg/m³ și umiditate a solului de 45.0 %. Încărcătura traficului și nivelul zgomotului coexista, sugerând o activitate urbană moderată, însă nu se poate concluziona că traficul cauzează zgomotul în acest moment. Temperatura ambientală și umiditatea solului oferă o imagine a condițiilor de mediu pentru spațiile verzi, fără a indica neapărat necesitatea de irigare. Nu există praguri operaționale furnizate, astfel încât nu se poate determina dacă valorile depășesc sau nu orice limită de operare.\n\n**Recommended Actions:**\nContinuați monitorizarea telemetriei curente. Revizuiți măsurătorile ulterioare pentru eventuale anomalii recurente. Verificați starea senzorilor dacă apar anomalii viitoare.\n\n**Data Limitations:**\nNo material data limitation identified."
         },
         {
             "scenario_name": "2. Noise Index Breach",
@@ -46,8 +46,8 @@
                 "dB"
             ],
             "assessment_present": true,
-            "payload_length": 1423,
-            "model_response": "Operational Recommendation (Cluj-Napoca):\nStatus: NORMAL\nTelemetry Assessment\n- Temperature: 22.0 °C\n- PM2.5: 30.0 µg/m³\n- Noise Level: 82.0 dB\n- Traffic Load: 55.0 %\n- Soil Moisture: 50.0 %\n\n\n**Assessment:**\nObservațiile curente indică o temperatură ambientală de 22.0 °C, o concentrație PM2.5 de 30.0 µg/m³, un nivel de zgomot de 82.0 dB, o încărcare a traficului de 55.0 % și o umiditate a solului de 50.0 %. Nivelul de zgomot de 82.0 dB coexistă cu o încărcare a traficului de 55.0 %, sugerând un context urban activ, deși un singur instantaneu nu stabilește o cauzalitate directă între trafic și zgomot. De asemenea, citirile de trafic și PM2.5 pot fi analizate împreună ca indicatori ai mediului urban, fără a implica o corelație statistică sau o relație de cauză-efect. Temperatura de 22.0 °C și umiditatea solului de 50.0 % descriu condițiile ambientale și ale spațiului verde, fără a permite inferențe privind necesitatea irigației. Fără praguri de referință furnizate, datele nu justifică o intervenție operațională imediată.\n\n\n**Recommended Actions:**\nContinuă monitorizarea parametrilor actuali.\nAnalizează măsurătorile viitoare pentru a identifica eventuale tendințe.\nVerifică integritatea datelor dacă apar valori neobișnuite.\n\n\n**Data Limitations:**\nLipsa pragurilor de referință pentru temperatură, PM2.5, zgomot și umiditate a solului limitează evaluarea conformității sau necesitatea acțiunilor corective."
+            "payload_length": 1156,
+            "model_response": "**Assessment:**\nNivelul de zgomot de 82.0 dB și încărcătura de trafic de 55.0 % oferă o imagine simultană a activității urbane și a impactului potențial asupra mediului sonor. Împreună, aceste valori indică un nivel de zgomot care coexista cu un trafic moderat, fără a demonstra că unul cauzează celălalt în acest moment. În același timp, temperatura de 22.0 °C și umiditatea solului de 50.0 % descriu condițiile ambientale și de sol, dar nu indică un dezechilibru semnificativ. Aceste observații nu pot stabili un prag de alarm sau o tendință, deoarece nu există referințe de limită furnizate.\n\n**Recommended Actions:**\nContinuă monitorizarea zilnică a nivelului de zgomot și a încărcăturii de trafic pentru a detecta eventuale variații persistente. Verifică periodic datele pentru a confirma că nu există anomalii repetate în aceste metrici. Dacă se observă creșteri semnificative ale zgomotului în raport cu traficul, ia în considerare măsuri de reducere a zgomotului.\n\n**Data Limitations:**\nNu există limite de referință furnizate pentru zgomot, trafic, temperatură sau umiditate, ceea ce limitează capacitatea de a evalua conformitatea cu standardele."
         },
         {
             "scenario_name": "3. Traffic Load Congestion",
@@ -63,12 +63,13 @@
             "evaluated_section": "Assessment",
             "matched_compliance": true,
             "matched_variants": [
+                "traficul",
                 "traficului",
-                "încărcare a traficului"
+                "încărcarea traficului"
             ],
             "assessment_present": true,
-            "payload_length": 1267,
-            "model_response": "**Assessment:**\nTelemetria curentă indică o încărcare a traficului de 92.0 %, asociată cu un nivel de zgomot de 78.0 dB și o concentrație de PM2.5 de 35.0 µg/m³. Analizate împreună, aceste valori oferă o imagine de ansamblu a condițiilor urbane, unde coexistența unei încărcări ridicate a traficului cu indicatori de mediu specifici nu stabilește o relație de cauzalitate sau o corelație statistică, ci doar un context operațional simultan. Temperatura ambientală de 24.0 °C și umiditatea solului de 40.0 % descriu condiții distincte ale mediului înconjurător, fără dovezi suplimentare care să sugereze o interacțiune directă cu celelalte metrici. Datele disponibile nu includ praguri de referință, astfel încât nu se poate determina dacă aceste valori depășesc limitele operaționale sau reglementate.\n\n\n\n**Recommended Actions:**\nContinuarea monitorizării telemetriei pentru a observa persistența încărcării ridicate a traficului. Verificarea integrității surselor de date în cazul în care se identifică anomalii repetate. Analiza tendințelor pe baza unor observații ulterioare pentru a evalua eventualele schimbări în timp.\n\n\n\n**Data Limitations:**\nNu au fost furnizate praguri de referință aplicabile pentru a evalua conformitatea sau severitatea valorilor curente."
+            "payload_length": 1305,
+            "model_response": "Operational Recommendation (Cluj-Napoca):\nStatus: MONITOR\nTelemetry Assessment\n- Temperature: 24.0 °C\n- PM2.5: 35.0 µg/m³\n- Noise Level: 78.0 dB\n- Traffic Load: 92.0 %\n- Soil Moisture: 40.0 %\n\n**Assessment:**\nCitirea curentă oferă o imagine instantanee a temperaturii ambientale, concentrației PM2.5, nivelului de zgomot, încărcării traficului și umidității solului din zona monitorată. Considerând împreună, încărcarea traficului de 92.0 % și nivelul de zgomot de 78.0 dB indică o corelație de tip „traficul poate contribui la zgomotul urban”, fără a stabili cauzalitate. De asemenea, încărcarea traficului și concentrația PM2.5 de 35.0 µg/m³ oferă un indiciu al calității aerului asociat cu activitatea rutieră, dar nu confirmă un trend. Observațiile privind temperatura de 24.0 °C și umiditatea solului de 40.0 % descriu două condiții separate, fără a sugera un impact direct între ele.\n\n**Recommended Actions:**\n- Continuă monitorizarea periodică a parametrilor pentru a detecta eventuale variații persistente.\n- Revizuiește măsurătorile viitoare pentru a identifica eventuale anomalii repetate la nivelul traficului, zgomotului sau calității aerului.\n- Dacă persistă anomalii relevante, efectuează verificări suplimentare ale senzorilor.\n\n**Data Limitations:**\nNo material data limitation identified."
         },
         {
             "scenario_name": "4. Air Quality Critical PM2.5",
@@ -84,12 +85,11 @@
             "evaluated_section": "Assessment",
             "matched_compliance": true,
             "matched_variants": [
-                "calitatea aerului",
                 "pm2.5"
             ],
             "assessment_present": true,
-            "payload_length": 1448,
-            "model_response": "Operational Recommendation (Cluj-Napoca):\nStatus: MONITOR\nTelemetry Assessment\n- Temperature: 21.0 °C\n- PM2.5: 115.0 µg/m³\n- Noise Level: 52.0 dB\n- Traffic Load: 40.0 %\n- Soil Moisture: 42.0 %\n\n\n**Assessment:**\nTelemetria curentă indică o concentrație de PM2.5 de 115.0 µg/m³, care, în contextul focalizat pe calitatea aerului, necesită observație continuă în absența unor praguri de referință furnizate. Analizând împreună indicatorii, încărcarea traficului de 40.0 % și nivelul de zgomot de 52.0 dB oferă un context urban simultan, deși un singur instantaneu nu stabilește o cauzalitate sau o corelație statistică între trafic și calitatea aerului. Temperatura ambientală de 21.0 °C și umiditatea solului de 42.0 % descriu condiții distincte de mediu, fără dovezi suficiente pentru a infera o relație cauzală directă între acestea. Datele disponibile nu permit stabilirea conformității cu standarde reglementative, iar absența istoricului relevant limitează evaluarea tendințelor.\n\n\n**Recommended Actions:**\nContinuarea monitorizării telemetriei pentru a observa persistența valorilor de PM2.5.\nVerificarea surselor de date pentru a confirma integritatea măsurătorilor de calitate a aerului.\nAnaliza ulterioară a tendințelor dacă anomaliile persistă în măsurătoriile viitoare.\n\n\n**Data Limitations:**\nNu au fost furnizate praguri de referință aplicabile pentru a determina dacă valorile măsurate depășesc limitele operaționale sau reglementative."
+            "payload_length": 1278,
+            "model_response": "Operational Recommendation (Cluj-Napoca):\nStatus: MONITOR\nTelemetry Assessment\n- Temperature: 21.0 °C\n- PM2.5: 115.0 µg/m³\n- Noise Level: 52.0 dB\n- Traffic Load: 40.0 %\n- Soil Moisture: 42.0 %\n\n**Assessment:**\nCitirea curentă oferă o instantaneu a temperaturii ambientale, a concentrației PM2.5, a nivelului de zgomot, a încărcării traficului și a umidității solului din zona monitorată. Considerând împreună, încărcarea traficului de 40 % și nivelul de zgomot de 52 dB indică un tip de corelație „trafic + zgomot” ca indicator urban, fără a stabili cauzalitate. În același timp, concentrația PM2.5 de 115 µg/m³, împreună cu încărcarea traficului, oferă un context al calității aerului, sugerând că ambele valori pot fi influențate de activitatea rutieră, dar nu se poate demonstra o corelație statistică dintr-o singură instantaneu. Temperatură și umiditate a solului descriu două condiții distincte; nu există informație care să indice un impact direct între ele în acest moment.\n\n**Recommended Actions:**\n- Continuați monitorizarea continuă a valorilor PM2.5 și a încărcării traficului pentru a detecta eventuale variații persistente.\n- Verificați periodic datele pentru a identifica eventuale anomalii repetate.\n\n**Data Limitations:**\nNo material data limitation identified."
         },
         {
             "scenario_name": "5. Soil Moisture Drought Critical",
@@ -105,12 +105,11 @@
             "evaluated_section": "Assessment",
             "matched_compliance": true,
             "matched_variants": [
-                "umiditate",
                 "umiditatea solului"
             ],
             "assessment_present": true,
-            "payload_length": 1219,
-            "model_response": "**Assessment:**\nTelemetria curentă indică o umiditate a solului de 12.0 % și o temperatură ambientală de 34.0 °C, oferind o imagine simultană a condițiilor spațiilor verzi și a mediului termic. Analizate împreună, aceste valori descriu starea actuală a solului și a aerului, dar un singur instantaneu nu stabilește o relație cauzală între temperatură și umiditatea solului, nici un trend. Încărcarea traficului de 35.0 % și nivelul de zgomot de 55.0 dB pot fi examinate ca indicatori urbani co-ocurenți, dar datele disponibile nu confirmă că traficul a cauzat nivelul de zgomot măsurat. Deoarece nu au fost furnizate praguri operaționale aplicabile, datele disponibile nu stabilesc dacă aceste valori sunt conforme cu un standard specific.\n\n\n**Recommended Actions:**\nContinuarea monitorizării telemetriei curente, cu atenție specială la tendințele umidității solului. Examinarea măsurătorilor ulterioare pentru a determina dacă nivelul umidității solului persistă sau se modifică în timp. Efectuarea unei verificări suplimentare dacă o anomalie relevantă persistă în citirile de umiditate a solului sau temperatură.\n\n\n**Data Limitations:**\nNu a fost furnizat niciun prag de referință aplicabil pentru evaluarea curentă."
+            "payload_length": 1068,
+            "model_response": "Operational Recommendation (Cluj-Napoca):\nStatus: MONITOR\nTelemetry Assessment\n- Temperature: 34.0 °C\n- PM2.5: 20.0 µg/m³\n- Noise Level: 55.0 dB\n- Traffic Load: 35.0 %\n- Soil Moisture: 12.0 %\n\n**Assessment:**\nObservația curentă indică o temperatură ambiantă de 34.0 °C, o concentrație PM2.5 de 20.0 µg/m³, un nivel de zgomot de 55.0 dB și o încărcare de trafic de 35.0 %. Împreună, încărcarea traficului și nivelul de zgomot oferă o imagine a activității urbane, iar temperatura și umiditatea solului descriu condițiile de mediu în spațiul verde. Aceste valori coexista într-un singur instantaneu și nu dovedesc o cauzalitate sau o corelație statistică. Nu există praguri operaționale furnizate, astfel încât nu se poate stabili dacă valorile depășesc sau nu un standard.\n\n**Recommended Actions:**\nContinuă monitorizarea telemetriei curente.\nRevizuiește măsurătorile viitoare pentru a detecta eventuale anomalii repetitive.\nEfectuează verificări suplimentare dacă persistă un anomaliu relevant.\n\n**Data Limitations:**\nNu există limitări materiale de date identificate."
         },
         {
             "scenario_name": "6. Suburb Acoustic Overhead",
@@ -127,22 +126,32 @@
             "matched_compliance": true,
             "matched_variants": [
                 "zgomot",
-                "nivel de zgomot",
                 "db",
                 "dB"
             ],
             "assessment_present": true,
-            "payload_length": 1106,
-            "model_response": "**Assessment:**\nTelemetria curentă indică un nivel de zgomot de 85.0 dB, o încărcare a traficului de 62.0 % și o concentrație de PM2.5 de 45.0 µg/m³ în zona Grădini Mănăștur - Calea Florești. Analizând împreună nivelul de zgomot și încărcarea traficului, aceste valori constituie un context de mediu urban simultan, deși un singur instantaneu nu stabilește o cauzalitate directă între trafic și zgomot, nici o corelație statistică. Temperatura ambientală de 23.5 °C și umiditatea solului de 55.0 % descriu condiții distincte de mediu, fără dovezi suficiente pentru a infera o relație cauzală sau o tendință. Datele disponibile nu includ praguri de referință operaționale sau reglementate, astfel încât nu se poate determina dacă nivelul de zgomot sau celelalte metrici depășesc limitele acceptabile.\n\n\n\n**Recommended Actions:**\nContinuarea monitoring telemetriei pentru a observa persistența nivelului de zgomot de 85.0 dB.\n\n\n\n**Data Limitations:**\nNu au fost furnishizate praguri de refență aplicabile pentru a determina conformitatea sau depășirea limitelor pentru nivelul de zgomot și celelalte metrici."
+            "payload_length": 1329,
+            "model_response": "Operational Recommendation (Cluj-Napoca):\nStatus: NORMAL\nTelemetry Assessment\n- Temperature: 23.5 °C\n- PM2.5: 45.0 µg/m³\n- Noise Level: 85.0 dB\n- Traffic Load: 62.0 %\n- Soil Moisture: 55.0 %\n\n**Assessment:**\nNivelul de zgomot de 85.0 dB este observat simultan cu o încărcare a traficului de 62.0 %, oferind un tablou al condiţiilor urbane de zgomot şi trafic în zona monitorizată. De asemenea, temperatura de 23.5 °C și umiditatea solului de 55.0 % descriu condiţiile ambientale ale spaţiului verde, fără a indica o relaţie cauzală între ele. Co‑ocurenţa acestor valori nu permite stabilirea unei corelaţii statistice sau a unei cauze directe între trafic, zgomot și calitatea aerului (PM2.5 = 45.0 µg/m³). Nu există informaţii privind praguri de referinţă, astfel încât nu se poate afirma dacă valorile depășesc limite operative.\n\n**Recommended Actions:**\n- Continuaţi monitorizarea periodică a tuturor parametrilor pentru a detecta eventuale modificări semnificative.\n- Revizuiţi datele viitoare pentru a identifica posibile tipare de creştere a zgomotului în corelaţie cu traficul.\n\n**Data Limitations:**\nNu există praguri de referinţă furnizate pentru temperatură, PM2.5, nivel de zgomot, încărcare a traficului sau umiditatea solului, limitând capacitatea de a evalua conformitatea sau necesitatea unor intervenţii imediate."
         },
         {
             "scenario_name": "7. Industrial Zone Particulate Pollution",
             "target_location": "Iris - Zona Industrială",
+            "telemetry": {
+                "temperature": 20.0,
+                "noise_level": 68.0,
+                "traffic_load": 50.0,
+                "air_quality": 95.0,
+                "soil_moisture": 38.0
+            },
             "assertion_keyword": "air",
-            "matched_compliance": false,
-            "matched_variants": [],
-            "payload_length": 0,
-            "error": "❌ Ingestion Gateway Failure: Unable to complete operation with any configured model or key: Error code: 429 - {'error': {'message': 'Rate limit reached for model `qwen/qwen3.8-27b` in organization [redacted] service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199496, Requested 6126. Please try again in 40m28.704s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}"
+            "evaluated_section": "Assessment",
+            "matched_compliance": true,
+            "matched_variants": [
+                "pm2.5"
+            ],
+            "assessment_present": true,
+            "payload_length": 1587,
+            "model_response": "Operational Recommendation (Cluj-Napoca):\nStatus: NORMAL\nTelemetry Assessment\n- Temperature: 20.0 °C\n- PM2.5: 95.0 µg/m³\n- Noise Level: 68.0 dB\n- Traffic Load: 50.0 %\n- Soil Moisture: 38.0 %\n\n**Assessment:**\nCitirea curentă oferă o imagine de ansamblu a temperaturii ambientale, a concentrației PM2.5, a nivelului de zgomot, a încărcării traficului și a umidității solului în zona selectată. Combinația dintre încărcarea traficului (50.0 %) și nivelul de zgomot (68.0 dB) poate fi privită ca un indicator simultan al activității urbane, fără a se deduce o cauzalitate între ele. De asemenea, nivelul PM2.5 (95.0 µg/m³) și traficul pot fi interpretați împreună ca semnale de calitate a aerului asociate cu activitatea de trafic, dar această co‑ocurență nu stabilește o relație cauzală sau statistică. Temperatura (20.0 °C) și umiditatea solului (38.0 %) descriu condiții ambientale distincte pentru spațiul verde, fără a se trage concluzii privind necesitatea irigației. Nu există praguri operaționale furnizate, astfel încât datele nu permit evaluarea conformității sau a unui risc imediat.\n\n**Recommended Actions:**\nMenține monitorizarea continuă a tuturor parametrilor telemetriți.\nRevizuiește măsurătorile viitoare pentru a identifica eventuale modele persistente sau anomalii.\nEfectuează verificări suplimentare dacă se constată valori repetate care depășesc praguri de referință cunoscute.\n\n**Data Limitations:**\nNu a fost furnizat niciun prag de referință aplicabil pentru evaluarea actuală a valorilor de temperatură, PM2.5, zgomot, încărcare a traficului sau umiditate a solului."
         }
     ]
 }
