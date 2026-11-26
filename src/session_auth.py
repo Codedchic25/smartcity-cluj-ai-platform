@@ -7,12 +7,46 @@ import binascii
 import hashlib
 import hmac
 import json
+import os
 import time
 from collections.abc import MutableMapping
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any, Final
 
+from dotenv import load_dotenv
+
 from src.schemas import get_session_security_token
+
+ENV_FILE_PATH: Final[Path] = Path(__file__).resolve().parents[1] / ".env"
+
+
+def _load_local_environment(env_path: Path = ENV_FILE_PATH) -> None:
+    """Load local environment values and fill any entries missed by dotenv parsing."""
+    if os.getenv("PYTHON_DOTENV_DISABLED", "").strip().casefold() in {
+        "1",
+        "true",
+        "t",
+        "yes",
+        "y",
+    }:
+        return
+    if not env_path.is_file():
+        return
+
+    load_dotenv(dotenv_path=env_path, override=False)
+    with env_path.open(encoding="utf-8-sig") as env_file:
+        for line in env_file:
+            stripped_line = line.strip()
+            if not stripped_line or stripped_line.startswith("#") or "=" not in stripped_line:
+                continue
+            key, value = stripped_line.split("=", 1)
+            clean_key = key.strip()
+            if clean_key and clean_key not in os.environ:
+                os.environ[clean_key] = value.strip()
+
+
+_load_local_environment()
 
 SESSION_TOKEN_QUERY_PARAM: Final[str] = "session_token"
 SESSION_TOKEN_STATE_KEY: Final[str] = "_session_token"
@@ -113,7 +147,7 @@ def verify_signed_session_token(
 
 def persist_authenticated_session(
     username: str,
-    session_state: MutableMapping[str, Any],
+    session_state: MutableMapping[Any, Any],
     query_params: MutableMapping[str, Any],
     *,
     now: int | None = None,
@@ -128,7 +162,7 @@ def persist_authenticated_session(
 
 
 def restore_authenticated_session(
-    session_state: MutableMapping[str, Any],
+    session_state: MutableMapping[Any, Any],
     query_params: MutableMapping[str, Any],
     *,
     now: int | None = None,
@@ -175,7 +209,7 @@ def restore_authenticated_session(
 
 
 def clear_authenticated_session(
-    session_state: MutableMapping[str, Any],
+    session_state: MutableMapping[Any, Any],
     query_params: MutableMapping[str, Any],
 ) -> None:
     """Clear the authenticated state and remove its persistent URL token."""

@@ -11,9 +11,8 @@ If you are a Recruiter, Technical Manager, or System Auditor, you do not need to
 
 You can access the live, fully production-hardened cloud environment instantly: 👉 **[https://smartcity-cluj-ai-platform.streamlit.app/](https://smartcity-cluj-ai-platform.streamlit.app/)**
 * **Authorized Username:** `admin`
-* **Plaintext Access Key:** `cluj2026`
 
-> **Security Note:** The authentication layer dynamically converts your plaintext input into a **SHA-256 cryptographic signature** at runtime and matches it against the hidden, isolated cloud vault using `hmac.compare_digest()` constant-time validation. Hardcoded credentials or raw password strings are strictly excluded from the codebase, adhering to full OWASP Top 10 compliance standards.
+> **Security Note:** Administrative passwords are verified using Argon2id. Browser-session tokens are signed separately using HMAC-SHA256.
 
 ---
 
@@ -399,46 +398,59 @@ The dashboard uses these coordinates to display the selected monitoring location
 
 ## Authentication and Credential Handling
 
-The application contains a dedicated `AuthenticationService` responsible for verifying operator credentials.
+The application uses a dedicated `AuthenticationService` to authenticate
+operators and authorized recruiters.
 
-The documented authentication workflow includes:
+### Password Security
+
+User passwords are protected using **Argon2id**, a modern password-hashing
+algorithm designed to resist brute-force and GPU-based attacks.
+
+The authentication workflow includes:
 
 1. Retrieving the configured operator username.
-2. Retrieving the stored password hash from environment configuration.
-3. Hashing the supplied password before comparison.
-4. Comparing the resulting values using `hmac.compare_digest()`.
-5. Maintaining authenticated application state through Streamlit session state.
-6. Signing a 24-hour session token with HMAC-SHA256 and restoring it from the `session_token`
-   query parameter after a browser refresh or direct page load. Logging out clears both the
-   session state and query parameter.
+2. Retrieving the stored Argon2id password hash from Streamlit Secrets.
+3. Verifying the supplied password against the stored hash using
+   `PasswordHasher.verify()`.
+4. Maintaining authenticated application state through Streamlit session state.
+5. Signing browser-session tokens using HMAC-SHA256.
+6. Restoring valid sessions through the `session_token` query parameter.
 
-### Environment Configuration
+Session tokens have a 24-hour validity period. Logging out clears the
+authenticated session state and the session token query parameter.
 
-The expected configuration variables are:
+**Important security distinction:**
+- Argon2id is used for password hashing and verification.
+- HMAC-SHA256 is used for session-token signing.
+- These mechanisms serve different security purposes.
 
-```env
-PLATFORM_ADMIN_USER=your_admin_username
-PLATFORM_ADMIN_PASS=your_password_hash
-SESSION_SECURITY_TOKEN=your_unique_random_signing_key
-```
+### Streamlit Secrets Configuration
 
-`PLATFORM_ADMIN_PASS` is expected to contain a password hash rather than a plaintext password.
-`SESSION_SECURITY_TOKEN` must be a private, unique random value (at least 32 random bytes); it
-signs the expiring browser session token and must not be committed. Because the session token is
-carried in the URL, avoid sharing or logging authenticated URLs.
+For local development, copy `.env.example` to `.env` and configure the
+values there. `main.py` and `src/session_auth.py` load local environment
+values before initializing the application or signing browser sessions.
+The session-auth loader also handles whitespace around assignments such as
+`SESSION_SECURITY_TOKEN = value`. The `.env` file is ignored by Git and
+must never be committed.
 
-Real credentials and API keys must never be committed to the public repository.
+The environment template contains these five keys:
 
-### Security Considerations
+- `DATABASE_PATH` – SQLite database path.
+- `PLATFORM_ADMIN_USER` – configured account username.
+- `PLATFORM_ADMIN_PASS` – Argon2id password hash.
+- `GROQ_API_KEY` – Groq Cloud API key for live AI recommendations.
+- `SESSION_SECURITY_TOKEN` – dedicated secret key used for session-token signing.
 
-The authentication implementation separates credential verification from the presentation layer.
+For Streamlit Community Cloud, configure the corresponding variables in
+**Settings → Secrets** instead of uploading a local `.env` file. Credentials
+and cryptographic keys must never be committed to GitHub, embedded in source
+code, or published in README files.
 
-The project also documents local audit logging, alert cooldown controls, and input sanitization intended to reduce selected security risks.
+`PLATFORM_ADMIN_PASS` must contain an Argon2id encoded password hash,
+not a plaintext password or a legacy SHA-256 digest.
 
-These mechanisms demonstrate security-conscious application design, but they should not be interpreted as a complete security certification or a substitute for a formal security assessment.
-
----
-
+Never share actual recruiter credentials or secret values in public
+documentation.
 ## Operational Alerting and Security Auditing
 
 The application contains a local alert management component:
@@ -559,6 +571,9 @@ The documented context includes:
 - Current temperature measurement.
 - Air-quality measurement.
 - Soil moisture measurement.
+- A compact rising/stable/falling comparison from the selected station's latest
+  five `city_stats` records; fewer than two valid records produce an explicit
+  no-trend fallback.
 - Active interface language.
 - Recent security-alert log entries.
 - Structured prompt instructions.
@@ -585,11 +600,30 @@ The cleaned recommendation is stored in Streamlit session state using a location
 
 This helps preserve the displayed recommendation across application reruns.
 
+After generation, deterministic grounding adds the station name, any omitted
+current readings, and any omitted breaches against that station's configured
+thresholds. The trend summary is kept explicitly historical and cannot establish
+current conditions or causes.
+
 Removing visible reasoning markers is a presentation and sanitization measure. It does not, by itself, guarantee that a response is accurate, safe, or free from confidential information.
 
 `GroqProvider` aligns the response body with the active language (`RO`, `EN`, `IT`,
 `ES`, or `HU`). It formats the response as separate Markdown sections, each with a
 bold English label: **Assessment**, **Recommended Actions**, or **Data Limitations**.
+
+### Recommendation Caching and Rate Limits
+
+The recommendation request remains exclusive to the user's button click. Its
+result is cached with `@st.cache_data(ttl=300, show_spinner=False)` using the
+rendered prompt, telemetry values, location, and active language as cache inputs.
+Repeating the same request within five minutes reuses the result and helps reduce
+Groq token consumption; changed telemetry or language produces a different cache
+entry.
+
+`GroqProvider` initializes the Groq client with `max_retries=0`, disabling
+automatic SDK retries when the API returns HTTP 429. The provider handles the
+returned error through its configured key rotation and model fallback rather
+than waiting through hidden SDK retry delays.
 
 ### Operational Recommendations
 
@@ -627,7 +661,7 @@ The repository uses a native Python guardrail suite and a separate live LLM eval
 
 | Component | Purpose |
 |---|---|
-| `ai_tests/run_llm_eval.py` | Runs a sequential Python evaluation workflow |
+| `ai_tests/run_llm_eval.py` | Evaluates scenarios sequentially with free-tier-aware pacing, transient-429 retry, and deterministic report ordering |
 | `ai_tests/run_guardrail_eval.py` | Runs seven deterministic RAG and output-validation checks |
 
 The Python evaluation script generates a local report at:
@@ -638,7 +672,12 @@ ai_tests/llm_eval_report.json
 
 The RAG checks cover location metadata filtering, semantic keyword retrieval, injection
 sanitization, telemetry bounds, and numeric grounding. The live evaluator measures seven
-model scenarios and writes the actual result to `ai_tests/llm_eval_report.json`.
+model scenarios with `ThreadPoolExecutor(max_workers=1)`, spacing every request attempt by
+2.1 seconds. It retries only transient HTTP 429 rate limits once with a short capped backoff;
+other errors and exhausted quotas fail without retry. Each prompt fetches the station's
+authorized `SensorThresholdMatrix` and includes `[AUTHORIZED OPERATIONAL THRESHOLDS]` in both
+the prompt and retrieved evidence. Scenario order and the existing report schema remain
+compatible with the About page and GitHub Actions workflow.
 
 ### Security Test Categories
 
@@ -827,9 +866,15 @@ uv run python ai_tests/run_llm_eval.py
 The measured model result is written to `ai_tests/llm_eval_report.json`. A passing result
 applies only to that live run and does not guarantee future API availability or model output.
 
-The **Run Live Architecture Verification** button on `pages/4_About.py` runs Pytest, the LLM
-evaluator, and Python guardrail checks in the app's Python runtime. It stores current results
-in Streamlit session state and the JSON reports, then reruns the page to show updated metrics.
+The **Run Live Architecture Verification** button on `pages/4_About.py` runs in fast mode by
+default. A `ThreadPoolExecutor` runs the Pytest suite (`sys.executable -m pytest -q
+--disable-warnings`) alongside the native in-process guardrails; this default path makes no
+external Groq calls. The latest LLM evaluation score is reused when its report exists, or shown
+as **Cached / Skipped (Fast Mode)** when no report is available.
+
+To run the API-backed scenarios, first select **Include Live Groq LLM Eval (uses API tokens)**
+beside the button. Only that opt-in run calls Groq and consumes API tokens. Results are stored
+in Streamlit session state and the JSON reports, then the page reruns to show updated metrics.
 
 ### Unified Quality Monitoring Dashboard
 

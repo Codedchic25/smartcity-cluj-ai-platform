@@ -19,7 +19,7 @@ gantt
     Scaffolding Bază de Date (CityRepository)  :p2, after p1, 15
 
     section Securitate & Audit
-    Barieră Autentificare Operator (SHA-256/Constant-Time) :crit, p3, after p2, 20
+   Bariera de autentificare operator: Argon2id pentru verificarea parolei si hmac.compare_digest pentru compararea username-ului.
     Evaluare Praguri Alerte & Cooldown 10s   :p4, after p3, 15
     Ingestie security_alerts.log            :p5, after p4, 10
 
@@ -36,7 +36,7 @@ gantt
    Pagina Dashboard oprește randarea cu `st.warning` dacă lista de senzori este goală sau selecția nu poate fi rezolvată. Settings și Analytics au controale similare, astfel încât starea fără senzor activ nu provoacă acces la atributele unui obiect absent.
 
 2. **Intercepție Criptografică Sincronă (`AuthenticationService.verify_credentials`):**
-   Între textul introdus în interfața grafică Streamlit și hash-ul securizat stocat în fișierul local `.env` (`PLATFORM_ADMIN_PASS`) se interpune motorul nativ `hashlib`. Textul clar introdus de operator este transformat instant în amprentă digitală hexazecimală prin algoritmul modern și sigur **SHA-256**. Validarea finală se execută prin funcția `hmac.compare_digest` în timp constant, blocând complet atacurile cibernetice de tip timing side-channel (analiză de timp) și eliminând complet parolele hardcodate în cod.
+   Parola introdusa este verificata fata de hash-ul Argon2id configurat; compararea username-ului foloseste hmac.compare_digest.
 
 3. **Filtru Anti-Duplicare și Audit local:**
    Valorile telemetrice live sunt evaluate în raport cu pragurile stocate în baza de date SQLite. Dacă o valoare depășește limita (sau scade sub prag în cazul umidității solului), sistemul de alerte interceptează pachetul, validează bariera temporală de 10 secunde cooldown anti-spam și stochează evenimentul igienizat (anti-log-injection) în fișierul fizic `security_alerts.log`.
@@ -68,10 +68,22 @@ flowchart LR
 ### Workflow-ul de Intervenție AI & Guardrails:
 
 * **Context-Aware Grounding (Ancorare Contextuală):**
-  Atunci când asistentul inteligent din `app/ai/` pregătește un răspuns, el preia șablonul strict de instrucțiuni din `ai_tests/prompts.txt`, extrage dinamic limba activă din sesiune și accesează registrul de traduceri prin componenta `TranslationProvider`. Promptul final este îmbogățit cu limitele operaționale autorizate și ultimele 5 linii de alertă logate pe disc, oferind modelului o conștientizare deplină a incidentelor din Cluj-Napoca.
+  Atunci când asistentul inteligent din `app/ai/` pregătește un răspuns, el preia șablonul strict de instrucțiuni din `ai_tests/prompts.txt`, extrage dinamic limba activă din sesiune și accesează registrul de traduceri prin componenta `TranslationProvider`. Promptul final este îmbogățit cu limitele operaționale autorizate, ultimele 5 linii de alertă logate pe disc și un rezumat al ultimelor 5 citiri pentru stația selectată (`[RECENT TELEMETRY TREND]`). Tendința este marcată ca istorică; cu mai puțin de două înregistrări valide se declară indisponibilă, fără a deduce o direcție.
+
+* **Grounding Determinist:**
+  După răspunsul modelului, `UrbanAiAssistantComponent` completează fără apeluri LLM suplimentare numele stației, valorile curente omise și depășirile de prag configurate care nu au fost citate. Valorile și pragurile provin exclusiv din telemetria curentă și setările stației.
 
 * **State Isolation (Izolarea Stării):**
   Rezultatele analizei returnate de API-ul Groq pentru modelul target `openai/gpt-oss-20b` sunt filtrate prin expresii regulate (regex) avansate pentru a elimina blocurile de gândire internă (`<think>...</think>`). Răspunsul curat este stocat în `st.session_state` folosind o cheie unică per locație. Acest lucru izolează datele generative în raport cu bucla automată de reîmprospătare (auto-refresh) a ecranului specifică Streamlit, eliminând complet efectul de pâlpâire sau pierderea datelor din ferestrele de chat.
+
+* **Caching și controlul cererilor:**
+  Generarea rămâne declanșată exclusiv de butonul de recomandări. Rezultatele sunt cache-uite prin `@st.cache_data(ttl=300, show_spinner=False)`, cu o cheie bazată pe prompt, parametrii telemetriei și limba activă; repetarea aceleiași cereri în intervalul de 5 minute reutilizează rezultatul și reduce consumul de tokeni. Clientul `Groq` este inițializat cu `max_retries=0`, dezactivând reîncercările automate ale SDK-ului la 429; providerul poate continua apoi cu rotația cheilor și modelele fallback fără o pauză ascunsă de retry.
+
+* **Evaluarea live LLM (`ai_tests/run_llm_eval.py`):**
+  Cele șapte scenarii rulează determinist cu `ThreadPoolExecutor(max_workers=1)` și spațiere de 2,1 secunde între fiecare încercare de cerere. Doar erorile tranzitorii HTTP 429 primesc o singură reîncercare cu backoff scurt și plafonat; cotele epuizate și celelalte erori nu sunt reîncercate. Promptul include pragurile autorizate ale stației, obținute prin `SensorThresholdMatrix`, în secțiunea `[AUTHORIZED OPERATIONAL THRESHOLDS]` și în contextul RAG. Ordinea scenariilor și formatul raportului JSON rămân compatibile cu About și GitHub Actions.
+
+* **Verificare rapidă a arhitecturii (`pages/4_About.py`):**
+  Modul implicit folosește un executor cu strategii independente și `ThreadPoolExecutor` pentru a rula în paralel suita Pytest (`sys.executable -m pytest -q --disable-warnings`) și guardrail-urile native in-process. Acest flux nu apelează API-ul Groq: reutilizează ultimul raport LLM disponibil sau afișează `Cached / Skipped (Fast Mode)` dacă nu există unul. Evaluarea live Groq este separată și pornește numai când utilizatorul bifează **Include Live Groq LLM Eval**; astfel verificarea implicită rămâne rapidă și nu consumă tokeni API.
 
 * **Modernized Layout Constraints:**
   Pentru a garanta o experiență vizuală fluidă, toate butoanele și elementele din pagini folosesc exclusiv noul standard arhitectural nativ Streamlit (cum ar fi parametrul `use_container_width=True` sau containerele stretch), eliminând complet elementele legacy sau avertismentele (warnings) din consolă.

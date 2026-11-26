@@ -3,8 +3,7 @@
 This document lists the module structure and production-verified screenshots that validate the functionality of the Smart City Cluj-Napoca platform.
 
 ### 🔒 Operational Security & Central Control Panel
-
-* **01. Secure Operator Authentication:** Access checkpoint powered by **SHA-256** hashing and constant-time verification (`hmac.compare_digest`) protecting the `main.py` interface using isolated credentials from the `.env` file.
+* **01. Secure Operator Authentication:** Access checkpoint powered by **Argon2id** password verification and constant-time username comparison (`hmac.compare_digest`), protecting the `main.py` interface using credentials supplied through secure configuration.
 * **02. Centralized Control Dashboard:** Symmetrical KPI display for monitored parameters (Temperature, Air Quality, Soil Moisture, Noise, Traffic) inside the Dashboard.
 * **03. Industrial Audit Ledger:** Real-time logging of transactional telemetry directly into the `city_stats` SQLite table and alert recording with a 10-second cooldown inside `security_alerts.log`.
 * **04. Multi-Language Synchronization:** Dynamic localization via callbacks bound to `st.session_state["lang"]` consuming the public services provided by the `TranslationProvider` class (RO, EN, IT, ES, HU).

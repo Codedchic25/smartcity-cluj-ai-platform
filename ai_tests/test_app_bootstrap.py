@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-import hashlib
 import importlib.util
 import sqlite3
 from pathlib import Path
 from types import ModuleType, SimpleNamespace
 
 import pytest
+from argon2 import PasswordHasher
 
 from main import AuthenticationService, CityRepository, SmartCityApplicationEngine
 
@@ -64,7 +64,7 @@ def test_engine_initialization_seeds_empty_database_without_overwriting(
     database_path = tmp_path / "smart_city.db"
     monkeypatch.setenv(
         "PLATFORM_ADMIN_PASS",
-        hashlib.sha256(b"test-password").hexdigest(),
+        PasswordHasher().hash("test-password"),
     )
     engine = SmartCityApplicationEngine(
         CityRepository(str(database_path)),
@@ -84,6 +84,100 @@ def test_engine_initialization_seeds_empty_database_without_overwriting(
             connection.execute("SELECT temp_limit FROM settings WHERE sensor_id = 1").fetchone()[0]
             == 47.5
         )
+
+
+# ---------------------------------------------------------------------------
+# AuthenticationService - Argon2id regression tests
+# ---------------------------------------------------------------------------
+
+
+def test_authentication_accepts_valid_credentials(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Accept valid credentials using an Argon2id password hash."""
+    password = "test-password"
+    monkeypatch.setenv("PLATFORM_ADMIN_USER", "admin")
+    monkeypatch.setenv(
+        "PLATFORM_ADMIN_PASS",
+        PasswordHasher().hash(password),
+    )
+
+    service = AuthenticationService()
+
+    assert service.verify_credentials("admin", password)
+
+
+def test_authentication_rejects_invalid_password(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Reject an incorrect password."""
+    monkeypatch.setenv(
+        "PLATFORM_ADMIN_PASS",
+        PasswordHasher().hash("correct-password"),
+    )
+
+    service = AuthenticationService()
+
+    assert not service.verify_credentials("admin", "wrong-password")
+
+
+def test_authentication_rejects_invalid_username(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Reject credentials with an incorrect username."""
+    monkeypatch.setenv(
+        "PLATFORM_ADMIN_PASS",
+        PasswordHasher().hash("test-password"),
+    )
+
+    service = AuthenticationService()
+
+    assert not service.verify_credentials("operator", "test-password")
+
+
+def test_authentication_rejects_empty_password(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Reject an empty password."""
+    monkeypatch.setenv(
+        "PLATFORM_ADMIN_PASS",
+        PasswordHasher().hash("test-password"),
+    )
+
+    service = AuthenticationService()
+
+    assert not service.verify_credentials("admin", "")
+
+
+def test_authentication_rejects_malformed_hash(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Reject a malformed Argon2 password hash without raising an exception."""
+    monkeypatch.setenv("PLATFORM_ADMIN_PASS", "invalid-argon2-hash")
+
+    service = AuthenticationService()
+
+    assert not service.verify_credentials("admin", "test-password")
+
+
+def test_authentication_requires_configured_password_hash(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Fail securely when the password hash is missing."""
+    monkeypatch.delenv("PLATFORM_ADMIN_PASS", raising=False)
+
+    with pytest.raises(RuntimeError, match="PLATFORM_ADMIN_PASS"):
+        AuthenticationService()
+
+
+def test_authentication_uses_default_admin_username(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Use admin as the default username when no username is configured."""
+    monkeypatch.delenv("PLATFORM_ADMIN_USER", raising=False)
+    monkeypatch.setenv(
+        "PLATFORM_ADMIN_PASS",
+        PasswordHasher().hash("test-password"),
+    )
+
+    service = AuthenticationService()
+
+    assert service.verify_credentials("admin", "test-password")
+
+
+# ---------------------------------------------------------------------------
+# Application page regression tests
+# ---------------------------------------------------------------------------
 
 
 def test_dashboard_warns_when_active_sensor_is_missing(monkeypatch: pytest.MonkeyPatch) -> None:

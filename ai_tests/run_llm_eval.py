@@ -12,6 +12,7 @@ import re
 import sys
 import time
 import unicodedata
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
@@ -31,6 +32,10 @@ if ENV_FILE.is_file():
     load_dotenv(dotenv_path=ENV_FILE, override=True)
 
 # Enforce explicit linter bypass to protect dynamic path injection compliance
+from app.ai.ai_interface import (  # noqa: E402
+    SensorThresholdMatrix,
+    TelemetryContextReader,
+)
 from app.ai.groq_provider import GroqProvider  # noqa: E402
 from app.ai.rag_pipeline import (  # noqa: E402
     TelemetryEvidence,
@@ -90,6 +95,7 @@ class PromptTemplateLoader:
             template_path: Relative path matching the prompt text storage file.
         """
         self._template_path = PROJECT_ROOT / template_path
+        self._context_reader = TelemetryContextReader()
 
     def _load_template(self) -> str | None:
         """Read the prompt template safely from disk storage components.
@@ -105,14 +111,18 @@ class PromptTemplateLoader:
             return None
 
     @staticmethod
-    def _build_telemetry_context(scenario: EvalScenario) -> str:
+    def _build_telemetry_context(
+        scenario: EvalScenario,
+        thresholds: SensorThresholdMatrix,
+    ) -> str:
         """Build the canonical telemetry block used by the evaluation suite.
 
         Args:
             scenario: The immutable evaluation scenario containing sensor bounds.
+            thresholds: Authorized operational limits for the scenario station.
 
         Returns:
-            A formatted prompt fragment mapping all sensor dimensions.
+            A formatted prompt fragment mapping telemetry and authorized thresholds.
         """
         return f"""
 [LIVE URBAN TELEMETRY]
@@ -122,6 +132,14 @@ Noise level: {scenario.noise_level:.1f} dB
 Traffic load: {scenario.traffic_load:.1f} %
 Air quality PM2.5: {scenario.air_quality:.1f}
 Soil moisture: {scenario.soil_moisture:.1f} %
+
+[AUTHORIZED OPERATIONAL THRESHOLDS]
+Reference thresholds for {sanitize_untrusted_input(scenario.location, max_length=200)}:
+- Temperature Threshold: {thresholds.temperature_limit:.1f} °C
+- Noise Level Threshold: {thresholds.noise_limit:.1f} dB
+- Traffic Load Threshold: {thresholds.traffic_limit:.1f} %
+- Air Quality PM2.5 Threshold: {thresholds.air_quality_limit:.1f} µg/m³
+- Soil Moisture Minimum Threshold: {thresholds.soil_moisture_limit:.1f} %
 
 [TELEMETRY INTERPRETATION]
 Identify the dominant operational condition.
@@ -143,6 +161,7 @@ Provide a concise operational recommendation in the requested language.
             return None
 
         safe_location = sanitize_untrusted_input(scenario.location, max_length=200)
+        thresholds = self._context_reader.fetch_operational_thresholds(safe_location)
         rendered_prompt = (
             template_content.replace("{{locatie}}", safe_location)
             .replace("{{temperature}}", f"{scenario.temperature:.1f}")
@@ -156,7 +175,7 @@ Provide a concise operational recommendation in the requested language.
                 sanitize_untrusted_input("No active security breach events logged."),
             )
         )
-        telemetry_context = self._build_telemetry_context(scenario)
+        telemetry_context = self._build_telemetry_context(scenario, thresholds)
         records = [
             TelemetryEvidence(
                 location=safe_location,
@@ -188,6 +207,36 @@ Provide a concise operational recommendation in the requested language.
                 value=scenario.soil_moisture,
                 unit="%",
             ),
+            TelemetryEvidence(
+                location=safe_location,
+                sensor="temperature",
+                value=thresholds.temperature_limit,
+                unit="threshold °C",
+            ),
+            TelemetryEvidence(
+                location=safe_location,
+                sensor="noise",
+                value=thresholds.noise_limit,
+                unit="threshold dB",
+            ),
+            TelemetryEvidence(
+                location=safe_location,
+                sensor="traffic",
+                value=thresholds.traffic_limit,
+                unit="threshold %",
+            ),
+            TelemetryEvidence(
+                location=safe_location,
+                sensor="air_quality",
+                value=thresholds.air_quality_limit,
+                unit="threshold µg/m³",
+            ),
+            TelemetryEvidence(
+                location=safe_location,
+                sensor="soil_moisture",
+                value=thresholds.soil_moisture_limit,
+                unit="threshold %",
+            ),
         ]
         retrieved = retrieve_telemetry(
             records,
@@ -215,8 +264,11 @@ class LlmEvaluationOrchestrator:
     """
 
     MODEL_TARGET: Final[str] = "openai/gpt-oss-20b"
-    MAX_RETRIES: Final[int] = 3
-    REQUEST_INTERVAL_SECONDS: Final[float] = 1.0
+    MAX_RETRIES: Final[int] = 2
+    REQUEST_INTERVAL_SECONDS: Final[float] = 2.1
+    RATE_LIMIT_BACKOFF_SECONDS: Final[float] = 1.0
+    MAX_RATE_LIMIT_BACKOFF_SECONDS: Final[float] = 3.0
+    MAX_WORKERS: Final[int] = 1
 
     KEYWORD_VARIANTS: Final[dict[str, tuple[str, ...]]] = {
         "temperature": (
@@ -277,6 +329,7 @@ class LlmEvaluationOrchestrator:
         """Initialize provider, prompt loader and 7 synchronized evaluation scenarios."""
         self._provider = GroqProvider(model_target=self.MODEL_TARGET)
         self._loader = PromptTemplateLoader()
+        self._next_request_at = 0.0
         self._scenarios: Final[list[EvalScenario]] = [
             EvalScenario(
                 "1. Temperature Heatwave",
@@ -350,6 +403,16 @@ class LlmEvaluationOrchestrator:
             ),
         ]
 
+    def _wait_for_request_slot(self) -> None:
+        """Space sequential request starts to remain within free-tier rate limits."""
+        now = time.monotonic()
+        request_at = max(now, self._next_request_at)
+        self._next_request_at = request_at + self.REQUEST_INTERVAL_SECONDS
+
+        delay = request_at - time.monotonic()
+        if delay > 0:
+            time.sleep(delay)
+
     @staticmethod
     def _normalize_text(text: str) -> str:
         """Normalize case, whitespace, and diacritics for semantic matching."""
@@ -385,8 +448,9 @@ class LlmEvaluationOrchestrator:
         return match.group(1).strip() if match else None
 
     def _execute_with_backoff(self, rendered_prompt: str) -> str:
-        """Dispatches completion request incorporating Rate Limit mitigations."""
+        """Retry once with a short delay only for transient rate-limit failures."""
         for attempt in range(self.MAX_RETRIES):
+            self._wait_for_request_slot()
             try:
                 response_text = self._provider.generate_completion(rendered_prompt)
                 error_markers = (
@@ -402,23 +466,39 @@ class LlmEvaluationOrchestrator:
                 return response_text
             except Exception as exc:
                 err_msg = str(exc)
-                normalized_error = err_msg.casefold()
-                if (
-                    "429" in normalized_error
-                    or "rate_limit" in normalized_error
-                    or "rate limit" in normalized_error
-                ):
-                    match = re.search(
-                        r"again in\s+([0-9.]+)\s*s",
-                        err_msg,
-                        flags=re.IGNORECASE,
-                    )
-                    sleep_duration = min(float(match.group(1)) + 0.5, 60.0) if match else 2.5
-                    if attempt < self.MAX_RETRIES - 1:
-                        time.sleep(sleep_duration)
-                        continue
-                raise exc
+                if not self._is_transient_rate_limit(err_msg) or attempt >= self.MAX_RETRIES - 1:
+                    raise
+
+                match = re.search(
+                    r"(?:again in|retry after)\s+([0-9.]+)\s*s?",
+                    err_msg,
+                    flags=re.IGNORECASE,
+                )
+                requested_delay = (
+                    float(match.group(1)) + 0.25
+                    if match
+                    else self.RATE_LIMIT_BACKOFF_SECONDS * (2**attempt)
+                )
+                time.sleep(min(requested_delay, self.MAX_RATE_LIMIT_BACKOFF_SECONDS))
         return ""
+
+    @staticmethod
+    def _is_transient_rate_limit(error_message: str) -> bool:
+        """Recognize retryable 429 responses but exclude exhausted account quotas."""
+        normalized_error = error_message.casefold()
+        quota_exhaustion_markers = (
+            "daily limit",
+            "daily quota",
+            "monthly quota",
+            "quota exhausted",
+            "quota exceeded",
+        )
+        if any(marker in normalized_error for marker in quota_exhaustion_markers):
+            return False
+        return any(
+            marker in normalized_error
+            for marker in ("429", "rate_limit", "rate limit", "too many requests")
+        )
 
     def _evaluate_scenario(self, scenario: EvalScenario) -> dict[str, Any]:
         """Execute and evaluate one telemetry scenario safely."""
@@ -497,15 +577,20 @@ class LlmEvaluationOrchestrator:
         return report_path
 
     def execute_evaluation_suite(self, report_path: Path | None = None) -> tuple[int, int, Path]:
-        """Execute all model scenarios and persist their measured results."""
-        results: list[dict[str, Any]] = []
+        """Evaluate scenarios sequentially and persist results in declaration order."""
+        results_by_index: list[dict[str, Any] | None] = [None] * len(self._scenarios)
         passed_assertions = 0
 
-        for index, scenario in enumerate(self._scenarios):
-            if index:
-                time.sleep(self.REQUEST_INTERVAL_SECONDS)
-            result = self._evaluate_scenario(scenario)
-            results.append(result)
+        with ThreadPoolExecutor(max_workers=self.MAX_WORKERS) as executor:
+            futures = {
+                executor.submit(self._evaluate_scenario, scenario): index
+                for index, scenario in enumerate(self._scenarios)
+            }
+            for future in as_completed(futures):
+                results_by_index[futures[future]] = future.result()
+
+        results = [result for result in results_by_index if result is not None]
+        for result in results:
             if result.get("matched_compliance", False):
                 passed_assertions += 1
 

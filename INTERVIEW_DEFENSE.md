@@ -56,17 +56,36 @@ attacks and numerical hallucinations.
   2. `app/ai/groq_provider.py` integrates the production `openai/gpt-oss-20b` model via the Groq
   Cloud API at a low temperature (`0.2`), enforcing deterministic, action-oriented technical
   recommendations, backed by automatic multi-key rotation (`GROQ_API_KEYS`) on HTTP 401, 429, or
-  5xx errors.
-  3. **Groq Rate-Limit Mitigation (429):** We implemented a defensive retry algorithm using
-  Exponential Backoff with Jitter. When Groq returns a rate-limit response, a regex parser
-  extracts the exact retry-after delay from the payload and sleeps accordingly before retrying.
+  5xx errors. The Groq client uses `max_retries=0` so a 429 is returned immediately to this
+  fallback logic instead of triggering hidden SDK retries.
+  3. **Recommendation Cache:** `UrbanAiAssistantComponent` applies
+  `@st.cache_data(ttl=300, show_spinner=False)` to AI generation, keyed by the rendered prompt,
+  telemetry inputs, and active language. Generation is still triggered only by the recommendation
+  button; repeated matching inputs reuse the result for five minutes and reduce token consumption.
   4. The native Python evaluation script (`ai_tests/run_llm_eval.py`) executes **seven urban
   scenarios in Cluj-Napoca**. It verifies whole-word focal terms inside the `Assessment` section,
-  normalizes diacritics, and reports actual provider errors; the final score is computed strictly
-  from live run outcomes without placeholder or assumed passes.
+  normalizes diacritics, and reports actual provider errors; it uses one worker, spaces request
+  attempts by 2.1 seconds, and preserves scenario order. Only transient HTTP 429 errors receive
+  one short, capped retry; exhausted quotas and other errors fail immediately. The prompt loads
+  the station's authorized `SensorThresholdMatrix` and places
+  `[AUTHORIZED OPERATIONAL THRESHOLDS]` in retrieved evidence. The final score is computed
+  strictly from live run outcomes.
   5. A regex sanitization pass strips internal reasoning tags (`<think>...</think>`), paired with
   Pydantic schema validation and numerical grounding checks (`rag_pipeline.py` and
   `run_guardrail_eval.py`) before rendering responses in Streamlit.
+  6. The About page's default architecture verification runs Pytest and in-process native
+  guardrails concurrently through `ThreadPoolExecutor`, without external Groq requests. A prior
+  LLM score is reused when available; live Groq scenarios run only after selecting the
+  **Include Live Groq LLM Eval (uses API tokens)** checkbox.
+  7. **Historical RAG trend:** `TelemetryContextReader` selects up to five recent `city_stats`
+  rows for the chosen station and summarizes endpoint deltas as rising, stable, or falling.
+  Fewer than two valid readings produce an explicit no-trend fallback; the prompt treats every
+  trend as historical, not as the current state or a causal explanation.
+  8. **Deterministic response grounding:** After generation, `UrbanAiAssistantComponent` adds
+  only omitted station identity, current metric values, and configured threshold breaches.
+  These facts come from the already available telemetry and settings, so this completion step
+  does not make another API call or consume additional tokens. Focused SQLite and grounding
+  tests live in `ai_tests/test_ai_guardrails.py`.
 
 ---
 
@@ -80,7 +99,7 @@ both local and cloud attack surfaces.
   `GROQ_API_KEYS`) are decoupled from source code and stored in the local `.env` file or
   encrypted cloud secrets, excluded from Git via `.gitignore` and `.dockerignore`.
   2. **Layer 2 (Constant-Time Cryptography):** To eliminate plaintext password exposure,
-  configurations store a 64-character **SHA-256** hexadecimal digest. Verification executes via
+  Runtime authentication verifies the configured Argon2id password hash using argon2-cffi. Username comparison uses hmac.compare_digest.
   `hmac.compare_digest` in constant time, mitigating timing side-channel attacks, paired with
   HMAC-SHA256 signed 24-hour session tokens.
   3. **Layer 3 (Access Control & State Isolation):** Multipage views under `pages/` are globally
@@ -235,7 +254,8 @@ isolates the environment and sequentially enforces strict quality gates governed
   3. **Semantic & Guardrail AI Gate (LLMOps):** `ai_tests/run_guardrail_eval.py` runs 7 local
   deterministic RAG/grounding checks without credentials, while `ai_tests/run_llm_eval.py`
   evaluates **7 live Cluj-Napoca urban scenarios** against `openai/gpt-oss-20b` when a Groq API
-  key is configured, validating multilingual alignment and `Assessment` accuracy.
+  key is configured, using one worker, 2.1-second request pacing, transient-429 retry, and
+  authorized station thresholds.
 
 ---
 

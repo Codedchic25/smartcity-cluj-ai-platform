@@ -367,7 +367,7 @@ class GroqProvider:
                 api_key = self._api_keys[key_index]
 
                 try:
-                    client = Groq(api_key=api_key)
+                    client = Groq(api_key=api_key, max_retries=0)
 
                     if client.chat is None:
                         return "Subsystem Failure: Groq SDK instance is not fully loaded."

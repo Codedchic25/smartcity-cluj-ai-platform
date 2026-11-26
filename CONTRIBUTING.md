@@ -48,5 +48,5 @@ The project enforces strict static analysis. Any code violating these rules will
 ## 🔐 Security & Isolation
 
 * **No Secrets in Git:** Never commit private API keys or plaintext passwords into source code. All sensitive environment variables must remain isolated on disk inside the local `.env` file.
-* **Constant-Time Cryptography:** Administrative authentication verifies the **SHA-256** digest from `.env` using `hmac.compare_digest` to prevent timing side-channel attacks and eliminate hardcoded credentials (backdoors).
+* **Secure Password Authentication:** Administrative passwords are verified using Argon2id (`argon2-cffi`). Username comparison uses `hmac.compare_digest` to reduce timing side-channel exposure. Credentials must be supplied through secure configuration and must never be hardcoded.
 * **Local Audit System:** All alerting components must write through the 10-second cooldown shield into `security_alerts.log`, explicitly stripping `\n` and `\r` characters to mitigate Log Injection / Log Forgery attacks.

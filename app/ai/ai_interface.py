@@ -6,11 +6,14 @@ and production-grade code quality alignment with strict linter rule governance.
 
 from __future__ import annotations
 
+import math
 import os
 import re
 import sys
+import unicodedata
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from decimal import Decimal
 from pathlib import Path
 from typing import Any, Final, Protocol
 
@@ -24,6 +27,7 @@ if PROJECT_ROOT not in sys.path:
 
 from app.ai.rag_pipeline import (  # noqa: E402
     TelemetryEvidence,
+    extract_context_numbers,
     format_retrieved_context,
     retrieve_telemetry,
     sanitize_untrusted_input,
@@ -58,6 +62,10 @@ class ContextReaderInterface(ABC):
     def fetch_operational_thresholds(self, location_name: str) -> SensorThresholdMatrix:
         """Map nominal attributes explicitly to resolve sensor warning barriers."""
 
+    @abstractmethod
+    def fetch_recent_telemetry_trend(self, location_name: str, limit: int = 5) -> str:
+        """Summarize recent selected-station readings without inferring from one record."""
+
 
 class AiProviderInterface(Protocol):
     """Structural protocol defining LLM inference engines ensuring loose coupling."""
@@ -65,6 +73,23 @@ class AiProviderInterface(Protocol):
     def generate_completion(self, system_prompt_context: str) -> str:
         """Dispatches an inference request payload toward the cloud gateway grid."""
         ...
+
+
+@st.cache_data(ttl=300, show_spinner=False)
+def _cached_ai_completion(
+    rendered_prompt: str,
+    location: str,
+    temperature: float,
+    air_quality: float,
+    soil_moisture: float,
+    noise_level: float,
+    traffic_load: float,
+    language: str,
+    provider_cache_key: str,
+    _provider: AiProviderInterface,
+) -> str:
+    """Cache generated recommendations for matching telemetry and language inputs."""
+    return _provider.generate_completion(rendered_prompt)
 
 
 class TelemetryContextReader(ContextReaderInterface):
@@ -154,6 +179,74 @@ class TelemetryContextReader(ContextReaderInterface):
 
         return self._default_thresholds
 
+    def fetch_recent_telemetry_trend(self, location_name: str, limit: int = 5) -> str:
+        """Summarize recent readings for one station, or state why no trend is available."""
+        heading = "[RECENT TELEMETRY TREND]"
+        if not self._database_path.is_file():
+            return (
+                f"{heading}\nNo recent station history is available; "
+                "no trend can be established."
+            )
+
+        query: Final[str] = """
+            SELECT city_stats.temperature, city_stats.noise_level,
+                   city_stats.traffic_load, city_stats.air_quality,
+                   city_stats.soil_moisture
+            FROM city_stats
+            JOIN sensors ON sensors.id = city_stats.sensor_id
+            WHERE sensors.name = ?
+            ORDER BY city_stats.timestamp DESC, city_stats.id DESC
+            LIMIT ?;
+        """
+        try:
+            with self._sqlite3.connect(str(self._database_path), timeout=5) as connection:
+                rows = connection.execute(
+                    query,
+                    (location_name, max(2, min(int(limit), 20))),
+                ).fetchall()
+        except (self._sqlite3.Error, TypeError, ValueError):
+            return (
+                f"{heading}\nRecent station history is unavailable; "
+                "no trend can be established."
+            )
+
+        readings: list[tuple[float, ...]] = []
+        for row in reversed(rows):
+            try:
+                values = tuple(float(value) for value in row)
+            except (TypeError, ValueError):
+                continue
+            if len(values) == 5 and all(math.isfinite(value) for value in values):
+                readings.append(values)
+
+        if len(readings) < 2:
+            return (
+                f"{heading}\nFewer than two valid station readings are available; "
+                "no trend can be established."
+            )
+
+        metrics = (
+            ("Temperature", 0, "°C"),
+            ("Noise level", 1, "dB"),
+            ("Traffic load", 2, "%"),
+            ("Air quality PM2.5", 3, "µg/m³"),
+            ("Soil moisture", 4, "%"),
+        )
+        trend_lines = [
+            f"Historical comparison across {len(readings)} recent readings "
+            "(oldest to newest):"
+        ]
+        for label, index, unit in metrics:
+            start_value = readings[0][index]
+            end_value = readings[-1][index]
+            delta = round(end_value - start_value, 1)
+            direction = "stable" if delta == 0 else "rising" if delta > 0 else "falling"
+            trend_lines.append(
+                f"- {label}: {direction} "
+                f"({start_value:g} to {end_value:g} {unit}; delta {delta:+.1f} {unit})"
+            )
+        return f"{heading}\n" + "\n".join(trend_lines)
+
 
 class UrbanAiAssistantComponent:
     """Renders the intelligent AI advisory dashboard card with absolute state persistence."""
@@ -170,6 +263,17 @@ class UrbanAiAssistantComponent:
             context_reader or TelemetryContextReader()
         )
         self._ai_provider: Final[AiProviderInterface] = ai_provider or GroqProvider()
+        if isinstance(self._ai_provider, GroqProvider):
+            self._ai_cache_key: Final[str] = (
+                f"{type(self._ai_provider).__module__}."
+                f"{type(self._ai_provider).__qualname__}:"
+                f"{self._ai_provider.configured_model}"
+            )
+        else:
+            self._ai_cache_key = (
+                f"{type(self._ai_provider).__module__}."
+                f"{type(self._ai_provider).__qualname__}:{id(self._ai_provider)}"
+            )
         self._prompt_template_path: Final[str] = "ai_tests/prompts.txt"
         self._think_block_pattern: Final[re.Pattern] = re.compile(
             r"<think>.*?</think>", re.DOTALL | re.IGNORECASE
@@ -193,6 +297,119 @@ class UrbanAiAssistantComponent:
         cleaned = self._think_block_pattern.sub("", text)
         cleaned = self._think_tag_pattern.sub("", cleaned)
         return cleaned.strip()
+
+    @staticmethod
+    def _normalize_grounding_text(text: str) -> str:
+        decomposed = unicodedata.normalize("NFKD", text.casefold())
+        return "".join(char for char in decomposed if not unicodedata.combining(char))
+
+    @classmethod
+    def _response_mentions_metric_value(
+        cls,
+        response: str,
+        metric_aliases: tuple[str, ...],
+        value: float,
+    ) -> bool:
+        normalized_response = cls._normalize_grounding_text(response)
+        expected_value = Decimal(str(value)).normalize()
+        for alias in metric_aliases:
+            normalized_alias = cls._normalize_grounding_text(alias)
+            for match in re.finditer(
+                rf"(?<!\w){re.escape(normalized_alias)}(?!\w)",
+                normalized_response,
+            ):
+                nearby_text = normalized_response[
+                    max(0, match.start() - 32) : min(
+                        len(normalized_response), match.end() + 48
+                    )
+                ]
+                if expected_value in extract_context_numbers(nearby_text):
+                    return True
+        return False
+
+    @classmethod
+    def _response_mentions_threshold_breach(
+        cls,
+        response: str,
+        metric_aliases: tuple[str, ...],
+        measured_value: float,
+        threshold: float,
+        direction: str,
+    ) -> bool:
+        normalized_response = cls._normalize_grounding_text(response)
+        expected_measured = Decimal(str(measured_value)).normalize()
+        expected_threshold = Decimal(str(threshold)).normalize()
+        direction_terms = (
+            ("above", "exceeds", "greater than", "over", "depases", "peste", ">")
+            if direction == "above"
+            else ("below", "under", "less than", "sub", "mai putin", "<")
+        )
+        for alias in metric_aliases:
+            normalized_alias = cls._normalize_grounding_text(alias)
+            for match in re.finditer(
+                rf"(?<!\w){re.escape(normalized_alias)}(?!\w)",
+                normalized_response,
+            ):
+                nearby_text = normalized_response[
+                    max(0, match.start() - 40) : min(
+                        len(normalized_response), match.end() + 104
+                    )
+                ]
+                nearby_numbers = extract_context_numbers(nearby_text)
+                if (
+                    expected_measured in nearby_numbers
+                    and expected_threshold in nearby_numbers
+                    and any(term in nearby_text for term in direction_terms)
+                ):
+                    return True
+        return False
+
+    @classmethod
+    def _ensure_response_grounding(
+        cls,
+        response: str,
+        location: str,
+        readings: tuple[tuple[str, tuple[str, ...], float, str, float, str], ...],
+    ) -> str:
+        """Append only missing station, measurement, and configured-breach evidence."""
+        if not response or response.startswith(("❌", "Generic")):
+            return response
+
+        normalized_response = cls._normalize_grounding_text(response)
+        facts: list[str] = []
+        normalized_location = cls._normalize_grounding_text(location)
+        if normalized_location not in normalized_response:
+            facts.append(f"Station: {location}.")
+
+        missing_readings = [
+            f"{label}: {value:g} {unit}"
+            for label, aliases, value, unit, _, _ in readings
+            if not cls._response_mentions_metric_value(response, aliases, value)
+        ]
+        if missing_readings:
+            facts.append("Verified current readings: " + "; ".join(missing_readings) + ".")
+
+        missing_breaches = []
+        for label, aliases, value, unit, threshold, direction in readings:
+            breached = value > threshold if direction == "above" else value < threshold
+            if breached and not cls._response_mentions_threshold_breach(
+                response, aliases, value, threshold, direction
+            ):
+                relation = "exceeds" if direction == "above" else "is below"
+                missing_breaches.append(
+                    f"{label}: {value:g} {unit} {relation} configured threshold "
+                    f"{threshold:g} {unit}"
+                )
+        if missing_breaches:
+            facts.append(
+                "Verified configured threshold breaches: "
+                + "; ".join(missing_breaches)
+                + "."
+            )
+
+        if not facts:
+            return response
+        return response.rstrip() + "\n\n**Verified Operational Facts:**\n" + "\n".join(facts)
 
     def render(
         self,
@@ -289,7 +506,11 @@ class UrbanAiAssistantComponent:
             "temperature noise traffic air quality soil moisture",
             safe_location,
         )
-        retrieved_context = format_retrieved_context(retrieved_records)
+        recent_trend = self._context_reader.fetch_recent_telemetry_trend(safe_location)
+        retrieved_context = (
+            f"{format_retrieved_context(retrieved_records)}\n\n"
+            f"{sanitize_untrusted_input(recent_trend)}"
+        )
 
         telemetry_context_extension: Final[str] = (
             f"\n\n[AUTHORIZED OPERATIONAL THRESHOLDS]\n"
@@ -322,14 +543,70 @@ class UrbanAiAssistantComponent:
             translations.get("generate_rec", "Generate Recommendations"),
             type="secondary",
             key=f"ai_generate_btn_{safe_location.replace(' ', '_')}",
-            use_container_width=True,
+            width="stretch",
         ):
             with st.spinner(translations.get("loading_ai", "Analyzing sensor telemetry...")):
                 try:
-                    response_text = self._ai_provider.generate_completion(rendered_prompt)
+                    response_text = _cached_ai_completion(
+                        rendered_prompt,
+                        safe_location,
+                        temperature,
+                        air_quality,
+                        soil_moisture,
+                        noise_level,
+                        traffic_load,
+                        active_lang,
+                        self._ai_cache_key,
+                        self._ai_provider,
+                    )
                     if response_text:
-                        st.session_state[session_key] = self._clean_reasoning_artifacts(
-                            response_text
+                        cleaned_response = self._clean_reasoning_artifacts(response_text)
+                        station_readings = (
+                            (
+                                "Temperature",
+                                ("temperature", "temperatura"),
+                                temperature,
+                                "°C",
+                                thresholds.temperature_limit,
+                                "above",
+                            ),
+                            (
+                                "Air quality PM2.5",
+                                ("air quality", "calitatea aerului", "pm2.5", "pm25"),
+                                air_quality,
+                                "µg/m³",
+                                thresholds.air_quality_limit,
+                                "above",
+                            ),
+                            (
+                                "Noise level",
+                                ("noise", "noise level", "zgomot", "poluare fonica"),
+                                noise_level,
+                                "dB",
+                                thresholds.noise_limit,
+                                "above",
+                            ),
+                            (
+                                "Traffic load",
+                                ("traffic", "traffic load", "trafic", "aglomeratie"),
+                                traffic_load,
+                                "%",
+                                thresholds.traffic_limit,
+                                "above",
+                            ),
+                            (
+                                "Soil moisture",
+                                ("soil moisture", "moisture", "umiditate", "sol"),
+                                soil_moisture,
+                                "%",
+                                thresholds.soil_moisture_limit,
+                                "below",
+                            ),
+                        )
+                        st.session_state[session_key] = self._ensure_response_grounding(
+                            cleaned_response,
+                            safe_location,
+                            station_readings,
                         )
                     else:
                         st.warning("⚠️ Remote cloud gateway engine returned null.")
@@ -429,7 +706,7 @@ class GlobalSidebarComponent:
                 if st.button(
                     translations.get("logout_btn", "🚫 Disconnect"),
                     type="secondary",
-                    use_container_width=True,
+                    width="stretch",
                     key="global_logout_btn",
                 ):
                     clear_authenticated_session(st.session_state, st.query_params)

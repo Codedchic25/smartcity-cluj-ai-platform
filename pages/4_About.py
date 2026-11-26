@@ -7,11 +7,11 @@ automated testing metrics from local structural JSON reports via Pydantic contra
 from __future__ import annotations
 
 import json
+import subprocess
 import sys
-from contextlib import redirect_stderr, redirect_stdout
-from io import StringIO
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
-from typing import Any, Final, Literal
+from typing import Any, Final, Literal, Protocol
 
 import streamlit as st
 from pydantic import BaseModel, Field, ValidationError
@@ -198,6 +198,193 @@ class QualityMetricsReader:
             return LlmEvalSummary()
 
 
+QualitySummary = PytestSummary | GuardrailSummary | LlmEvalSummary
+
+
+class CheckExecution:
+    """Pair a command result with its validated quality summary."""
+
+    def __init__(self, command: dict[str, Any], summary: QualitySummary) -> None:
+        """Store a check's command metadata and Pydantic summary."""
+        self.command = command
+        self.summary = summary
+
+
+class LiveCheckStrategy(Protocol):
+    """Contract for an independently executable quality check."""
+
+    def execute(self) -> CheckExecution:
+        """Run one check and return its command result and validated summary."""
+        ...
+
+
+class PytestCheckStrategy:
+    """Run the repository's pytest suite in an isolated Python subprocess."""
+
+    def __init__(self, report_path: Path) -> None:
+        """Set the JSON report location for this pytest invocation."""
+        self._report_path = report_path
+
+    def execute(self) -> CheckExecution:
+        """Run pytest and return its measured result."""
+        command = [
+            sys.executable,
+            "-m",
+            "pytest",
+            "-q",
+            "--disable-warnings",
+            "--json-report-file",
+            str(self._report_path),
+        ]
+        try:
+            completed = subprocess.run(
+                command,
+                cwd=PROJECT_ROOT,
+                capture_output=True,
+                check=False,
+                text=True,
+                timeout=120,
+            )
+        except (OSError, subprocess.SubprocessError) as exc:
+            return CheckExecution(
+                command={
+                    "name": "Pytest",
+                    "returncode": 1,
+                    "passed": False,
+                    "error": str(exc),
+                    "output": "",
+                },
+                summary=PytestSummary(status="Failed", color="red"),
+            )
+
+        output = f"{completed.stdout or ''}{completed.stderr or ''}"[-6000:]
+        summary = QualityMetricsReader.read_pytest_metrics(self._report_path)
+        passed = completed.returncode == 0 and summary.status == "Passed"
+        if not passed:
+            summary = PytestSummary(
+                status="Failed",
+                passed=summary.passed,
+                total=summary.total,
+                color="red",
+            )
+
+        return CheckExecution(
+            command={
+                "name": "Pytest",
+                "returncode": completed.returncode,
+                "passed": passed,
+                "error": "" if passed else f"Pytest exited with code {completed.returncode}.",
+                "output": output,
+            },
+            summary=summary,
+        )
+
+
+class GuardrailCheckStrategy:
+    """Run the native RAG and grounding assertions without calling an LLM."""
+
+    def __init__(self, report_path: Path) -> None:
+        """Set the JSON report location for native guardrail results."""
+        self._report_path = report_path
+
+    def execute(self) -> CheckExecution:
+        """Run the in-process guardrail suite and return its measured result."""
+        try:
+            report = write_guardrail_report(self._report_path)
+            summary = QualityMetricsReader.read_guardrail_metrics(self._report_path)
+            passed = summary.status == "Passed" and summary.successes == summary.total == 7
+            error = (
+                ""
+                if passed
+                else f"{summary.successes}/{summary.total} native guardrails passed."
+            )
+            return CheckExecution(
+                command={
+                    "name": "RAG & guardrails",
+                    "returncode": 0 if passed else 1,
+                    "passed": passed,
+                    "error": error,
+                    "output": json.dumps(report.get("results", []), ensure_ascii=False),
+                },
+                summary=summary,
+            )
+        except (OSError, RuntimeError, TypeError, ValueError) as exc:
+            return CheckExecution(
+                command={
+                    "name": "RAG & guardrails",
+                    "returncode": 1,
+                    "passed": False,
+                    "error": str(exc),
+                    "output": "",
+                },
+                summary=GuardrailSummary(status="Failed", color="red"),
+            )
+
+
+class LiveLlmCheckStrategy:
+    """Run the explicitly requested live Groq scenario evaluation."""
+
+    def __init__(self, report_path: Path) -> None:
+        """Set the JSON report location for live model scenarios."""
+        self._report_path = report_path
+
+    def execute(self) -> CheckExecution:
+        """Run the API-backed scenarios and return their measured result."""
+        try:
+            from ai_tests.run_llm_eval import LlmEvaluationOrchestrator
+
+            passed_count, total, _ = LlmEvaluationOrchestrator().execute_evaluation_suite(
+                self._report_path
+            )
+            summary = QualityMetricsReader.read_llm_eval_metrics(self._report_path)
+            passed = total == 7 and passed_count == total and summary.rate == 100.0
+            return CheckExecution(
+                command={
+                    "name": "Live Groq LLM evaluation",
+                    "returncode": 0 if passed else 1,
+                    "passed": passed,
+                    "error": "" if passed else f"{passed_count}/{total} scenarios passed.",
+                    "output": f"Live Groq evaluation: {passed_count}/{total} scenarios passed.",
+                },
+                summary=summary,
+            )
+        except (ImportError, OSError, RuntimeError, TypeError, ValueError) as exc:
+            return CheckExecution(
+                command={
+                    "name": "Live Groq LLM evaluation",
+                    "returncode": 1,
+                    "passed": False,
+                    "error": str(exc),
+                    "output": "",
+                },
+                summary=LlmEvalSummary(
+                    status="Failed",
+                    model="openai/gpt-oss-20b",
+                    color="red",
+                ),
+            )
+
+
+class LiveQaExecutor:
+    """Execute selected quality-check strategies concurrently."""
+
+    def __init__(self, strategies: dict[str, LiveCheckStrategy]) -> None:
+        """Store the selected independent check strategies."""
+        self._strategies = strategies
+
+    def execute(self) -> dict[str, CheckExecution]:
+        """Submit every selected check to a worker and collect its result."""
+        with ThreadPoolExecutor(
+            max_workers=len(self._strategies),
+            thread_name_prefix="live-qa",
+        ) as executor:
+            futures = {
+                name: executor.submit(strategy.execute)
+                for name, strategy in self._strategies.items()
+            }
+            return {name: future.result() for name, future in futures.items()}
+
+
 class AboutQualityPage:
     """Orchestrates the System Quality Control Center and Architecture Overview UI."""
 
@@ -205,134 +392,66 @@ class AboutQualityPage:
         """Initialize the quality board reader dependencies."""
         self._reader: Final[QualityMetricsReader] = QualityMetricsReader()
 
-    def _execute_live_qa_suite(self) -> None:
-        """Run Python regression, live LLM, and native RAG guardrail evaluations."""
+    def _execute_live_qa_suite(self, include_live_llm: bool = False) -> None:
+        """Run fast local checks and optionally include the live Groq evaluation."""
         AI_TESTS_DIR.mkdir(parents=True, exist_ok=True)
 
-        with st.spinner("Running Python regression, live Groq, and RAG guardrail checks..."):
-            pytest_output = StringIO()
-            pytest_ran = False
-            try:
-                import pytest
+        strategies: dict[str, LiveCheckStrategy] = {
+            "pytest": PytestCheckStrategy(AI_TESTS_DIR / "pytest_report.json"),
+            "guardrails": GuardrailCheckStrategy(AI_TESTS_DIR / "rag_guardrails_report.json"),
+        }
+        llm_report = AI_TESTS_DIR / "llm_eval_report.json"
+        if include_live_llm:
+            strategies["llm"] = LiveLlmCheckStrategy(llm_report)
 
-                with redirect_stdout(pytest_output), redirect_stderr(pytest_output):
-                    pytest_code = pytest.main(
-                        [
-                            "-q",
-                            "--json-report-file",
-                            str(AI_TESTS_DIR / "pytest_report.json"),
-                        ]
-                    )
-                pytest_ran = True
-                pytest_returncode = int(pytest_code)
-                pytest_error = (
-                    ""
-                    if pytest_returncode == 0
-                    else f"Pytest exited with code {pytest_returncode}."
-                )
-            except (ImportError, OSError, RuntimeError, ValueError) as exc:
-                pytest_returncode = 1
-                pytest_error = str(exc)
-
-            pytest_output_text = pytest_output.getvalue()
-            command_results: dict[str, dict[str, Any]] = {
-                "Pytest": {
-                    "name": "Pytest",
-                    "returncode": pytest_returncode,
-                    "passed": pytest_returncode == 0,
-                    "error": pytest_error,
-                    "output": pytest_output_text[-6000:],
-                }
+        with st.spinner("Running parallel local quality checks..."):
+            executions = LiveQaExecutor(strategies).execute()
+            command_results = {
+                name: execution.command for name, execution in executions.items()
             }
-            pytest_data = (
-                QualityMetricsReader.read_pytest_metrics(AI_TESTS_DIR / "pytest_report.json")
-                if pytest_ran
-                else PytestSummary(status="Failed", color="red")
-            )
-            pytest_succeeded = pytest_returncode == 0 and pytest_data.status == "Passed"
-            if not pytest_succeeded:
-                pytest_data = PytestSummary(
-                    status="Failed",
-                    passed=pytest_data.passed,
-                    total=pytest_data.total,
-                    color="red",
-                )
-            command_results["Pytest"]["passed"] = pytest_succeeded
-
-            llm_report = AI_TESTS_DIR / "llm_eval_report.json"
-            llm_output = StringIO()
-            llm_data = LlmEvalSummary(status="Failed", model="openai/gpt-oss-20b", color="red")
-            try:
-                from ai_tests.run_llm_eval import LlmEvaluationOrchestrator
-
-                with redirect_stdout(llm_output), redirect_stderr(llm_output):
-                    passed, total, _ = LlmEvaluationOrchestrator().execute_evaluation_suite(
-                        llm_report
-                    )
-                command_results["Python LLM evaluation"] = {
-                    "name": "Python LLM evaluation",
-                    "returncode": 0 if total > 0 and passed == total else 1,
-                    "passed": total == 7 and passed == 7,
-                    "error": "" if passed == total else f"{passed}/{total} scenarios passed.",
-                    "output": llm_output.getvalue()[-6000:],
-                }
-                llm_data = QualityMetricsReader.read_llm_eval_metrics(llm_report)
-            except (ImportError, OSError, RuntimeError, TypeError, ValueError) as exc:
-                command_results["Python LLM evaluation"] = {
-                    "name": "Python LLM evaluation",
-                    "returncode": 1,
-                    "passed": False,
-                    "error": str(exc),
-                    "output": llm_output.getvalue()[-6000:],
-                }
-
-            guardrail_report = AI_TESTS_DIR / "rag_guardrails_report.json"
-            guardrail_data: dict[str, Any] = {}
-            try:
-                guardrail_data = write_guardrail_report(guardrail_report)
-                guardrail_stats = guardrail_data["stats"]
-                guardrail_error = ""
-            except OSError as exc:
-                guardrail_error = str(exc)
-                guardrail_stats = {"successes": 0, "failures": 7, "errors": 0}
-            guardrail_summary = GuardrailSummary(
-                status=(
-                    "Passed"
-                    if guardrail_stats["failures"] == 0 and guardrail_stats["successes"] == 7
-                    else "Review Required"
-                ),
-                successes=guardrail_stats["successes"],
-                total=guardrail_stats["successes"] + guardrail_stats["failures"],
-                color="green" if guardrail_stats["failures"] == 0 else "red",
-            )
-            command_results["RAG & guardrails"] = {
-                "name": "RAG & guardrails",
-                "returncode": 1
-                if guardrail_error
-                else (0 if guardrail_summary.successes == guardrail_summary.total else 1),
-                "passed": (
-                    not guardrail_error
-                    and guardrail_summary.successes == 7
-                    and guardrail_summary.total == 7
-                ),
-                "error": guardrail_error
-                or (
-                    ""
-                    if guardrail_summary.successes == guardrail_summary.total
-                    else f"{guardrail_summary.successes}/{guardrail_summary.total} checks passed."
-                ),
-                "output": json.dumps(guardrail_data.get("results", []), ensure_ascii=False),
-            }
-
             summaries = {
-                "pytest": pytest_data.model_dump(),
-                "llm": llm_data.model_dump(),
-                "guardrails": guardrail_summary.model_dump(),
+                name: execution.summary.model_dump()
+                for name, execution in executions.items()
             }
 
-        all_passed = all(result["passed"] for result in command_results.values())
+            if include_live_llm:
+                llm_data = LlmEvalSummary.model_validate(summaries["llm"])
+            elif llm_report.is_file():
+                llm_data = QualityMetricsReader.read_llm_eval_metrics(llm_report)
+                command_results["llm"] = {
+                    "name": "LLM evaluation (cached)",
+                    "returncode": 0,
+                    "passed": True,
+                    "skipped": True,
+                    "error": "",
+                    "output": (
+                        "Reused the most recent LLM evaluation report; "
+                        "live evaluation skipped."
+                    ),
+                }
+            else:
+                llm_data = LlmEvalSummary(
+                    status="Cached / Skipped (Fast Mode)",
+                    model="openai/gpt-oss-20b",
+                )
+                command_results["llm"] = {
+                    "name": "LLM evaluation",
+                    "returncode": 0,
+                    "passed": True,
+                    "skipped": True,
+                    "error": "",
+                    "output": "Cached / Skipped (Fast Mode): no previous evaluation report exists.",
+                }
+            summaries["llm"] = llm_data.model_dump()
+
+        required_checks = ("pytest", "guardrails", "llm") if include_live_llm else (
+            "pytest",
+            "guardrails",
+        )
+        all_passed = all(command_results[name]["passed"] for name in required_checks)
         st.session_state["live_qa_execution"] = {
             "passed": all_passed,
+            "include_live_llm": include_live_llm,
             "commands": command_results,
             "summaries": summaries,
         }
@@ -359,14 +478,21 @@ class AboutQualityPage:
         )
         st.markdown("<br>", unsafe_allow_html=True)
 
-        trigger_tests: Final[bool] = st.button(
-            "⚡ Run Live Architecture Verification",
-            key="btn_trigger_live_qa_suite",
-            use_container_width=True,
-            type="primary",
-        )
+        controls = st.columns((2, 1))
+        with controls[0]:
+            include_live_llm: Final[bool] = st.checkbox(
+                "Include Live Groq LLM Eval (uses API tokens)",
+                key="include_live_groq_llm_eval",
+            )
+        with controls[1]:
+            trigger_tests: Final[bool] = st.button(
+                "⚡ Run Live Architecture Verification",
+                key="btn_trigger_live_qa_suite",
+                width="stretch",
+                type="primary",
+            )
         if trigger_tests:
-            self._execute_live_qa_suite()
+            self._execute_live_qa_suite(include_live_llm=include_live_llm)
 
         st.divider()
 
@@ -379,10 +505,16 @@ class AboutQualityPage:
             llm_data = LlmEvalSummary.model_validate(live_execution["summaries"]["llm"])
 
             if live_execution["passed"]:
-                st.success(
-                    "All live checks passed: Pytest, RAG guardrails 7/7, "
-                    "and Python LLM evaluation 100.0%."
-                )
+                if live_execution.get("include_live_llm", False):
+                    st.success(
+                        "All checks passed: Pytest, RAG guardrails 7/7, "
+                        f"and live Groq evaluation {llm_data.rate:.1f}%."
+                    )
+                else:
+                    st.success(
+                        "Fast local checks passed: Pytest and RAG guardrails. "
+                        f"LLM evaluation: {llm_data.status}."
+                    )
             else:
                 st.error(
                     "Live verification did not meet all required results. "
@@ -390,7 +522,13 @@ class AboutQualityPage:
                 )
             with st.expander("Live verification command output"):
                 for command_result in live_execution["commands"].values():
-                    outcome = "Passed" if command_result["passed"] else "Failed"
+                    outcome = (
+                        "Skipped"
+                        if command_result.get("skipped", False)
+                        else "Passed"
+                        if command_result["passed"]
+                        else "Failed"
+                    )
                     st.markdown(f"**{command_result['name']}: {outcome}**")
                     if command_result["error"]:
                         st.caption(command_result["error"])

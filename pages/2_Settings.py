@@ -317,7 +317,7 @@ class SettingsPage:
 
                     commit_btn: Final[bool] = st.form_submit_button(
                         label=f"💾 Save Boundaries for Node {node.id}",
-                        use_container_width=True,
+                        width="stretch",
                     )
 
                     if commit_btn:
@@ -355,7 +355,7 @@ class SettingsPage:
             st.warning("⚠️ Telemetry matrix logging channels returned empty data blocks.")
             return
 
-        st.dataframe(raw_dump.head(10), use_container_width=True)
+        st.dataframe(raw_dump.head(10), width="stretch")
         st.markdown("<br>", unsafe_allow_html=True)
         exp_col1, exp_col2 = st.columns(2)
 
@@ -366,7 +366,7 @@ class SettingsPage:
                 data=csv_data,
                 file_name="smart_city_cluj_telemetry.csv",
                 mime="text/csv",
-                use_container_width=True,
+                width="stretch",
             )
 
         with exp_col2:
@@ -376,7 +376,7 @@ class SettingsPage:
                 data=xlsx_data,
                 file_name="smart_city_cluj_matrix.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                use_container_width=True,
+                width="stretch",
             )
 
     def display(self) -> None:

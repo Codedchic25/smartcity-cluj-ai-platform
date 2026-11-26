@@ -6,7 +6,6 @@ and PEP 8 compliant line lengths fully optimized for enterprise CI/CD gates.
 
 from __future__ import annotations
 
-import hashlib
 import hmac
 import logging
 import os
@@ -16,7 +15,14 @@ from pathlib import Path
 from typing import Any, Final
 
 import streamlit as st
+from argon2 import PasswordHasher
+from argon2.exceptions import (
+    InvalidHashError,
+    VerificationError,
+    VerifyMismatchError,
+)
 from dotenv import load_dotenv
+from streamlit.errors import StreamlitSecretNotFoundError
 
 from translations import TranslationProvider
 
@@ -57,42 +63,60 @@ class AlertThresholds:
 
 
 class AuthenticationService:
-    """Hardened cryptographic service executing constant-time operator verification."""
+    """Secure operator authentication using Argon2id password hashing."""
 
     USERNAME_ENV: Final[str] = "PLATFORM_ADMIN_USER"
     PASSWORD_HASH_ENV: Final[str] = "PLATFORM_ADMIN_PASS"
 
     def __init__(self) -> None:
-        """Initialize operational token ledger pointers from environment scopes."""
-        username_source = os.environ.get(self.USERNAME_ENV)
+        """Initialize authentication credentials from environment variables."""
+        try:
+            username_secret = st.secrets.get(self.USERNAME_ENV, "")
+            password_secret = st.secrets.get(self.PASSWORD_HASH_ENV, "")
+        except StreamlitSecretNotFoundError:
+            username_secret = ""
+            password_secret = ""
+
+        username_source = username_secret or os.environ.get(self.USERNAME_ENV)
+
         self._expected_username: Final[str] = (
             username_source.strip() if username_source and username_source.strip() else "admin"
         )
 
-        hash_source = os.environ.get(self.PASSWORD_HASH_ENV)
+        hash_source = password_secret or os.environ.get(self.PASSWORD_HASH_ENV)
+
         if not hash_source or not hash_source.strip():
             raise RuntimeError(
-                f"Critical Security Fault: Administrative signature gateway token "
-                f"'{self.PASSWORD_HASH_ENV}' is unconfigured in environment scopes."
+                f"Critical Security Fault: Password hash "
+                f"'{self.PASSWORD_HASH_ENV}' is not configured."
             )
 
-        self._configured_secret: Final[str] = hash_source.strip()
+        self._configured_hash: Final[str] = hash_source.strip()
+        self._password_hasher: Final[PasswordHasher] = PasswordHasher()
 
-    def verify_credentials(self, username_input: str, password_input: str) -> bool:
-        """Validate operator credentials utilizing constant-time comparison blocks."""
+    def verify_credentials(
+        self,
+        username_input: str,
+        password_input: str,
+    ) -> bool:
+        """Verify operator credentials using Argon2id."""
         clean_user_input = username_input.strip()
-        clean_expected_user = self._expected_username.strip()
 
-        if not hmac.compare_digest(clean_user_input, clean_expected_user):
+        if not hmac.compare_digest(
+            clean_user_input,
+            self._expected_username,
+        ):
             return False
-        try:
-            computed_bytes = password_input.strip().encode("utf-8")
-            computed_hash: str = hashlib.sha256(computed_bytes).hexdigest()
-            clean_configured_secret = self._configured_secret.strip()
 
-            return hmac.compare_digest(computed_hash, clean_configured_secret)
-        except Exception as exc:
-            LOGGER.error("Cryptographic subsystem failure during token check: %s", exc)
+        if not password_input:
+            return False
+
+        try:
+            return self._password_hasher.verify(
+                self._configured_hash,
+                password_input,
+            )
+        except (VerifyMismatchError, VerificationError, InvalidHashError):
             return False
 
 

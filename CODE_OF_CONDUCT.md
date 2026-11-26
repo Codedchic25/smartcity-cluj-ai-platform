@@ -10,4 +10,4 @@ Because this system simulates critical urban infrastructure decisions (city aler
 
 ## 3. Unacceptable Behavior
 * Intentionally injecting corrupted sensor parameters or modifying source code to bypass local security guardrails.
-* Publicly sharing plaintext credentials or private API keys (`GROQ_API_KEY`) used during development inside files tracked by version control. All administrative test passwords must be stored exclusively as cryptographic digests (**SHA-256 hashes**) inside locally isolated `.env` files.
+* Publicly sharing plaintext credentials or private API keys (`GROQ_API_KEY`) used during development inside files tracked by version control. Administrative passwords must use Argon2id encoded hashes and must never be committed to version control.

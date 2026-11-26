@@ -382,13 +382,13 @@ class DashboardPage:
             tooltip=active_node.name,
             icon=folium.Icon(color="blue", icon="info-sign"),
         ).add_to(geospatial_map)
-        st_folium(geospatial_map, height=300, use_container_width=True)
+        st_folium(geospatial_map, height=300, width="stretch")
 
         st.divider()
         chart_figure: Final[go.Figure] = VisualizationEngine.build_multi_metric_chart(
             df=history_df, translations=active_translations_dict
         )
-        st.plotly_chart(chart_figure, use_container_width=True)
+        st.plotly_chart(chart_figure, width="stretch")
 
         st.divider()
         with st.expander(f"🧠 {provider.get('ai_assistant')}", expanded=True):

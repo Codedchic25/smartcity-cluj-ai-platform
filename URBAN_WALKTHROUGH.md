@@ -33,7 +33,7 @@ Streamlit Community Cloud runtimes.
    uv run streamlit run main.py
    ```
 2. Open the local URL displayed in the terminal (`http://localhost:8501`).
-3. The interface is immediately gated by the secure login screen. Enter the administrative credentials configured via a **SHA-256** digest in the `.env` file. The default plaintext password for local testing is `cluj2026`. The system enforces constant-time verification (`hmac.compare_digest`) to eliminate timing side-channel attacks and prevent hardcoded credentials.
+3. The interface is immediately gated by the secure login screen. Administrative credentials are supplied through secure configuration. Password verification uses Argon2id, while username comparison uses `hmac.compare_digest`. No default plaintext administrative password is provided.
 
 ---
 

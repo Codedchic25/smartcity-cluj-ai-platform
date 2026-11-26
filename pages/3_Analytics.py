@@ -396,14 +396,14 @@ class AnalyticsPage:
         with col_grid1:
             st.markdown(f"#### {provider.get('pearson_heatmap_title')}")
             fig_corr: go.Figure = AnalyticsEngine.generate_heatmap(df_analytics, self._metrics_list)
-            st.plotly_chart(fig_corr, use_container_width=True)
+            st.plotly_chart(fig_corr, width="stretch")
 
         with col_grid2:
             st.markdown("#### Normalized District Urban Balance Signature (Radar)")
             fig_radar: go.Figure = AnalyticsEngine.generate_urban_radar_chart(
                 df_analytics, self._metrics_list, selected_sensor
             )
-            st.plotly_chart(fig_radar, use_container_width=True)
+            st.plotly_chart(fig_radar, width="stretch")
 
         st.divider()
 
@@ -411,7 +411,7 @@ class AnalyticsPage:
         fig_joint: go.Figure = AnalyticsEngine.generate_marginal_distribution_plot(
             df_analytics, "traffic_load", "air_quality"
         )
-        st.plotly_chart(fig_joint, use_container_width=True)
+        st.plotly_chart(fig_joint, width="stretch")
 
         st.divider()
 
@@ -451,7 +451,7 @@ class AnalyticsPage:
             )
             fig_ml.update_yaxes(tickformat=".1f")
             fig_ml.update_xaxes(tickformat=".1f")
-            st.plotly_chart(fig_ml, use_container_width=True)
+            st.plotly_chart(fig_ml, width="stretch")
             st.caption(f"Model engine: {provider.get('ml_model_caption')}")
         else:
             st.warning("Computational failure: Insufficient historical records.")

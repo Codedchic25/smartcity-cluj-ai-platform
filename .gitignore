@@ -39,3 +39,8 @@ security_alerts.log
 .env.local
 .env.*.local
 .streamlit/
+
+# Local documentation backups
+*.bak
+backup_docs_before_argon2/
+backup_docs_before_argon2_final/

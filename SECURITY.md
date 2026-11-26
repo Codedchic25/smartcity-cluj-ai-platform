@@ -27,7 +27,7 @@ The platform enforces a multi-layered local security architecture:
 ## 2. Credential & Urban Secret Management
 
 - **Private Key Isolation**: All sensitive credentials (`GROQ_API_KEY`) and administrative accounts are completely decoupled from source code and stored exclusively inside the local `.env` file (or Streamlit Cloud Secrets).
-- **Strong Local Cryptographic Hashing**: Passwords are never stored in plain text inside `.env`; instead, they are stored as hexadecimal digests generated via **SHA-256**. The `AuthenticationService` class in `main.py` performs runtime hashing and validates credentials using `hmac.compare_digest` in constant time, mitigating timing side-channel attacks and eliminating hardcoded credentials.
+- **Argon2id Password Hashing:** Administrative passwords are stored as Argon2id encoded hashes and are never stored in plaintext.
 - **Production Secret Leak Prevention**: The `.env` file is explicitly excluded via `.gitignore` and `.dockerignore`. No production keys or certificates ever enter public version control (GitHub).
 - **Container Hardening**: Running the platform inside a Docker container isolates application processes from the Host OS. All non-essential ports are closed, exposing solely the standard communication port `8501` protected by Docker network directives.
 

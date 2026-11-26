@@ -101,6 +101,37 @@ def test_session_security_token_falls_back_to_environment(monkeypatch: pytest.Mo
     assert schemas.get_session_security_token() == expected_token
 
 
+def test_session_auth_loads_spaced_dotenv_assignments_as_fallback(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Strip whitespace around dotenv keys and values when filling missing env vars."""
+    import os
+
+    from src import session_auth
+
+    env_file = tmp_path / ".env"
+    env_file.write_text(
+        "SESSION_SECURITY_TOKEN = fallback-session-token\nPLATFORM_ADMIN_USER = local-admin\n",
+        encoding="utf-8",
+    )
+    monkeypatch.delenv("PYTHON_DOTENV_DISABLED", raising=False)
+    monkeypatch.delenv("SESSION_SECURITY_TOKEN", raising=False)
+    monkeypatch.delenv("PLATFORM_ADMIN_USER", raising=False)
+    loaded_paths: list[Path] = []
+    monkeypatch.setattr(
+        session_auth,
+        "load_dotenv",
+        lambda *, dotenv_path, override: loaded_paths.append(Path(dotenv_path)),
+    )
+
+    session_auth._load_local_environment(env_file)
+
+    assert loaded_paths == [env_file]
+    assert os.environ["SESSION_SECURITY_TOKEN"] == "fallback-session-token"
+    assert os.environ["PLATFORM_ADMIN_USER"] == "local-admin"
+
+
 def test_signed_session_token_lifecycle(monkeypatch: pytest.MonkeyPatch) -> None:
     """Restore valid sessions and reject expired, altered, or logged-out tokens."""
     from src import session_auth

@@ -2,11 +2,11 @@
 
 ## 0. Executive Summary (30-Second Elevator Pitch)
 
-**Smart City Cluj-Napoca** is a modular urban intelligence, IoT telemetry, and AI-assisted analytics platform built in **Python 3.12** and **Streamlit**. The application combines deterministic data processing (**Pydantic v2** validation, **SQLite** persistence, **Pandas/NumPy** statistical analytics, cooldown-throttled audit logging) with operational recommendations generated via the **Groq Cloud API**, featuring API key rotation, multi-model fallback, cryptographic session security (**SHA-256 + HMAC-SHA256**), and native Python verification checks for RAG and LLM workflows.
+**Smart City Cluj-Napoca** is a modular urban intelligence, IoT telemetry, and AI-assisted analytics platform built in **Python 3.12** and **Streamlit**. The application combines deterministic data processing (**Pydantic v2** validation, **SQLite** persistence, **Pandas/NumPy** statistical analytics, cooldown-throttled audit logging) with operational recommendations generated via the **Groq Cloud API**, featuring API key rotation, multi-model fallback, cryptographic session security (**Argon2id password hashing + HMAC-SHA256 session-token signing**), and native Python verification checks for RAG and LLM workflows.
 
 ### End-to-End Execution Pipeline
 
-    [Login: SHA-256 + hmac.compare_digest]
+    [Login: Argon2id password verification + hmac.compare_digest for username comparison]
            │
            ▼
     [HMAC-SHA256 Signed Session (24h TTL) in session_state & URL query_param]
@@ -19,7 +19,7 @@
            │
            ├──► [Deterministic Analytics: Pearson Correlations, Linear Regression, CSV/XLSX Export]
            │
-           └──► [Context Builder: Telemetry + Thresholds + Latest 5 alerts from security_alerts.log]
+           └──► [Context Builder: Telemetry + Thresholds + Station Trend + Latest 5 alerts]
                        │
                        ▼
                 [GroqProvider: Multi-Model Fallback + Sanitization (<think>) -> UI Recommendations]
@@ -63,7 +63,7 @@ Authentication is engineered across two independent layers (Defense-in-Depth):
 
 1. **Credential Verification (`AuthenticationService`):**
    * Reads the configured username (`PLATFORM_ADMIN_USER`) and password hash (`PLATFORM_ADMIN_PASS`) from secure configuration.
-   * Converts the submitted form password into a **SHA-256** hexadecimal digest at runtime and compares it against the stored hash using **`hmac.compare_digest()`** (constant-time comparison to mitigate *timing side-channel* attacks).
+   * Verifies the submitted password against the configured Argon2id encoded password hash using PasswordHasher.verify().
    * Zero plaintext passwords or hardcoded hashes exist anywhere in the source code.
 
 2. **Cryptographically Signed Session Tokens (`src/session_auth.py`):**
@@ -95,9 +95,29 @@ Authentication is engineered across two independent layers (Defense-in-Depth):
 
 ### AI Resilience & Multi-Model Fallback (`app/ai/groq_provider.py`)
 1. **Context Construction (`ai_interface.py`):** Loads the prompt template from `ai_tests/prompts.txt` and dynamically injects the selected station, current telemetry, configured thresholds, active UI language (`RO`, `EN`, `IT`, `ES`, `HU`), and the latest 5 events from `security_alerts.log`.
-2. **Key Rotation & Fallback (`GroqProvider`):** Collects `GROQ_API_KEY*` entries from `st.secrets` and environment variables, supporting lists and CSV strings. Rotates keys on HTTP 401, 429, and 5xx errors, and falls back across backup models if the primary model is unavailable.
-3. **Response Sanitization:** Strips internal reasoning blocks (`<think>...</think>`) before rendering recommendations and caches the result in `st.session_state` per station.
-4. **Language & Markdown Alignment:** Aligns response body text with the active language (`RO`, `EN`, `IT`, `ES`, or `HU`) and places the bold English Assessment, Recommended Actions, and Data Limitations labels on separate lines as Markdown sections.
+2. **Key Rotation & Fallback (`GroqProvider`):** Collects `GROQ_API_KEY*` entries from `st.secrets` and environment variables, supporting lists and CSV strings. Rotates keys on HTTP 401, 429, and 5xx errors, and falls back across backup models if the primary model is unavailable. The Groq client uses `max_retries=0` so 429 responses are handled immediately by provider fallback rather than delayed by automatic SDK retries.
+3. **Recommendation Cache:** `UrbanAiAssistantComponent` uses `@st.cache_data(ttl=300, show_spinner=False)` keyed by the rendered prompt, telemetry values, and active language. The request remains exclusive to the recommendation button; matching inputs reuse the cached answer for five minutes and reduce token consumption.
+4. **Response Sanitization:** Strips internal reasoning blocks (`<think>...</think>`) before rendering recommendations and stores the result in `st.session_state` per station.
+5. **Language & Markdown Alignment:** Aligns response body text with the active language (`RO`, `EN`, `IT`, `ES`, or `HU`) and places the bold English Assessment, Recommended Actions, and Data Limitations labels on separate lines as Markdown sections.
+6. **Recent Telemetry Trend:** `TelemetryContextReader` retrieves up to five latest rows for the selected station, orders them chronologically for comparison, and adds a compact `[RECENT TELEMETRY TREND]` summary with per-metric deltas and rising/stable/falling direction. With fewer than two valid readings, the prompt receives a safe no-trend fallback. The prompt explicitly treats this block as historical evidence only.
+7. **Deterministic Grounding:** After the model response, the assistant checks for the selected station, current metric values, and configured threshold breaches. It appends only omitted facts from the same telemetry and station settings, requiring no extra Groq request or tokens. Unit tests cover station-specific trends and missing-fact completion in `ai_tests/test_ai_guardrails.py`.
+
+### Live Evaluator Rate Limits and Grounding
+
+`ai_tests/run_llm_eval.py` runs its seven scenarios with one worker and 2.1-second spacing
+between request attempts, preserving declared scenario order. It retries only transient HTTP
+429 rate limits once with a short capped backoff; exhausted quotas and other errors are not
+retried. Each scenario loads its authorized `SensorThresholdMatrix` and supplies
+`[AUTHORIZED OPERATIONAL THRESHOLDS]` in both the prompt and retrieved evidence.
+
+### Fast Architecture Verification (`pages/4_About.py`)
+
+The default verification uses a `ThreadPoolExecutor` to run the Pytest suite
+(`sys.executable -m pytest -q --disable-warnings`) and native in-process RAG
+guardrails in parallel. This mode does not call Groq; it reuses the latest LLM
+evaluation report or displays **Cached / Skipped (Fast Mode)** when no report
+exists. Selecting **Include Live Groq LLM Eval (uses API tokens)** opts into the
+external seven-scenario evaluation.
 
 ### Local Alerting Engine (`src/utils/local_alerts.py`)
 * **`AlertManager`** operates **100% offline**, completely independent of Groq API availability.
