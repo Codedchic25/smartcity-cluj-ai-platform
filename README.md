@@ -25,7 +25,7 @@ The project demonstrates an end-to-end software engineering workflow that combin
 > **Primary language:** Python 3.12
 > **Interface:** Streamlit
 > **Database:** SQLite
-> **AI inference:** Groq Cloud API with `openai/gpt-oss-20b`
+> **AI inference:** Groq-first routing with Gemini OpenAI-compatible fallback
 
 ## Table of Contents
 
@@ -204,6 +204,7 @@ To prevent malformed IoT telemetry, out-of-bounds threshold updates, or corrupte
 ### AI and LLM Integration
 
 - Groq Cloud API integration.
+- Gemini fallback through Google's OpenAI-compatible endpoint.
 - Configurable LLM model target.
 - Context-aware prompt construction.
 - Telemetry-informed operational recommendations.
@@ -255,6 +256,8 @@ Smart City Application
 |   +-- ai/
 |   |   +-- ai_interface.py
 |   |   +-- groq_provider.py
+|   |   +-- prompt_registry.py
+|   |   +-- prompts.yaml
 |   |
 |   +-- database/
 |
@@ -263,7 +266,6 @@ Smart City Application
 |       +-- local_alerts.py
 |
 +-- ai_tests/
-|   +-- prompts.txt
 |   +-- run_llm_eval.py
 |   +-- test_alerts_offline.py
 |
@@ -321,7 +323,7 @@ The presence of a dependency in the project configuration does not necessarily m
 
 ### AI and Analytics Technologies
 
-- Large language model inference through the Groq Cloud API.
+- Groq-primary LLM inference with Gemini fallback.
 - Context-aware prompt construction.
 - Scenario-based LLM evaluation.
 - Statistical correlation analysis.
@@ -433,12 +435,13 @@ The session-auth loader also handles whitespace around assignments such as
 `SESSION_SECURITY_TOKEN = value`. The `.env` file is ignored by Git and
 must never be committed.
 
-The environment template contains these five keys:
+The environment template contains these six keys:
 
 - `DATABASE_PATH` – SQLite database path.
 - `PLATFORM_ADMIN_USER` – configured account username.
 - `PLATFORM_ADMIN_PASS` – Argon2id password hash.
 - `GROQ_API_KEY` – Groq Cloud API key for live AI recommendations.
+- `GEMINI_API_KEY` – optional Gemini fallback API key.
 - `SESSION_SECURITY_TOKEN` – dedicated secret key used for session-token signing.
 
 For Streamlit Community Cloud, configure the corresponding variables in
@@ -551,7 +554,8 @@ app/ai/
 └── groq_provider.py
 ```
 
-The active provider is `GroqProvider`, which communicates with the Groq Cloud API.
+`FallbackAiProviderRouter` tries `GroqProvider` first and routes eligible failures
+to `GeminiOpenAiProvider`.
 
 The documented model target is:
 
@@ -574,17 +578,23 @@ The documented context includes:
 - A compact rising/stable/falling comparison from the selected station's latest
   five `city_stats` records; fewer than two valid records produce an explicit
   no-trend fallback.
+- The two most relevant passages from `docs/cluj_urban_sop.md`, retrieved with
+  TF-IDF and cosine similarity and marked `[AUTHORIZED URBAN SOP CONTEXT]`.
 - Active interface language.
 - Recent security-alert log entries.
 - Structured prompt instructions.
 
-The prompt template is located at:
+The active prompt configuration is:
 
 ```text
-ai_tests/prompts.txt
+app/ai/prompts.yaml
 ```
 
-The AI interface substitutes dynamic values into the template before sending the request to the inference provider.
+`PromptRegistryLoader` validates the YAML with the frozen Pydantic v2
+`PromptTemplateConfig` and caches it in memory. It sends `system_instructions`,
+`output_format`, and anti-hallucination rules as a separate system prompt while
+dynamic telemetry and retrieved evidence are rendered into `user_template`.
+The application and live evaluator load prompts exclusively from this YAML registry.
 
 The documented implementation reads the latest five lines from `security_alerts.log` when constructing the AI context.
 
@@ -604,6 +614,11 @@ After generation, deterministic grounding adds the station name, any omitted
 current readings, and any omitted breaches against that station's configured
 thresholds. The trend summary is kept explicitly historical and cannot establish
 current conditions or causes.
+
+`FallbackAiProviderRouter` reports end-to-end latency and token counts from the
+successful provider. The response and these metrics share one cached result, and a
+subtle caption below the recommendation displays the generation telemetry without
+making another request on a cache hit.
 
 Removing visible reasoning markers is a presentation and sanitization measure. It does not, by itself, guarantee that a response is accurate, safe, or free from confidential information.
 
@@ -625,6 +640,20 @@ automatic SDK retries when the API returns HTTP 429. The provider handles the
 returned error through its configured key rotation and model fallback rather
 than waiting through hidden SDK retry delays.
 
+`FallbackAiProviderRouter` tries Groq first and switches to
+`GeminiOpenAiProvider` when Groq exhausts its configured keys/models or raises
+a structured provider failure (`is_provider_failure`, covering typed API/network
+exceptions, HTTP `>= 400` status codes, structured telemetry errors, and normalized
+failure messages without misclassifying numeric sensor telemetry). Gemini uses the
+OpenAI SDK with Google's OpenAI-compatible endpoint
+(`https://generativelanguage.googleapis.com/v1beta/openai/`), always attempts
+`configured_model` first (`gemini-2.5-flash-lite` by default) followed by
+deduplicated fallback candidates without dropping any configured model, and disables
+SDK retries. Both providers propagate `system_prompt_only` end-to-end into API
+payloads and cached session telemetry, enforce strict sensor-value-unit RAG
+grounding, and omit iterative Gemini correction retries in favor of immediate
+multi-model fallback and deterministic guardrails.
+
 ### Operational Recommendations
 
 The intended workflow is:
@@ -639,7 +668,10 @@ Context Construction
 Structured Prompt
        |
        v
-Groq Cloud API
+FallbackAiProviderRouter
+      / \
+     v   v
+   Groq  Gemini
        |
        v
 LLM Response
@@ -661,7 +693,7 @@ The repository uses a native Python guardrail suite and a separate live LLM eval
 
 | Component | Purpose |
 |---|---|
-| `ai_tests/run_llm_eval.py` | Evaluates scenarios sequentially with free-tier-aware pacing, transient-429 retry, and deterministic report ordering |
+| `ai_tests/run_llm_eval.py` | Uses the validated YAML prompt registry and Groq-to-Gemini fallback to evaluate scenarios sequentially with free-tier-aware pacing, transient-429 retry, and deterministic report ordering |
 | `ai_tests/run_guardrail_eval.py` | Runs seven deterministic RAG and output-validation checks |
 
 The Python evaluation script generates a local report at:
@@ -673,11 +705,13 @@ ai_tests/llm_eval_report.json
 The RAG checks cover location metadata filtering, semantic keyword retrieval, injection
 sanitization, telemetry bounds, and numeric grounding. The live evaluator measures seven
 model scenarios with `ThreadPoolExecutor(max_workers=1)`, spacing every request attempt by
-2.1 seconds. It retries only transient HTTP 429 rate limits once with a short capped backoff;
-other errors and exhausted quotas fail without retry. Each prompt fetches the station's
-authorized `SensorThresholdMatrix` and includes `[AUTHORIZED OPERATIONAL THRESHOLDS]` in both
-the prompt and retrieved evidence. Scenario order and the existing report schema remain
-compatible with the About page and GitHub Actions workflow.
+8.5 seconds. It permits up to two adaptive retries for transient HTTP 429 responses or empty
+payloads, using 15/30-second backoff; exhausted quotas are not retried. Each generated
+response is evaluated by the Pydantic-validated `LlmJudgeEvaluator` against its scenario's
+telemetry and authorized `SensorThresholdMatrix`. Rate-limited judge calls are recorded as
+skipped without failing the scenario. The JSON report includes `avg_faithfulness_score`, and
+the About page displays it with a safe zero default for older reports. Scenario order and the
+report contract remain compatible with the About page and GitHub Actions workflow.
 
 ### Security Test Categories
 
@@ -817,7 +851,7 @@ These mechanisms cover different aspects of application quality and should be in
 
 ### Python Unit and Regression Tests
 
-The Python test suite uses Pytest.
+The Python test suite uses Pytest (**99 passing automated tests** across `ai_tests/`, including telemetry propagation, Gemini fallback ordering, structured router error classification, sensor-bound RAG grounding, and automated Markdown documentation synchronization).
 
 According to the supplied README, the documented test scopes include:
 
@@ -857,7 +891,8 @@ grounding. The current report is written to `ai_tests/rag_guardrails_report.json
 
 ### Live LLM Evaluation
 
-Run the seven Groq-backed scenarios with one or more configured Groq API keys:
+Run the seven scenarios through the Groq-first router. Configure Groq and/or Gemini
+credentials to enable the corresponding provider:
 
 ```powershell
 uv run python ai_tests/run_llm_eval.py
@@ -872,9 +907,10 @@ default. A `ThreadPoolExecutor` runs the Pytest suite (`sys.executable -m pytest
 external Groq calls. The latest LLM evaluation score is reused when its report exists, or shown
 as **Cached / Skipped (Fast Mode)** when no report is available.
 
-To run the API-backed scenarios, first select **Include Live Groq LLM Eval (uses API tokens)**
-beside the button. Only that opt-in run calls Groq and consumes API tokens. Results are stored
-in Streamlit session state and the JSON reports, then the page reruns to show updated metrics.
+To run the API-backed scenarios, first select **Include Live LLM Eval (uses API tokens)**
+beside the button. Only that opt-in run calls the Groq-to-Gemini provider router and consumes
+API tokens. Results are stored in Streamlit session state and the JSON reports, then the page
+reruns to show updated metrics.
 
 ### Unified Quality Monitoring Dashboard
 
@@ -883,7 +919,7 @@ The application's **`4_About.py`** page integrates a centralized, real-time **Sy
 This component acts as an architectural aggregator that defensively parses the execution artifacts generated by the testing suites on disk:
 - **`pytest_report.json`**: Extracts the exact count of passed unit tests and regression assertions.
 - **`rag_guardrails_report.json`**: Monitors native retrieval, sanitization, and numeric-grounding checks.
-- **`llm_eval_report.json`**: Tracks the dynamic compliance rate of the contextual urban scenarios against the active `openai/gpt-oss-20b` engine.
+- **`llm_eval_report.json`**: Tracks scenario compliance and judge faithfulness for `llama-3.1-8b-instant` generation and `llama-3.3-70b-versatile` judging.
 
 This provides municipal operators and technical auditors with an immediate, high-visibility visual confirmation of the platform's stability, security alignment, and software integrity directly within the Streamlit interface.
 
@@ -924,8 +960,9 @@ uv run pytest -v
 uv run ruff check .
 ```
 
-Run `uv run python ai_tests/run_guardrail_eval.py` for local checks. Configure a Groq API key
-and run `uv run python ai_tests/run_llm_eval.py` for live model evaluation.
+Run `uv run python ai_tests/run_guardrail_eval.py` for local checks. Configure
+`GROQ_API_KEY` and/or `GEMINI_API_KEY`, then run `uv run python ai_tests/run_llm_eval.py`
+for live model evaluation.
 
 This sequence separates dependency synchronization, Python regression testing, static analysis,
 native guardrail checks, and external LLM evaluation.
@@ -1063,7 +1100,7 @@ Before running the platform locally, make sure you have:
 - **Python 3.12**
 - **Git**
 - **uv** for Python dependency and environment management
-- A **Groq API key** for live LLM-powered functionality
+- A Groq and/or Gemini API key for live LLM-powered functionality
 
 ### 1. Clone the Repository
 
@@ -1090,6 +1127,7 @@ Example configuration:
 PLATFORM_ADMIN_USER=your_admin_username
 PLATFORM_ADMIN_PASS=your_password_hash
 GROQ_API_KEY=your_groq_api_key
+GEMINI_API_KEY=your_gemini_api_key
 ```
 
 Replace the example values with your own configuration.
@@ -1169,14 +1207,15 @@ cluj-smartcity-ai-iot-platform/
 ├── .vscode/
 │   └── settings.json
 ├── ai_tests/
-│   ├── prompts.txt
 │   ├── run_llm_eval.py
 │   ├── test_alerts_offline.py
 │   └── ...
 ├── app/
 │   ├── ai/
 │   │   ├── ai_interface.py
-│   │   └── groq_provider.py
+│   │   ├── groq_provider.py
+│   │   ├── prompt_registry.py
+│   │   └── prompts.yaml
 │   └── database/
 ├── assets/
 │   └── ...
@@ -1219,14 +1258,14 @@ cluj-smartcity-ai-iot-platform/
 
 ## Troubleshooting
 
-### Missing or Invalid Groq API Key
+### Missing or Invalid AI Provider Keys
 
-**Symptoms:** LLM-powered functionality fails, or the provider cannot authenticate.
+**Symptoms:** LLM-powered functionality fails, or neither configured provider can authenticate.
 
 **What to check:**
 
-1. Confirm that `GROQ_API_KEY` is configured in the environment used by the application.
-2. Verify that the key is valid and has not expired or been revoked.
+1. Confirm `GROQ_API_KEY` is configured; `GEMINI_API_KEY` enables the secondary provider.
+2. Verify configured keys are valid and have not expired or been revoked.
 3. Restart the Streamlit process after changing environment configuration.
 4. Review the terminal output for provider errors without exposing the API key.
 

@@ -34,6 +34,7 @@ dependencies = [
     "uvicorn[standard]>=0.42",
     "python-multipart>=0.0.27",
     "groq>=1.6",
+    "openai>=1.0",
     "google-genai>=1.73",
     "httpx>=0.28",
     "requests>=2.33",

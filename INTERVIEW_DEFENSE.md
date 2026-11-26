@@ -53,11 +53,17 @@ attacks and numerical hallucinations.
   1. In `app/ai/ai_interface.py`, the assistant dynamically resolves active language context by
   querying the localization dictionaries exposed via `get_all_translations()` in `translations.py`
   (RO, EN, IT, ES, HU).
-  2. `app/ai/groq_provider.py` integrates the production `openai/gpt-oss-20b` model via the Groq
-  Cloud API at a low temperature (`0.2`), enforcing deterministic, action-oriented technical
-  recommendations, backed by automatic multi-key rotation (`GROQ_API_KEYS`) on HTTP 401, 429, or
-  5xx errors. The Groq client uses `max_retries=0` so a 429 is returned immediately to this
-  fallback logic instead of triggering hidden SDK retries.
+  2. `FallbackAiProviderRouter` tries the `openai/gpt-oss-20b` Groq model first, rotating
+  `GROQ_API_KEYS` and Groq models on provider failures. If Groq keys/models fail or a 429/TPM
+  limit is returned, it switches to `GeminiOpenAiProvider`, which uses the `openai` SDK with
+  Google's OpenAI-compatible Gemini endpoint, always trying `configured_model` first followed by
+  deduplicated fallback candidates (`gemini-2.5-flash-lite`, `gemini-3-flash-preview`,
+  `gemini-3.1-flash-lite`, `gemini-2.5-flash`) without dropping configured models. Router
+  failures are classified structurally via `is_provider_failure` (typed API/network errors,
+  HTTP `>= 400` codes, structured telemetry errors, and normalized failure messages) without
+  misclassifying numeric sensor telemetry. Both providers propagate `system_prompt_only` into
+  API payloads and cached telemetry, enforce strict sensor-value-unit RAG grounding, and
+  omit iterative Gemini correction retries to avoid doubling token cost and latency.
   3. **Recommendation Cache:** `UrbanAiAssistantComponent` applies
   `@st.cache_data(ttl=300, show_spinner=False)` to AI generation, keyed by the rendered prompt,
   telemetry inputs, and active language. Generation is still triggered only by the recommendation
@@ -65,18 +71,26 @@ attacks and numerical hallucinations.
   4. The native Python evaluation script (`ai_tests/run_llm_eval.py`) executes **seven urban
   scenarios in Cluj-Napoca**. It verifies whole-word focal terms inside the `Assessment` section,
   normalizes diacritics, and reports actual provider errors; it uses one worker, spaces request
-  attempts by 2.1 seconds, and preserves scenario order. Only transient HTTP 429 errors receive
-  one short, capped retry; exhausted quotas and other errors fail immediately. The prompt loads
-  the station's authorized `SensorThresholdMatrix` and places
+  attempts by 8.5 seconds, and preserves scenario order. Transient HTTP 429 and empty-payload
+  errors receive up to two adaptive retries with 15/30-second backoff; exhausted quotas fail
+  without retry. After each response, the Pydantic `LlmJudgeVerdict` scores faithfulness and
+  actionability and flags hallucinations against the scenario's telemetry and thresholds. A
+  judge-side 429 skips that verdict without failing the scenario; the report records the mean
+  faithfulness score and the About card displays it, defaulting to zero for older reports. The
+  prompt loads the station's authorized `SensorThresholdMatrix` and places
   `[AUTHORIZED OPERATIONAL THRESHOLDS]` in retrieved evidence. The final score is computed
-  strictly from live run outcomes.
+  strictly from live run outcomes. The assistant and evaluator share the cached,
+  Pydantic-v2-validated `app/ai/prompts.yaml` registry; system instructions and output
+  guardrails are sent separately from the rendered telemetry user prompt.   The evaluator and application now load prompts exclusively from
+  `app/ai/prompts.yaml`.
   5. A regex sanitization pass strips internal reasoning tags (`<think>...</think>`), paired with
   Pydantic schema validation and numerical grounding checks (`rag_pipeline.py` and
   `run_guardrail_eval.py`) before rendering responses in Streamlit.
   6. The About page's default architecture verification runs Pytest and in-process native
-  guardrails concurrently through `ThreadPoolExecutor`, without external Groq requests. A prior
-  LLM score is reused when available; live Groq scenarios run only after selecting the
-  **Include Live Groq LLM Eval (uses API tokens)** checkbox.
+  guardrails concurrently through `ThreadPoolExecutor`, without external provider requests. A
+  prior LLM score is reused when available; live Groq-to-Gemini scenarios run only after selecting
+  the **Include Live LLM Eval (uses API tokens)** checkbox (running a fast 3-scenario sample
+  via `max_scenarios=3` in the UI, while CLI/CI runs all 7 scenarios via `--scenarios`).
   7. **Historical RAG trend:** `TelemetryContextReader` selects up to five recent `city_stats`
   rows for the chosen station and summarizes endpoint deltas as rising, stable, or falling.
   Fewer than two valid readings produce an explicit no-trend fallback; the prompt treats every
@@ -86,6 +100,13 @@ attacks and numerical hallucinations.
   These facts come from the already available telemetry and settings, so this completion step
   does not make another API call or consume additional tokens. Focused SQLite and grounding
   tests live in `ai_tests/test_ai_guardrails.py`.
+  9. **Hybrid SOP Retrieval:** `SopKnowledgeRetriever` builds a lightweight TF-IDF index over
+  `docs/cluj_urban_sop.md`, ranks passages with cosine similarity, and injects at most two
+  relevant procedures as `[AUTHORIZED URBAN SOP CONTEXT]`. The SOPs keep interventions under
+  authorized human control and do not supply invented thresholds.
+  10. **LLM Observability:** The router measures end-to-end generation time and returns token
+  counts from the successful provider. `UrbanAiAssistantComponent` caches these metrics with the
+  answer and displays a small caption under it, so a cache hit does not make another request.
 
 ---
 
@@ -96,7 +117,7 @@ attacks and numerical hallucinations.
 both local and cloud attack surfaces.
 * **Technical Justification**:
   1. **Layer 1 (Secret Isolation):** All private credentials and API keys (`GROQ_API_KEY`,
-  `GROQ_API_KEYS`) are decoupled from source code and stored in the local `.env` file or
+  `GROQ_API_KEYS`, `GEMINI_API_KEY`) are decoupled from source code and stored in the local `.env` file or
   encrypted cloud secrets, excluded from Git via `.gitignore` and `.dockerignore`.
   2. **Layer 2 (Constant-Time Cryptography):** To eliminate plaintext password exposure,
   Runtime authentication verifies the configured Argon2id password hash using argon2-cffi. Username comparison uses hmac.compare_digest.
@@ -153,16 +174,16 @@ container rebuilds and reliable uptime for technical reviewers.
 
 ## 🔒 8. Cloud Secret Management (Security Constraints)
 
-### Question: Since `.env` is excluded via `.gitignore` and never pushed to GitHub, how does your application run live on Streamlit Community Cloud without exposing `GROQ_API_KEY` or administrative credentials?
+### Question: Since `.env` is excluded via `.gitignore` and never pushed to GitHub, how does your application run live on Streamlit Community Cloud without exposing provider keys or administrative credentials?
 * **Defense**: The project strictly adheres to **OWASP Top 10** guidelines and *Twelve-Factor App*
 principles regarding configuration and secret isolation. Configuration files are excluded from
 public Git repositories and injected securely at runtime by the hosting platform.
 * **Technical Justification**: Instead of storing secrets in version control, we utilize
 **Streamlit Secrets Management**. Configuration variables are stored encrypted in the cloud
 console as TOML entries. At runtime, Streamlit maps them into the protected `st.secrets` object,
-which `main.py` and `groq_provider.py` read seamlessly alongside `os.environ` fallbacks (supporting
-both single `GROQ_API_KEY` and multi-key `GROQ_API_KEYS` rotation). This *Layered Security* model
-ensures `openai/gpt-oss-20b` receives valid credentials while keeping source code clean.
+which the provider router reads alongside `os.environ` and local `.env` configuration. Groq
+supports single and rotating keys; Gemini uses `GEMINI_API_KEY` as the secondary provider
+credential. This *Layered Security* model keeps provider keys out of source control.
 
 ---
 
@@ -248,14 +269,16 @@ isolates the environment and sequentially enforces strict quality gates governed
   1. **Style & Static Analysis Gate (Ruff):** Enforces line-length boundaries (`E501`),
   alphabetical import sorting (`I001`), and clean static analysis rules. Any violation fails the
   build immediately.
-  2. **Logic & Regression Gate (Pytest):** The offline test suite executes **27 automated tests**
-  via `uv run pytest -v` (covering bootstrap initialization, seeder idempotency, missing-sensor
+  2. **Logic & Regression Gate (Pytest):** The offline test suite runs via `uv run pytest -v`
+  (covering bootstrap initialization, seeder idempotency, missing-sensor
   guards, session security, and native Python AI/RAG guardrails in `test_ai_guardrails.py`).
   3. **Semantic & Guardrail AI Gate (LLMOps):** `ai_tests/run_guardrail_eval.py` runs 7 local
   deterministic RAG/grounding checks without credentials, while `ai_tests/run_llm_eval.py`
-  evaluates **7 live Cluj-Napoca urban scenarios** against `openai/gpt-oss-20b` when a Groq API
-  key is configured, using one worker, 2.1-second request pacing, transient-429 retry, and
-  authorized station thresholds.
+  evaluates **7 live Cluj-Napoca urban scenarios** using `llama-3.1-8b-instant` for generation
+  and the fast non-reasoning `llama-3.1-8b-instant` model for judging (avoiding `<think>` token overhead). It uses one worker,
+  adaptive header-driven pacing (x-ratelimit-remaining-tokens / x-ratelimit-reset-tokens, 1.5s fallback), and up to three adaptive retries for transient 429/empty payload
+  errors, with authorized station thresholds. A Pydantic
+  `LlmJudgeVerdict` scores each response and contributes to the reported average faithfulness.
 
 ---
 
@@ -271,7 +294,8 @@ eliminating *Environment Drift* and billing-related service interruptions.
   empty, preserving any existing custom thresholds or telemetry. Dashboard, Settings, and
   Analytics display controlled warnings if an active sensor cannot be resolved, preventing
   `AttributeError` crashes.
-  2. **Zero-Trust Secrets:** To prevent exposing API keys (`GROQ_API_KEY`, `GROQ_API_KEYS`) or
+  2. **Zero-Trust Secrets:** To prevent exposing API keys (`GROQ_API_KEY`, `GROQ_API_KEYS`,
+  `GEMINI_API_KEY`) or
   credentials in public Git history, secrets are stored encrypted in the cloud management console.
   At runtime, the platform injects them directly into protected process memory as TOML variables
   exposed via `st.secrets`, ensuring continuous uptime for technical evaluators and strict

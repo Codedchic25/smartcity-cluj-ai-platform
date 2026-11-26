@@ -19,15 +19,24 @@ from typing import Any, Final, Protocol
 
 import pandas as pd
 import streamlit as st
+from pydantic import ValidationError
 
 # Path resilience injection framework for distributed virtual testing environments
 PROJECT_ROOT: Final[str] = str(Path(__file__).resolve().parents[2])
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
+from app.ai.prompt_registry import (  # noqa: E402
+    PromptRegistryError,
+    PromptRegistryLoader,
+    PromptTemplateConfig,
+)
 from app.ai.rag_pipeline import (  # noqa: E402
     TelemetryEvidence,
-    extract_context_numbers,
+    _canonical_unit,
+    _extract_number_unit_mentions,
+    _find_metric_spans,
+    _split_clauses,
     format_retrieved_context,
     retrieve_telemetry,
     sanitize_untrusted_input,
@@ -45,6 +54,26 @@ class SensorThresholdMatrix:
     traffic_limit: float
     air_quality_limit: float
     soil_moisture_limit: float
+
+
+@dataclass(frozen=True, slots=True)
+class AiGenerationTelemetry:
+    """Timing and token usage reported for one model generation."""
+
+    latency_ms: float | None = None
+    prompt_tokens: int | None = None
+    completion_tokens: int | None = None
+    total_tokens: int | None = None
+    system_prompt_only: bool = False
+    error: dict[str, Any] | str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class AiCompletionResult:
+    """Cached recommendation text and its originating provider telemetry."""
+
+    response_text: str
+    telemetry: AiGenerationTelemetry | None = None
 
 
 class ContextReaderInterface(ABC):
@@ -75,6 +104,55 @@ class AiProviderInterface(Protocol):
         ...
 
 
+class SopKnowledgeRetriever:
+    """Rank local SOP sections against telemetry-focused queries using TF-IDF."""
+
+    def __init__(self, sop_path: str | Path | None = None) -> None:
+        """Load and index the operational SOP passages."""
+        from sklearn.feature_extraction.text import TfidfVectorizer
+        from sklearn.metrics.pairwise import cosine_similarity
+
+        source_path = (
+            Path(sop_path) if sop_path else Path(PROJECT_ROOT) / "docs" / "cluj_urban_sop.md"
+        )
+        document = source_path.read_text(encoding="utf-8")
+        self._passages: list[str] = [
+            section.strip()
+            for section in re.split(r"(?m)(?=^##\s+)", document)
+            if section.lstrip().startswith("## ")
+        ]
+        if not self._passages:
+            raise ValueError(f"No SOP sections were found in '{source_path}'.")
+
+        self._vectorizer = TfidfVectorizer(
+            analyzer="char_wb",
+            lowercase=True,
+            ngram_range=(3, 5),
+            strip_accents="unicode",
+        )
+        self._passage_vectors = self._vectorizer.fit_transform(self._passages)
+        self._cosine_similarity = cosine_similarity
+
+    def retrieve(self, query: str, top_k: int = 2) -> list[str]:
+        """Return the highest-ranked matching SOP passages in stable order."""
+        if top_k <= 0 or not query.strip():
+            return []
+
+        query_vector = self._vectorizer.transform([query])
+        if query_vector.nnz == 0:
+            return []
+
+        scores = self._cosine_similarity(query_vector, self._passage_vectors).ravel()
+        ranked_indexes = sorted(range(len(scores)), key=lambda index: (-scores[index], index))
+        return [self._passages[index] for index in ranked_indexes if scores[index] > 0][:top_k]
+
+
+@st.cache_resource(show_spinner=False)
+def _cached_sop_knowledge_retriever() -> SopKnowledgeRetriever:
+    """Reuse the fitted SOP index across Streamlit reruns."""
+    return SopKnowledgeRetriever()
+
+
 @st.cache_data(ttl=300, show_spinner=False)
 def _cached_ai_completion(
     rendered_prompt: str,
@@ -87,9 +165,45 @@ def _cached_ai_completion(
     language: str,
     provider_cache_key: str,
     _provider: AiProviderInterface,
-) -> str:
-    """Cache generated recommendations for matching telemetry and language inputs."""
-    return _provider.generate_completion(rendered_prompt)
+    system_prompt: str = "",
+    system_prompt_only: bool = False,
+) -> AiCompletionResult:
+    """Cache recommendation text and its telemetry as one consistent result."""
+    from app.ai.multi_provider import call_with_prompt_options
+
+    telemetry_generator = getattr(_provider, "generate_completion_with_telemetry", None)
+    if callable(telemetry_generator):
+        response_text, telemetry = call_with_prompt_options(
+            telemetry_generator,
+            rendered_prompt,
+            system_prompt=system_prompt,
+            system_prompt_only=system_prompt_only,
+        )
+        telemetry_system_prompt_only = telemetry.get("system_prompt_only")
+        return AiCompletionResult(
+            response_text=response_text,
+            telemetry=AiGenerationTelemetry(
+                latency_ms=telemetry.get("latency_ms"),
+                prompt_tokens=telemetry.get("prompt_tokens"),
+                completion_tokens=telemetry.get("completion_tokens"),
+                total_tokens=telemetry.get("total_tokens"),
+                system_prompt_only=(
+                    telemetry_system_prompt_only
+                    if isinstance(telemetry_system_prompt_only, bool)
+                    else system_prompt_only
+                ),
+                error=telemetry.get("error"),
+            ),
+        )
+
+    return AiCompletionResult(
+        response_text=call_with_prompt_options(
+            _provider.generate_completion,
+            rendered_prompt,
+            system_prompt=system_prompt,
+            system_prompt_only=system_prompt_only,
+        )
+    )
 
 
 class TelemetryContextReader(ContextReaderInterface):
@@ -183,10 +297,7 @@ class TelemetryContextReader(ContextReaderInterface):
         """Summarize recent readings for one station, or state why no trend is available."""
         heading = "[RECENT TELEMETRY TREND]"
         if not self._database_path.is_file():
-            return (
-                f"{heading}\nNo recent station history is available; "
-                "no trend can be established."
-            )
+            return f"{heading} No recent station history; no trend can be established."
 
         query: Final[str] = """
             SELECT city_stats.temperature, city_stats.noise_level,
@@ -205,10 +316,7 @@ class TelemetryContextReader(ContextReaderInterface):
                     (location_name, max(2, min(int(limit), 20))),
                 ).fetchall()
         except (self._sqlite3.Error, TypeError, ValueError):
-            return (
-                f"{heading}\nRecent station history is unavailable; "
-                "no trend can be established."
-            )
+            return f"{heading} History unavailable; no trend can be established."
 
         readings: list[tuple[float, ...]] = []
         for row in reversed(rows):
@@ -220,32 +328,23 @@ class TelemetryContextReader(ContextReaderInterface):
                 readings.append(values)
 
         if len(readings) < 2:
-            return (
-                f"{heading}\nFewer than two valid station readings are available; "
-                "no trend can be established."
-            )
+            return f"{heading} Fewer than two valid readings; no trend can be established."
 
         metrics = (
-            ("Temperature", 0, "°C"),
-            ("Noise level", 1, "dB"),
-            ("Traffic load", 2, "%"),
-            ("Air quality PM2.5", 3, "µg/m³"),
-            ("Soil moisture", 4, "%"),
+            ("T", 0, "°C"),
+            ("Noise", 1, "dB"),
+            ("Traffic", 2, "%"),
+            ("PM2.5", 3, "µg/m³"),
+            ("Soil", 4, "%"),
         )
-        trend_lines = [
-            f"Historical comparison across {len(readings)} recent readings "
-            "(oldest to newest):"
-        ]
+        trend_items = [f"n={len(readings)}"]
         for label, index, unit in metrics:
             start_value = readings[0][index]
             end_value = readings[-1][index]
             delta = round(end_value - start_value, 1)
             direction = "stable" if delta == 0 else "rising" if delta > 0 else "falling"
-            trend_lines.append(
-                f"- {label}: {direction} "
-                f"({start_value:g} to {end_value:g} {unit}; delta {delta:+.1f} {unit})"
-            )
-        return f"{heading}\n" + "\n".join(trend_lines)
+            trend_items.append(f"{label} {direction} Δ{delta:+g}{unit}")
+        return f"{heading} " + "; ".join(trend_items)
 
 
 class UrbanAiAssistantComponent:
@@ -257,40 +356,45 @@ class UrbanAiAssistantComponent:
         ai_provider: AiProviderInterface | None = None,
     ) -> None:
         """Initialize the AI component anchoring deep template path variables."""
-        from app.ai.groq_provider import GroqProvider
+        from app.ai.multi_provider import FallbackAiProviderRouter
 
         self._context_reader: Final[ContextReaderInterface] = (
             context_reader or TelemetryContextReader()
         )
-        self._ai_provider: Final[AiProviderInterface] = ai_provider or GroqProvider()
-        if isinstance(self._ai_provider, GroqProvider):
+        self._ai_provider: Final[AiProviderInterface] = ai_provider or FallbackAiProviderRouter()
+        self._sop_retriever: Final[SopKnowledgeRetriever] = _cached_sop_knowledge_retriever()
+        configured_model = getattr(self._ai_provider, "configured_model", None)
+        if isinstance(configured_model, str):
             self._ai_cache_key: Final[str] = (
                 f"{type(self._ai_provider).__module__}."
                 f"{type(self._ai_provider).__qualname__}:"
-                f"{self._ai_provider.configured_model}"
+                f"{configured_model}"
             )
         else:
             self._ai_cache_key = (
                 f"{type(self._ai_provider).__module__}."
                 f"{type(self._ai_provider).__qualname__}:{id(self._ai_provider)}"
             )
-        self._prompt_template_path: Final[str] = "ai_tests/prompts.txt"
+        self._prompt_template_path: Final[Path] = PromptRegistryLoader.DEFAULT_PROMPT_PATH
         self._think_block_pattern: Final[re.Pattern] = re.compile(
             r"<think>.*?</think>", re.DOTALL | re.IGNORECASE
         )
         self._think_tag_pattern: Final[re.Pattern] = re.compile(r"</?think>", re.IGNORECASE)
 
-    def _load_prompt_template(self) -> str | None:
-        """Safely read execution limits and guardrails from files."""
+    def _load_prompt_config(self) -> PromptTemplateConfig | None:
+        """Load the validated prompt configuration and surface file/schema errors."""
         try:
-            with open(self._prompt_template_path, encoding="utf-8") as file:
-                return file.read()
-        except OSError:
+            return PromptRegistryLoader.load(self._prompt_template_path)
+        except (OSError, PromptRegistryError, ValidationError) as exc:
             st.error(
-                f"❌ Production template file '{self._prompt_template_path}' "
-                f"was not found or is inaccessible on disk."
+                f"❌ Prompt configuration '{self._prompt_template_path}' could not be loaded: {exc}"
             )
             return None
+
+    def _load_prompt_template(self) -> str | None:
+        """Preserve compatibility for callers that request only the user template."""
+        prompt_config = self._load_prompt_config()
+        return prompt_config.user_template if prompt_config else None
 
     def _clean_reasoning_artifacts(self, text: str) -> str:
         """Remove advanced analytical raw trace fragments."""
@@ -304,27 +408,86 @@ class UrbanAiAssistantComponent:
         return "".join(char for char in decomposed if not unicodedata.combining(char))
 
     @classmethod
+    def _target_metric_subclauses(
+        cls,
+        response: str,
+        metric_aliases: tuple[str, ...],
+    ) -> list[str]:
+        """Extract clause slices owned exclusively by the target metric aliases."""
+        normalized_aliases = tuple(
+            sorted(
+                {
+                    normalized
+                    for alias in metric_aliases
+                    if (normalized := cls._normalize_grounding_text(alias).strip())
+                },
+                key=len,
+                reverse=True,
+            )
+        )
+        if not normalized_aliases:
+            return []
+
+        subclauses: list[str] = []
+        for clause in _split_clauses(response):
+            normalized_clause = cls._normalize_grounding_text(clause)
+            target_spans: list[tuple[int, int, str]] = []
+            for alias in normalized_aliases:
+                for match in re.finditer(
+                    rf"(?<!\w){re.escape(alias)}(?!\w)",
+                    normalized_clause,
+                ):
+                    target_spans.append((match.start(), match.end(), "__target__"))
+            if not target_spans:
+                continue
+
+            other_spans = [
+                (start, end, metric)
+                for start, end, metric in _find_metric_spans(normalized_clause)
+                if not any(
+                    not (end <= t_start or start >= t_end) for t_start, t_end, _ in target_spans
+                )
+            ]
+            combined = sorted(
+                (*target_spans, *other_spans),
+                key=lambda item: (item[0], -(item[1] - item[0])),
+            )
+            deduped: list[tuple[int, int, str]] = []
+            last_end = -1
+            for start, end, tag in combined:
+                if start >= last_end:
+                    deduped.append((start, end, tag))
+                    last_end = end
+
+            for idx, (start, _end, tag) in enumerate(deduped):
+                if tag != "__target__":
+                    continue
+                left = 0 if idx == 0 else start
+                right = len(normalized_clause)
+                for next_start, _next_end, next_tag in deduped[idx + 1 :]:
+                    if next_tag != "__target__":
+                        right = next_start
+                        break
+                subclauses.append(normalized_clause[left:right])
+        return subclauses
+
+    @classmethod
     def _response_mentions_metric_value(
         cls,
         response: str,
         metric_aliases: tuple[str, ...],
         value: float,
+        unit: str = "",
     ) -> bool:
-        normalized_response = cls._normalize_grounding_text(response)
         expected_value = Decimal(str(value)).normalize()
-        for alias in metric_aliases:
-            normalized_alias = cls._normalize_grounding_text(alias)
-            for match in re.finditer(
-                rf"(?<!\w){re.escape(normalized_alias)}(?!\w)",
-                normalized_response,
-            ):
-                nearby_text = normalized_response[
-                    max(0, match.start() - 32) : min(
-                        len(normalized_response), match.end() + 48
-                    )
-                ]
-                if expected_value in extract_context_numbers(nearby_text):
-                    return True
+        expected_unit = _canonical_unit(unit) if unit else None
+        for subclause in cls._target_metric_subclauses(response, metric_aliases):
+            for _, _, number, found_unit in _extract_number_unit_mentions(subclause):
+                if number != expected_value:
+                    continue
+                if expected_unit is not None and found_unit != expected_unit:
+                    continue
+                return True
         return False
 
     @classmethod
@@ -335,33 +498,32 @@ class UrbanAiAssistantComponent:
         measured_value: float,
         threshold: float,
         direction: str,
+        unit: str = "",
     ) -> bool:
-        normalized_response = cls._normalize_grounding_text(response)
         expected_measured = Decimal(str(measured_value)).normalize()
         expected_threshold = Decimal(str(threshold)).normalize()
+        expected_unit = _canonical_unit(unit) if unit else None
         direction_terms = (
             ("above", "exceeds", "greater than", "over", "depases", "peste", ">")
             if direction == "above"
             else ("below", "under", "less than", "sub", "mai putin", "<")
         )
-        for alias in metric_aliases:
-            normalized_alias = cls._normalize_grounding_text(alias)
-            for match in re.finditer(
-                rf"(?<!\w){re.escape(normalized_alias)}(?!\w)",
-                normalized_response,
-            ):
-                nearby_text = normalized_response[
-                    max(0, match.start() - 40) : min(
-                        len(normalized_response), match.end() + 104
-                    )
-                ]
-                nearby_numbers = extract_context_numbers(nearby_text)
-                if (
-                    expected_measured in nearby_numbers
-                    and expected_threshold in nearby_numbers
-                    and any(term in nearby_text for term in direction_terms)
-                ):
-                    return True
+        for subclause in cls._target_metric_subclauses(response, metric_aliases):
+            if not any(term in subclause for term in direction_terms):
+                continue
+            mentions = _extract_number_unit_mentions(subclause)
+            has_measured = any(
+                number == expected_measured
+                and (expected_unit is None or found_unit == expected_unit)
+                for _, _, number, found_unit in mentions
+            )
+            has_threshold = any(
+                number == expected_threshold
+                and (expected_unit is None or found_unit == expected_unit)
+                for _, _, number, found_unit in mentions
+            )
+            if has_measured and has_threshold:
+                return True
         return False
 
     @classmethod
@@ -372,7 +534,9 @@ class UrbanAiAssistantComponent:
         readings: tuple[tuple[str, tuple[str, ...], float, str, float, str], ...],
     ) -> str:
         """Append only missing station, measurement, and configured-breach evidence."""
-        if not response or response.startswith(("❌", "Generic")):
+        from app.ai.multi_provider import is_provider_failure
+
+        if not response or is_provider_failure(response):
             return response
 
         normalized_response = cls._normalize_grounding_text(response)
@@ -384,7 +548,7 @@ class UrbanAiAssistantComponent:
         missing_readings = [
             f"{label}: {value:g} {unit}"
             for label, aliases, value, unit, _, _ in readings
-            if not cls._response_mentions_metric_value(response, aliases, value)
+            if not cls._response_mentions_metric_value(response, aliases, value, unit=unit)
         ]
         if missing_readings:
             facts.append("Verified current readings: " + "; ".join(missing_readings) + ".")
@@ -393,7 +557,12 @@ class UrbanAiAssistantComponent:
         for label, aliases, value, unit, threshold, direction in readings:
             breached = value > threshold if direction == "above" else value < threshold
             if breached and not cls._response_mentions_threshold_breach(
-                response, aliases, value, threshold, direction
+                response,
+                aliases,
+                value,
+                threshold,
+                direction,
+                unit=unit,
             ):
                 relation = "exceeds" if direction == "above" else "is below"
                 missing_breaches.append(
@@ -402,14 +571,90 @@ class UrbanAiAssistantComponent:
                 )
         if missing_breaches:
             facts.append(
-                "Verified configured threshold breaches: "
-                + "; ".join(missing_breaches)
-                + "."
+                "Verified configured threshold breaches: " + "; ".join(missing_breaches) + "."
             )
 
         if not facts:
             return response
         return response.rstrip() + "\n\n**Verified Operational Facts:**\n" + "\n".join(facts)
+
+    @staticmethod
+    def _format_telemetry_badge(telemetry: AiGenerationTelemetry) -> str | None:
+        if telemetry.latency_ms is None:
+            return None
+        token_values = (
+            telemetry.prompt_tokens,
+            telemetry.completion_tokens,
+            telemetry.total_tokens,
+        )
+        token_summary = (
+            " · tokens " + "/".join(str(value) for value in token_values)
+            if all(value is not None for value in token_values)
+            else " · token usage unavailable"
+        )
+        return f"LLM telemetry · {telemetry.latency_ms:.0f} ms{token_summary}"
+
+    @staticmethod
+    def _build_sop_query(
+        temperature: float,
+        air_quality: float,
+        noise_level: float,
+        traffic_load: float,
+        soil_moisture: float,
+        thresholds: SensorThresholdMatrix,
+    ) -> str:
+        metrics = (
+            (
+                temperature > thresholds.temperature_limit,
+                "temperature temperatura heatwave heat wave val de caldura canicula",
+            ),
+            (
+                air_quality > thresholds.air_quality_limit,
+                "PM2.5 air quality calitatea aerului poluare particule fine",
+            ),
+            (
+                noise_level > thresholds.noise_limit,
+                "noise zgomot urban poluare fonica",
+            ),
+            (
+                traffic_load > thresholds.traffic_limit,
+                "traffic trafic congestion aglomeratie trafic intens",
+            ),
+            (
+                soil_moisture < thresholds.soil_moisture_limit,
+                "soil moisture umiditatea solului seceta drought",
+            ),
+        )
+        breached_metrics = [terms for breached, terms in metrics if breached]
+        selected_metrics = breached_metrics or [terms for _, terms in metrics]
+        return " ".join(selected_metrics)
+
+    @staticmethod
+    def _compact_sop_passage(passage: str) -> str:
+        """Keep the trigger and first verification step from one authorized SOP."""
+        lines = passage.strip().splitlines()
+        title = lines[0].removeprefix("## ").strip() if lines else "Urban SOP"
+        trigger_match = re.search(
+            r"\*\*Declanșare:\*\*\s*(.*?)(?:\n\n|$)",
+            passage,
+            flags=re.DOTALL,
+        )
+        action_match = re.search(
+            r"(?m)^\s*1\.\s*(.*?)(?=^\s*\d+\.|\Z)",
+            passage,
+            flags=re.DOTALL,
+        )
+
+        def shorten(value: str, word_limit: int) -> str:
+            words = value.split()
+            return " ".join(words[:word_limit])
+
+        trigger = shorten(trigger_match.group(1), 6) if trigger_match else ""
+        first_step = shorten(action_match.group(1), 7) if action_match else ""
+        details = "; ".join(
+            part for part in (f"trigger: {trigger}" if trigger else "", first_step) if part
+        )
+        return f"{title}: {details}" if details else " ".join(lines)[:180]
 
     def render(
         self,
@@ -420,22 +665,29 @@ class UrbanAiAssistantComponent:
         translations: dict[str, str],
         noise_level: float = 0.0,
         traffic_load: float = 0.0,
+        system_prompt_only: bool = False,
     ) -> None:
         """Render the cloud advisory component with defensive data verification blocks."""
-        prompt_template = self._load_prompt_template()
-        if not prompt_template:
+        prompt_config = self._load_prompt_config()
+        if prompt_config is None:
             return
 
         safe_location = sanitize_untrusted_input(location, max_length=200)
         session_key: Final[str] = f"persistent_ai_response_{safe_location.replace(' ', '_')}"
+        telemetry_session_key: Final[str] = f"{session_key}_telemetry"
         if session_key not in st.session_state:
             st.session_state[session_key] = None
+        if telemetry_session_key not in st.session_state:
+            st.session_state[telemetry_session_key] = None
 
         active_lang: Final[str] = st.session_state.get("lang", "RO")
         historical_alerts_log: Final[str] = self._context_reader.get_latest_alerts_context(
             limit_lines=5
         )
-        safe_historical_alerts = sanitize_untrusted_input(historical_alerts_log)
+        safe_historical_alerts = sanitize_untrusted_input(
+            historical_alerts_log,
+            max_length=220,
+        )
 
         thresholds = self._context_reader.fetch_operational_thresholds(safe_location)
 
@@ -506,37 +758,43 @@ class UrbanAiAssistantComponent:
             "temperature noise traffic air quality soil moisture",
             safe_location,
         )
+        sop_query = self._build_sop_query(
+            temperature,
+            air_quality,
+            noise_level,
+            traffic_load,
+            soil_moisture,
+            thresholds,
+        )
+        sop_passages = self._sop_retriever.retrieve(sop_query, top_k=2)
+        sop_context = "\n".join(self._compact_sop_passage(passage) for passage in sop_passages)
         recent_trend = self._context_reader.fetch_recent_telemetry_trend(safe_location)
         retrieved_context = (
             f"{format_retrieved_context(retrieved_records)}\n\n"
             f"{sanitize_untrusted_input(recent_trend)}"
         )
+        if sop_context:
+            retrieved_context += (
+                "\n\n[AUTHORIZED URBAN SOP CONTEXT]\n"
+                f"{sanitize_untrusted_input(sop_context, max_length=420)}"
+            )
 
-        telemetry_context_extension: Final[str] = (
-            f"\n\n[AUTHORIZED OPERATIONAL THRESHOLDS]\n"
-            f"Reference thresholds for {location}:\n"
-            f"- Temperature Threshold: {thresholds.temperature_limit:.1f} °C\n"
-            f"- Noise Level Threshold: {thresholds.noise_limit:.1f} dB\n"
-            f"- Traffic Load Threshold: {thresholds.traffic_limit:.1f} %\n"
-            f"- Air Quality PM2.5 Threshold: "
-            f"{thresholds.air_quality_limit:.1f} µg/m³\n"
-            f"- Soil Moisture Minimum Threshold: "
-            f"{thresholds.soil_moisture_limit:.1f} %"
-        )
-
-        rendered_prompt = (
-            prompt_template.replace("{{locatie}}", safe_location)
-            .replace("{{temperature}}", f"{temperature:.1f}")
-            .replace("{{air_quality}}", f"{air_quality:.1f}")
-            .replace("{{soil_moisture}}", f"{soil_moisture:.1f}")
-            .replace("{{noise_level}}", f"{noise_level:.1f}")
-            .replace("{{traffic_load}}", f"{traffic_load:.1f}")
-            .replace("{{limba_activa}}", active_lang)
-            .replace("{{jurnal_alerte_recente}}", safe_historical_alerts)
+        rendered_prompt = PromptRegistryLoader.render_user_template(
+            prompt_config,
+            {
+                "locatie": safe_location,
+                "temperature": f"{temperature:.1f}",
+                "air_quality": f"{air_quality:.1f}",
+                "soil_moisture": f"{soil_moisture:.1f}",
+                "noise_level": f"{noise_level:.1f}",
+                "traffic_load": f"{traffic_load:.1f}",
+                "limba_activa": active_lang,
+                "jurnal_alerte_recente": safe_historical_alerts,
+            },
         )
         rendered_prompt = (
-            f"{rendered_prompt.rstrip()}\n\n{telemetry_context_extension.strip()}"
-            f"\n\n[RETRIEVED CONTEXT]\n{retrieved_context}\n[/RETRIEVED CONTEXT]"
+            f"{rendered_prompt.rstrip()}\n\n[RETRIEVED CONTEXT]\n"
+            f"{retrieved_context}\n[/RETRIEVED CONTEXT]"
         )
 
         if st.button(
@@ -545,9 +803,10 @@ class UrbanAiAssistantComponent:
             key=f"ai_generate_btn_{safe_location.replace(' ', '_')}",
             width="stretch",
         ):
+            st.session_state[telemetry_session_key] = None
             with st.spinner(translations.get("loading_ai", "Analyzing sensor telemetry...")):
                 try:
-                    response_text = _cached_ai_completion(
+                    completion = _cached_ai_completion(
                         rendered_prompt,
                         safe_location,
                         temperature,
@@ -558,7 +817,10 @@ class UrbanAiAssistantComponent:
                         active_lang,
                         self._ai_cache_key,
                         self._ai_provider,
+                        system_prompt=PromptRegistryLoader.build_system_prompt(prompt_config),
+                        system_prompt_only=system_prompt_only,
                     )
+                    response_text = completion.response_text
                     if response_text:
                         cleaned_response = self._clean_reasoning_artifacts(response_text)
                         station_readings = (
@@ -608,20 +870,42 @@ class UrbanAiAssistantComponent:
                             safe_location,
                             station_readings,
                         )
+                        st.session_state[telemetry_session_key] = {
+                            "telemetry": completion.telemetry,
+                            "system_prompt_only": (
+                                completion.telemetry.system_prompt_only
+                                if completion.telemetry is not None
+                                else system_prompt_only
+                            ),
+                        }
                     else:
                         st.warning("⚠️ Remote cloud gateway engine returned null.")
                 except Exception as exc:
+                    st.session_state[telemetry_session_key] = None
                     st.error(f"❌ Critical connection error: {exc}")
 
         if st.session_state[session_key]:
+            from app.ai.multi_provider import is_provider_failure
+
             st.markdown("<br>", unsafe_allow_html=True)
             response_payload: str = str(st.session_state[session_key])
+            telemetry_state = st.session_state.get(telemetry_session_key)
 
-            if response_payload.startswith("❌") or response_payload.startswith("Generic"):
+            if is_provider_failure(
+                response_payload,
+                telemetry_state if isinstance(telemetry_state, dict) else None,
+            ):
                 st.error(response_payload)
             else:
                 with st.chat_message("assistant"):
                     st.markdown(response_payload)
+                telemetry = (
+                    telemetry_state.get("telemetry") if isinstance(telemetry_state, dict) else None
+                )
+                if isinstance(telemetry, AiGenerationTelemetry):
+                    telemetry_badge = self._format_telemetry_badge(telemetry)
+                    if telemetry_badge:
+                        st.caption(telemetry_badge)
 
 
 class GlobalSidebarComponent:
@@ -689,7 +973,8 @@ class GlobalSidebarComponent:
         with st.sidebar:
 
             def global_lang_callback() -> None:
-                st.session_state["lang"] = st.session_state["global_language_widget"]
+                fallback = st.session_state.get("lang", "RO")
+                st.session_state["lang"] = st.session_state.get("global_language_widget", fallback)
 
             st.selectbox(
                 translations.get("language_select", "🌐 Change language / Schimbă limba"),
@@ -731,6 +1016,7 @@ def render_ai_assistant(
     translations: dict[str, str],
     noise_level: float = 0.0,
     traffic_load: float = 0.0,
+    system_prompt_only: bool = False,
 ) -> None:
     """Legacy interface orchestration wrapper mapping metrics into clean OOP."""
     reader = TelemetryContextReader()
@@ -743,6 +1029,7 @@ def render_ai_assistant(
         translations=translations,
         noise_level=noise_level,
         traffic_load=traffic_load,
+        system_prompt_only=system_prompt_only,
     )
 
 

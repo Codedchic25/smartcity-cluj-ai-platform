@@ -50,7 +50,7 @@ Streamlit Community Cloud runtimes.
 
 1. Navigate to **`3_Analytics.py`**.
 2. **Classical ML Forecasting:** Select an urban parameter. A Linear Regression model or NumPy `polyfit` polynomial estimator queries historical SQLite records, computes the trend slope, and renders the upcoming predictive intervals on the Plotly chart without stale visual caching.
-3. **Operational Recommendation (Llama Engine):** At the bottom of the page, the contextual AI assistant is ready for queries. Upon submission, the pipeline retrieves dense context from the latest 5 log entries, injects it into the prompt template from `ai_tests/prompts.txt`, and invokes the production `openai/gpt-oss-20b` model to generate a tailored administrative recommendation. The output—stripped of internal `<think>` tags via regex—is securely persisted in `st.session_state` to survive UI auto-refresh cycles.
+3. **Operational Recommendation (Llama Engine):** At the bottom of the page, the contextual AI assistant is ready for queries. Upon submission, the pipeline retrieves dense context from the latest 5 log entries, injects it into the prompt template from `app/ai/prompts.yaml`, and invokes the production `openai/gpt-oss-20b` model to generate a tailored administrative recommendation. The output—stripped of internal `<think>` tags via regex—is securely persisted in `st.session_state` to survive UI auto-refresh cycles.
 
 ---
 

@@ -17,4 +17,4 @@ This document lists the module structure and production-verified screenshots tha
 * **09. Time-Series Trend Charts:** Predictive Plotly subplots inside the Dashboard rendered with stable, modern formatting.
 * **10. Linear Temperature Prediction:** 5-step forward extrapolation automatically computed using a `LinearRegression` model or NumPy polynomials.
 * **11. Road Traffic Predictive Deviation:** Congestion index forecasting powered by numerical computations using NumPy `polyfit`.
-* **12. Contextual AI Guardrails:** End-to-end assistant hardening enforced through immutable instructions in `prompts.txt`, paired with regex-based stripping of internal `<think>...</think>` reasoning tags.
+* **12. Contextual AI Guardrails:** End-to-end assistant hardening enforced through immutable instructions in `app/ai/prompts.yaml`, paired with regex-based stripping of internal `<think>...</think>` reasoning tags.

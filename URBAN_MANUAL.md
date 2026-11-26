@@ -61,7 +61,7 @@ The system rejects black-box probabilistic models for urban safety enforcement. 
 ---
 
 # 4. Cybersecurity Architecture & Contextual Ingestion
-Civic applications are prime targets for prompt injection attacks. To harden the pipeline, the system decouples raw user queries and enforces a strictly isolated prompt structure using unified variables within `prompts.txt`.
+Civic applications are prime targets for prompt injection attacks. To harden the pipeline, the system decouples raw user queries and enforces a strictly isolated prompt structure using unified variables within `app/ai/prompts.yaml`.
 
 Furthermore, the urban assistant performs dynamic live security context injection directly into the prompt structure by reading the latest 5 lines from `security_alerts.log`. This ensures the LLM generates recommendations grounded in real incident history within a completely isolated boundary, stripping internal `<think>...</think>` reasoning tags via regular expressions.
 
@@ -69,7 +69,7 @@ Furthermore, the urban assistant performs dynamic live security context injectio
 
 # 5. Python MLOps Validation Suite
 
-To ensure the AI engine maintains linguistic alignment across the languages selected in the Streamlit interface, the automation defined in `run_llm_eval.py` executes programmatic matrix evaluations directly against the production client, targeting the `openai/gpt-oss-20b` model on Groq cloud infrastructure.
+To ensure the AI engine maintains linguistic alignment across the languages selected in the Streamlit interface, `run_llm_eval.py` evaluates scenarios using `llama-3.1-8b-instant` for generation and `llama-3.3-70b-versatile` for judging through the Groq gateway.
 
 The programmatic evaluator runs seven Cluj-Napoca urban scenarios through Groq. It
 normalizes diacritics, verifies focal terms inside the `Assessment` section, applies

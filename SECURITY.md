@@ -15,7 +15,7 @@ The platform enforces a multi-layered local security architecture:
 [Local Interface Isolation] ─► CityRepository securely queries DATABASE_PATH
          │
          ▼
-[Structured Prompt Syntax] ──► Isolates payloads inside delimited tags in prompts.txt
+[Structured Prompt Syntax] ──► Isolates payloads inside delimited tags in the YAML prompt registry
          │
          ▼
 [Language Matrix Sync] ──────► Aligns responses with the TranslationProvider component

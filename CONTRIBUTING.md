@@ -39,7 +39,7 @@ The project enforces strict static analysis. Any code violating these rules will
 ## 🧪 Test Suite, Security & MLOps Integration
 
 * **Backend Regression Tests:** Whenever you add new features or update localization dictionaries, run the full test suite using `uv run pytest`. This executes all automated tests and automatically generates the structured metric report `ai_tests/pytest_report.json`.
-* **Semantic Validation:** Changes to prompts in `ai_tests/prompts.txt` require re-running the Python evaluation matrix (`run_llm_eval.py`) to verify alignment across critical urban profiles directly against the active production model `openai/gpt-oss-20b`, outputting `ai_tests/llm_eval_report.json`.
+* **Semantic Validation:** Changes to `app/ai/prompts.yaml` require re-running `run_llm_eval.py` to verify alignment across critical urban profiles. The evaluator uses `llama-3.1-8b-instant` for generation and `llama-3.3-70b-versatile` for judging, and writes `ai_tests/llm_eval_report.json`.
 * **RAG & Guardrails:** Run `uv run python ai_tests/run_guardrail_eval.py` for the seven native filtering, sanitization, and numerical grounding checks. The report is written to `ai_tests/rag_guardrails_report.json`.
 * **Live LLM Evaluation:** Run `uv run python ai_tests/run_llm_eval.py` with a configured Groq API key. Results are recorded in `ai_tests/llm_eval_report.json`; do not assume prior runs guarantee a current passing score.
 

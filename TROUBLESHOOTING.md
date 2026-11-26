@@ -123,5 +123,5 @@ The **"Run Live Architecture Verification"** button runs Pytest and native
 in-process guardrails concurrently by default and does not call Groq. It reuses
 the latest LLM evaluation report or displays **Cached / Skipped (Fast Mode)**
 when no report exists. To use API tokens for a fresh LLM evaluation, select
-**Include Live Groq LLM Eval (uses API tokens)** next to the button before
-starting verification.
+**Include Live LLM Eval (uses API tokens)** next to the button before
+starting verification. The live evaluator tries Groq first and may fall back to Gemini, using a fast 3-scenario sample (`max_scenarios=3`) with the non-reasoning `llama-3.1-8b-instant` judge in the UI (or `--scenarios N` in CLI) to avoid free-tier HTTP 429 TPM rate limits. If `python-dotenv` logs a parse warning at startup, ensure `.env` entries contain no spaces around `=` (e.g., `GROQ_API_KEY_1=gsk_...`).

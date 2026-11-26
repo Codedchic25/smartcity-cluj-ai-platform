@@ -2,7 +2,7 @@
 
 ## 0. Executive Summary (30-Second Elevator Pitch)
 
-**Smart City Cluj-Napoca** is a modular urban intelligence, IoT telemetry, and AI-assisted analytics platform built in **Python 3.12** and **Streamlit**. The application combines deterministic data processing (**Pydantic v2** validation, **SQLite** persistence, **Pandas/NumPy** statistical analytics, cooldown-throttled audit logging) with operational recommendations generated via the **Groq Cloud API**, featuring API key rotation, multi-model fallback, cryptographic session security (**Argon2id password hashing + HMAC-SHA256 session-token signing**), and native Python verification checks for RAG and LLM workflows.
+**Smart City Cluj-Napoca** is a modular urban intelligence, IoT telemetry, and AI-assisted analytics platform built in **Python 3.12** and **Streamlit**. The application combines deterministic data processing (**Pydantic v2** validation, **SQLite** persistence, **Pandas/NumPy** statistical analytics, cooldown-throttled audit logging) with Groq-first operational recommendations and Gemini fallback, cryptographic session security (**Argon2id password hashing + HMAC-SHA256 session-token signing**), and native Python verification checks for RAG and LLM workflows.
 
 ### End-to-End Execution Pipeline
 
@@ -22,7 +22,7 @@
            └──► [Context Builder: Telemetry + Thresholds + Station Trend + Latest 5 alerts]
                        │
                        ▼
-                [GroqProvider: Multi-Model Fallback + Sanitization (<think>) -> UI Recommendations]
+                [FallbackAiProviderRouter: Groq -> Gemini + Grounding -> UI Recommendations]
 
 ---
 
@@ -49,7 +49,7 @@ when a station has fewer than two stored readings, it uses synthetic history.
 ### Separation of Concerns
 * **`main.py` & `pages/`:** Presentation layer (UI) and session orchestration.
 * **`src/`:** Pydantic v2 data contracts (`schemas.py`), session token management (`session_auth.py`), and the local alerting engine (`utils/local_alerts.py`).
-* **`app/ai/`:** AI interface abstraction (`ai_interface.py`), RAG/grounding pipeline (`rag_pipeline.py`), and resilient Groq client (`groq_provider.py`).
+* **`app/ai/`:** AI interface (`ai_interface.py`), RAG/grounding pipeline (`rag_pipeline.py`), Groq client (`groq_provider.py`), and Groq-first Gemini fallback (`multi_provider.py`).
 * **`app/database/` & `migrations/`:** SQLAlchemy ORM models, async session setup, and Alembic migrations prepared for external database scaling.
 * **`ai_tests/`:** Pytest regression suite and native Python evaluators for RAG guardrails and LLM scenarios.
 
@@ -91,35 +91,42 @@ Authentication is engineered across two independent layers (Defense-in-Depth):
 
 ---
 
-## 4. AI / Groq Integration & Deterministic Alert Engine
+## 4. Multi-Provider AI Integration & Deterministic Alert Engine
 
-### AI Resilience & Multi-Model Fallback (`app/ai/groq_provider.py`)
-1. **Context Construction (`ai_interface.py`):** Loads the prompt template from `ai_tests/prompts.txt` and dynamically injects the selected station, current telemetry, configured thresholds, active UI language (`RO`, `EN`, `IT`, `ES`, `HU`), and the latest 5 events from `security_alerts.log`.
-2. **Key Rotation & Fallback (`GroqProvider`):** Collects `GROQ_API_KEY*` entries from `st.secrets` and environment variables, supporting lists and CSV strings. Rotates keys on HTTP 401, 429, and 5xx errors, and falls back across backup models if the primary model is unavailable. The Groq client uses `max_retries=0` so 429 responses are handled immediately by provider fallback rather than delayed by automatic SDK retries.
+### AI Resilience & Multi-Provider Fallback (`app/ai/multi_provider.py`)
+1. **Context Construction (`ai_interface.py`):** `PromptRegistryLoader` validates and caches only `app/ai/prompts.yaml` through the immutable Pydantic v2 `PromptTemplateConfig`. It sends system instructions, output format, and anti-hallucination rules separately from the rendered user template containing the selected station, current telemetry, configured thresholds, active UI language (`RO`, `EN`, `IT`, `ES`, `HU`), recent station trend, retrieved SOP passages, and latest events from `security_alerts.log`.
+2. **Provider Routing (`FallbackAiProviderRouter`):** `GroqProvider` rotates `GROQ_API_KEY*` credentials and Groq models with SDK retries disabled. If Groq exhausts its keys/models or returns a 429/TPM error, `GeminiOpenAiProvider` uses the `openai` SDK with Google's OpenAI-compatible endpoint, `GEMINI_API_KEY`, and `gemini-2.5-flash` followed by `gemini-2.5-flash-lite`. Gemini output uses the same numeric grounding validation.
 3. **Recommendation Cache:** `UrbanAiAssistantComponent` uses `@st.cache_data(ttl=300, show_spinner=False)` keyed by the rendered prompt, telemetry values, and active language. The request remains exclusive to the recommendation button; matching inputs reuse the cached answer for five minutes and reduce token consumption.
 4. **Response Sanitization:** Strips internal reasoning blocks (`<think>...</think>`) before rendering recommendations and stores the result in `st.session_state` per station.
 5. **Language & Markdown Alignment:** Aligns response body text with the active language (`RO`, `EN`, `IT`, `ES`, or `HU`) and places the bold English Assessment, Recommended Actions, and Data Limitations labels on separate lines as Markdown sections.
 6. **Recent Telemetry Trend:** `TelemetryContextReader` retrieves up to five latest rows for the selected station, orders them chronologically for comparison, and adds a compact `[RECENT TELEMETRY TREND]` summary with per-metric deltas and rising/stable/falling direction. With fewer than two valid readings, the prompt receives a safe no-trend fallback. The prompt explicitly treats this block as historical evidence only.
-7. **Deterministic Grounding:** After the model response, the assistant checks for the selected station, current metric values, and configured threshold breaches. It appends only omitted facts from the same telemetry and station settings, requiring no extra Groq request or tokens. Unit tests cover station-specific trends and missing-fact completion in `ai_tests/test_ai_guardrails.py`.
+7. **Deterministic Grounding:** After the model response, the assistant checks for the selected station, current metric values, and configured threshold breaches. It appends only omitted facts from the same telemetry and station settings, requiring no extra provider request or tokens. Unit tests cover station-specific trends and missing-fact completion in `ai_tests/test_ai_guardrails.py`.
+8. **Hybrid SOP Retrieval:** `SopKnowledgeRetriever` indexes `docs/cluj_urban_sop.md` with `TfidfVectorizer`, ranks procedures with `cosine_similarity`, and adds at most two passages as `[AUTHORIZED URBAN SOP CONTEXT]`. SOP guidance informs recommendations but never overrides thresholds or operator authority.
+9. **Generation Telemetry:** The router reports end-to-end latency and token usage from the successful provider. `UrbanAiAssistantComponent` caches telemetry with the response and shows a compact caption beneath it, including on cache hits without issuing another API call.
 
 ### Live Evaluator Rate Limits and Grounding
 
-`ai_tests/run_llm_eval.py` runs its seven scenarios with one worker and 2.1-second spacing
-between request attempts, preserving declared scenario order. It retries only transient HTTP
-429 rate limits once with a short capped backoff; exhausted quotas and other errors are not
-retried. Each scenario loads its authorized `SensorThresholdMatrix` and supplies
+`ai_tests/run_llm_eval.py` uses the same validated YAML prompt registry and separate system/user
+prompts, then runs its seven scenarios through the Groq-to-Gemini router with one worker and adaptive header-driven pacing (x-ratelimit-remaining-tokens / x-ratelimit-reset-tokens, 1.5s fallback)
+between request attempts, preserving declared scenario order. Transient HTTP 429 errors and
+empty payloads allow up to two adaptive retries with 15/30-second backoff; exhausted quotas
+are not retried. Each scenario loads its authorized `SensorThresholdMatrix` and supplies
 `[AUTHORIZED OPERATIONAL THRESHOLDS]` in both the prompt and retrieved evidence.
+`LlmJudgeEvaluator` returns a Pydantic `LlmJudgeVerdict` for faithfulness, actionability, and
+hallucination detection; rate-limited judge calls are skipped cleanly. The JSON report stores
+the mean `avg_faithfulness_score`, which the About page shows with a zero default for legacy
+reports.
 
 ### Fast Architecture Verification (`pages/4_About.py`)
 
 The default verification uses a `ThreadPoolExecutor` to run the Pytest suite
 (`sys.executable -m pytest -q --disable-warnings`) and native in-process RAG
-guardrails in parallel. This mode does not call Groq; it reuses the latest LLM
+guardrails in parallel. This mode does not call external AI providers; it reuses the latest LLM
 evaluation report or displays **Cached / Skipped (Fast Mode)** when no report
-exists. Selecting **Include Live Groq LLM Eval (uses API tokens)** opts into the
-external seven-scenario evaluation.
+exists. Selecting **Include Live LLM Eval (uses API tokens)** opts into the
+external seven-scenario evaluation through the Groq-to-Gemini router.
 
 ### Local Alerting Engine (`src/utils/local_alerts.py`)
-* **`AlertManager`** operates **100% offline**, completely independent of Groq API availability.
+* **`AlertManager`** operates **100% offline**, completely independent of external AI provider availability.
 * Evaluates threshold breaches (upper-bound limits for temperature, noise, traffic, PM2.5; lower-bound limit for soil moisture — drought detection).
 * Enforces a **configurable cooldown (10 seconds)** to prevent log flooding (*alert fatigue*) and sanitizes `\r` / `\n` characters prior to writing to `security_alerts.log` to mitigate **Log Injection** attacks.

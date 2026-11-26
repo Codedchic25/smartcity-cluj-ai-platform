@@ -68,6 +68,7 @@ class LlmEvalSummary(BaseModel):
     Attributes:
         status: Verification status label for the evaluated model.
         rate: Percentage of scenarios passing factual grounding checks.
+        avg_faithfulness_score: Mean judge faithfulness score from 1 to 5.
         model: Identifier of the deployed LLM inference model.
         color: Semantic badge color indicator.
     """
@@ -76,8 +77,10 @@ class LlmEvalSummary(BaseModel):
     passed: int = Field(default=0, ge=0)
     total: int = Field(default=0, ge=0)
     rate: float = Field(default=0.0, ge=0.0, le=100.0)
-    model: str = Field(default="gpt-oss-20b")
+    avg_faithfulness_score: float = Field(default=0.0, ge=0.0, le=5.0)
+    model: str = Field(default="llama-3.1-8b-instant")
     color: BadgeColor = Field(default="orange")
+    external_messages: list[str] = Field(default_factory=list)
 
 
 PytestSummary.model_rebuild(_types_namespace={"BadgeColor": BadgeColor})
@@ -172,10 +175,43 @@ class QualityMetricsReader:
         try:
             with open(report_path, encoding="utf-8") as file:
                 data = json.load(file)
+            if not isinstance(data, dict):
+                return LlmEvalSummary()
+
             passed = int(data.get("successful_compliance_count", 0))
             total = int(data.get("total_evaluated_scenarios", 0))
             rate = float(data.get("success_rate_percentage", 0.0))
-            model = str(data.get("model_deployed", "openai/gpt-oss-20b"))
+            avg_faithfulness_score = float(data.get("avg_faithfulness_score", 0.0))
+            model = str(data.get("model_deployed", "llama-3.1-8b-instant"))
+            external_messages = []
+            rate_limit_markers = (
+                "429",
+                "rate limit",
+                "rate_limit",
+                "too many requests",
+                "quota",
+                "resource exhausted",
+            )
+            details = data.get("detailed_metrics", [])
+            if isinstance(details, list):
+                for detail in details:
+                    if not isinstance(detail, dict):
+                        continue
+                    message = detail.get("external_message") or detail.get("error")
+                    if isinstance(message, str) and any(
+                        marker in message.casefold() for marker in rate_limit_markers
+                    ):
+                        external_messages.append(message[:500])
+                    judge = detail.get("llm_judge")
+                    if (
+                        isinstance(judge, dict)
+                        and judge.get("status") == "rate_limited"
+                        and not isinstance(message, str)
+                    ):
+                        external_messages.append(
+                            f"External LLM judge rate-limited scenario "
+                            f"{detail.get('scenario_name', 'unknown')}."
+                        )
 
             status = (
                 "Passed"
@@ -191,10 +227,19 @@ class QualityMetricsReader:
                 passed=passed,
                 total=total,
                 rate=rate,
+                avg_faithfulness_score=avg_faithfulness_score,
                 model=model,
                 color=color,
+                external_messages=external_messages,
             )
-        except (json.JSONDecodeError, OSError, TypeError, ValidationError, ValueError):
+        except (
+            json.JSONDecodeError,
+            OSError,
+            OverflowError,
+            TypeError,
+            ValidationError,
+            ValueError,
+        ):
             return LlmEvalSummary()
 
 
@@ -294,9 +339,7 @@ class GuardrailCheckStrategy:
             summary = QualityMetricsReader.read_guardrail_metrics(self._report_path)
             passed = summary.status == "Passed" and summary.successes == summary.total == 7
             error = (
-                ""
-                if passed
-                else f"{summary.successes}/{summary.total} native guardrails passed."
+                "" if passed else f"{summary.successes}/{summary.total} native guardrails passed."
             )
             return CheckExecution(
                 command={
@@ -359,7 +402,7 @@ class LiveLlmCheckStrategy:
                 },
                 summary=LlmEvalSummary(
                     status="Failed",
-                    model="openai/gpt-oss-20b",
+                    model="llama-3.1-8b-instant",
                     color="red",
                 ),
             )
@@ -406,12 +449,9 @@ class AboutQualityPage:
 
         with st.spinner("Running parallel local quality checks..."):
             executions = LiveQaExecutor(strategies).execute()
-            command_results = {
-                name: execution.command for name, execution in executions.items()
-            }
+            command_results = {name: execution.command for name, execution in executions.items()}
             summaries = {
-                name: execution.summary.model_dump()
-                for name, execution in executions.items()
+                name: execution.summary.model_dump() for name, execution in executions.items()
             }
 
             if include_live_llm:
@@ -425,14 +465,13 @@ class AboutQualityPage:
                     "skipped": True,
                     "error": "",
                     "output": (
-                        "Reused the most recent LLM evaluation report; "
-                        "live evaluation skipped."
+                        "Reused the most recent LLM evaluation report; live evaluation skipped."
                     ),
                 }
             else:
                 llm_data = LlmEvalSummary(
                     status="Cached / Skipped (Fast Mode)",
-                    model="openai/gpt-oss-20b",
+                    model="llama-3.1-8b-instant",
                 )
                 command_results["llm"] = {
                     "name": "LLM evaluation",
@@ -444,9 +483,13 @@ class AboutQualityPage:
                 }
             summaries["llm"] = llm_data.model_dump()
 
-        required_checks = ("pytest", "guardrails", "llm") if include_live_llm else (
-            "pytest",
-            "guardrails",
+        required_checks = (
+            ("pytest", "guardrails", "llm")
+            if include_live_llm
+            else (
+                "pytest",
+                "guardrails",
+            )
         )
         all_passed = all(command_results[name]["passed"] for name in required_checks)
         st.session_state["live_qa_execution"] = {
@@ -481,7 +524,7 @@ class AboutQualityPage:
         controls = st.columns((2, 1))
         with controls[0]:
             include_live_llm: Final[bool] = st.checkbox(
-                "Include Live Groq LLM Eval (uses API tokens)",
+                "Include Live LLM Eval (uses API tokens)",
                 key="include_live_groq_llm_eval",
             )
         with controls[1]:
@@ -561,9 +604,12 @@ class AboutQualityPage:
             st.markdown("**Context Evaluation Guard**")
             st.markdown(f"**Status:** :{llm_data.color}[{llm_data.status}]")
             st.metric(label="LLM Scenario Compliance", value=f"{llm_data.rate:.1f}%")
+            st.caption(f"Average faithfulness: {llm_data.avg_faithfulness_score:.1f} / 5")
             st.caption(
                 f"Scenarios: {llm_data.passed}/{llm_data.total} · Engine: `{llm_data.model}`"
             )
+            for message in llm_data.external_messages:
+                st.warning(message)
 
         st.divider()
 
