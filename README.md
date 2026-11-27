@@ -16,7 +16,6 @@ You can access the live, fully production-hardened cloud environment instantly: 
 
 ---
 
-
 A modular Python application for urban telemetry monitoring, data analytics, statistical modeling, AI-assisted operational recommendations, configurable alerts, security auditing, and structured data export.
 
 The project demonstrates an end-to-end software engineering workflow that combines local relational persistence, interactive visualization, classical machine learning techniques, and large language model (LLM) integration.
@@ -135,19 +134,11 @@ The following screenshots illustrate the application's interface and analytical 
 
 *Selection of the target variable.*
 
-![Joint Density Dispersion](assets/analytics_joint_density_dispersion.png)
-
-*Interactive distribution and relationship visualization.*
-
 ![Joint Density Violin Metrics](assets/analytics_joint_density_violin_metrics.png)
 
 *Distribution analysis using a violin plot.*
 
 ### 4. Configuration and Data Management
-
-![Administration Settings](assets/panel_settings.png)
-
-*Administrative controls and configurable telemetry thresholds.*
 
 ![Data Export Module](assets/export_module.png)
 
@@ -166,20 +157,23 @@ To prevent malformed IoT telemetry, out-of-bounds threshold updates, or corrupte
 * **Operational Thresholds (`SensorThreshold`):** Validates administrator-configured alert margins in the Settings control panel prior to executing atomic SQLite `UPSERT` transactions.
 * **Analytics & QA Observability (`RegressionResult`, `PytestSummary`, `GuardrailSummary`, `LlmEvalSummary`):** Encapsulates linear regression outputs and parses local JSON test reports cleanly into typed status badges inside the **System Quality Control Center**.
 
-
 ### 5. Architecture and Localization
 
-![Application Architecture Overview](assets/about_architecture_overview.png)
+![End-to-End Architecture & Guardrail Blueprint](assets/architecture_blueprint.jpg)
 
-*Application architecture overview.*
+*End-to-end architecture blueprint covering Pydantic v2 data contracts, deterministic alerting, multi-provider RAG/LLM routing, and live quality verification.*
 
-![Station Selector](assets/about_station_selector_dropdown.png)
+![System Architecture Visual Overview](assets/architecture_system_overview.jpg)
 
-*Monitoring station selection.*
+*Visual system overview connecting IoT telemetry, defense-in-depth security, deterministic processing, AI guardrails, and Streamlit Cloud deployment.*
 
-![Language Selector](assets/bout_language_selector_dropdown.png)
+![Systemic Quality & AI Compliance Control Center](assets/about_quality_control_center.png)
 
-*Multilingual interface selection.*
+*Systemic Quality & AI Compliance Control Center displaying verified metrics on page load (99/99 Pytest, 7/7 RAG Guardrails, 100.0% LLM Compliance).*
+
+![Live Cloud Verification Passed](assets/about_live_verification_passed.png)
+
+*On-demand live verification run in Streamlit Cloud confirming end-to-end Pytest, RAG guardrail, and LLM evaluation compliance.*
 
 ## Core Features
 
@@ -214,9 +208,12 @@ To prevent malformed IoT telemetry, out-of-bounds threshold updates, or corrupte
 
 ### Security and Reliability
 
-- Dedicated authentication service.
-- Password-hash verification.
-- Constant-time comparison using `hmac.compare_digest()`.
+- Dedicated authentication service.- Argon2id password hashing and verification using
+  `argon2-cffi` (`PasswordHasher.verify()`).
+- HMAC-SHA256 signed session tokens with signature
+  verification using `hmac.compare_digest()`.
+- Constant-time credential and cryptographic signature comparisons
+  to mitigate timing attacks.
 - Configurable operational alert thresholds.
 - Duplicate-alert suppression through a cooldown mechanism.
 - Local security audit logging.
@@ -291,7 +288,6 @@ Smart City Application
 | Pytest | Runs automated Python tests |
 
 The application is designed as a portfolio-grade engineering project. Its architecture demonstrates how conventional backend processing, data analysis, security controls, and generative AI can be integrated into a single local application.
-
 
 ---
 
@@ -560,7 +556,7 @@ to `GeminiOpenAiProvider`.
 The documented model target is:
 
 ```text
-openai/gpt-oss-20b
+qwen/qwen3.8-27b
 ```
 
 The model identifier is passed through the configured Groq chat-completion interface. It identifies the inference model targeted by the application, not a model hosted locally by this repository.
@@ -647,7 +643,7 @@ exceptions, HTTP `>= 400` status codes, structured telemetry errors, and normali
 failure messages without misclassifying numeric sensor telemetry). Gemini uses the
 OpenAI SDK with Google's OpenAI-compatible endpoint
 (`https://generativelanguage.googleapis.com/v1beta/openai/`), always attempts
-`configured_model` first (`gemini-2.5-flash-lite` by default) followed by
+`configured_model` first (`gemini-3.5-flash` by default) followed by
 deduplicated fallback candidates without dropping any configured model, and disables
 SDK retries. Both providers propagate `system_prompt_only` end-to-end into API
 payloads and cached session telemetry, enforce strict sensor-value-unit RAG
@@ -727,7 +723,6 @@ The objective is to verify that the assistant respects the intended prompt const
 Passing a finite set of adversarial tests does not prove that an LLM application is immune to prompt injection. It provides evidence about the specific scenarios evaluated.
 
 The exact evaluation results should be confirmed by running the test suite against the current code and configuration.
-
 
 ---
 
@@ -919,10 +914,9 @@ The application's **`4_About.py`** page integrates a centralized, real-time **Sy
 This component acts as an architectural aggregator that defensively parses the execution artifacts generated by the testing suites on disk:
 - **`pytest_report.json`**: Extracts the exact count of passed unit tests and regression assertions.
 - **`rag_guardrails_report.json`**: Monitors native retrieval, sanitization, and numeric-grounding checks.
-- **`llm_eval_report.json`**: Tracks scenario compliance and judge faithfulness for `llama-3.1-8b-instant` generation and `llama-3.3-70b-versatile` judging.
+- **`llm_eval_report.json`**: Tracks scenario compliance and judge faithfulness for `qwen/qwen3.8-27b -> gemini-3.5-flash` generation and compact JSON judging.
 
 This provides municipal operators and technical auditors with an immediate, high-visibility visual confirmation of the platform's stability, security alignment, and software integrity directly within the Streamlit interface.
-
 
 ### Static Analysis and Code Formatting
 
@@ -1090,7 +1084,6 @@ The repository also documents:
 
 These tools provide alternative development and execution environments. Actual deployment behavior depends on the corresponding configurations and external services.
 
-
 ## Installation and Setup
 
 ### Prerequisites
@@ -1105,8 +1098,8 @@ Before running the platform locally, make sure you have:
 ### 1. Clone the Repository
 
 ```powershell
-git clone https://github.com/Codedchic25/smartcity-cluj-iot-platform.git
-cd smartcity-cluj-iot-platform
+git clone https://github.com/Codedchic25/smartcity-cluj-ai-platform.git
+cd smartcity-cluj-ai-platform
 ```
 
 ### 2. Install Dependencies
@@ -1364,7 +1357,7 @@ These items are development opportunities, not claims that every capability is a
 **Maria Gabriela Cojocaru**
 
 - GitHub: [@Codedchic25](https://github.com/Codedchic25)
-- Project repository: [smartcity-cluj-iot-platform](https://github.com/Codedchic25/smartcity-cluj-iot-platform)
+- Project repository: [smartcity-cluj-ai-platform](https://github.com/Codedchic25/smartcity-cluj-ai-platform)
 - LinkedIn: [Maria Gabriela Cojocaru](https://www.linkedin.com/in/maria-gabriela-cojocaru/)
 
 ---

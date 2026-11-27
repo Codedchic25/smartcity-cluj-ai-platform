@@ -53,12 +53,12 @@ attacks and numerical hallucinations.
   1. In `app/ai/ai_interface.py`, the assistant dynamically resolves active language context by
   querying the localization dictionaries exposed via `get_all_translations()` in `translations.py`
   (RO, EN, IT, ES, HU).
-  2. `FallbackAiProviderRouter` tries the `openai/gpt-oss-20b` Groq model first, rotating
+  2. `FallbackAiProviderRouter` tries the `qwen/qwen3.8-27b` Groq model first (with `openai/gpt-oss-20b` and `openai/gpt-oss-120b` fallbacks), rotating
   `GROQ_API_KEYS` and Groq models on provider failures. If Groq keys/models fail or a 429/TPM
   limit is returned, it switches to `GeminiOpenAiProvider`, which uses the `openai` SDK with
   Google's OpenAI-compatible Gemini endpoint, always trying `configured_model` first followed by
-  deduplicated fallback candidates (`gemini-2.5-flash-lite`, `gemini-3-flash-preview`,
-  `gemini-3.1-flash-lite`, `gemini-2.5-flash`) without dropping configured models. Router
+  deduplicated fallback candidates (`gemini-3.5-flash`, `gemini-3.5-flash-lite`,
+  `gemini-3.6-flash`, `gemini-3.8-flash`) without dropping configured models. Router
   failures are classified structurally via `is_provider_failure` (typed API/network errors,
   HTTP `>= 400` codes, structured telemetry errors, and normalized failure messages) without
   misclassifying numeric sensor telemetry. Both providers propagate `system_prompt_only` into
@@ -274,8 +274,8 @@ isolates the environment and sequentially enforces strict quality gates governed
   guards, session security, and native Python AI/RAG guardrails in `test_ai_guardrails.py`).
   3. **Semantic & Guardrail AI Gate (LLMOps):** `ai_tests/run_guardrail_eval.py` runs 7 local
   deterministic RAG/grounding checks without credentials, while `ai_tests/run_llm_eval.py`
-  evaluates **7 live Cluj-Napoca urban scenarios** using `llama-3.1-8b-instant` for generation
-  and the fast non-reasoning `llama-3.1-8b-instant` model for judging (avoiding `<think>` token overhead). It uses one worker,
+  evaluates **7 live Cluj-Napoca urban scenarios** using `qwen/qwen3.8-27b -> gemini-3.5-flash` for generation
+  and compact JSON judging (`max_tokens=40`, stripping any `<think>` blocks). It uses one worker,
   adaptive header-driven pacing (x-ratelimit-remaining-tokens / x-ratelimit-reset-tokens, 1.5s fallback), and up to three adaptive retries for transient 429/empty payload
   errors, with authorized station thresholds. A Pydantic
   `LlmJudgeVerdict` scores each response and contributes to the reported average faithfulness.
@@ -300,3 +300,35 @@ eliminating *Environment Drift* and billing-related service interruptions.
   At runtime, the platform injects them directly into protected process memory as TOML variables
   exposed via `st.secrets`, ensuring continuous uptime for technical evaluators and strict
   compliance with OWASP Top 10 security standards.
+
+
+---
+
+## 📊 15. Dual-Layer Evaluation Metrics: Deterministic Compliance vs. LLM Faithfulness
+
+### Question: In the Systemic Quality & AI Compliance Control Center, what is the difference between Scenario Compliance and Average Faithfulness, and how are they computed without hardcoding?
+* **Defense**: A single pass/fail metric cannot distinguish between a response that merely mentions the right sensor keyword and a response that stays strictly faithful to retrieved telemetry without extrapolating unsupported causes. Therefore, `ai_tests/run_llm_eval.py` separates **deterministic keyword/section compliance** from **semantic faithfulness scoring**.
+* **Technical Justification**:
+  1. **Deterministic Scenario Compliance (`matched_compliance`):** A local Python evaluator isolates the `Assessment` section of each generated response, normalizes diacritics, and verifies whole-word presence of the scenario's focal telemetry term. The percentage in `success_rate_percentage` is computed dynamically at runtime from live pass counts (`passed / total * 100`).
+  2. **Semantic Faithfulness Score (`avg_faithfulness_score`):** Each response is independently audited by `LlmJudgeEvaluator` using the `judge_instructions` contract in `app/ai/prompts.yaml`. Comparing the output strictly against the scenario's telemetry values and authorized `SensorThresholdMatrix`, the judge returns a Pydantic-validated `LlmJudgeVerdict` (`faithfulness: int` on a `1–5` scale, `passed: bool`). A `5/5` score requires strict adherence to supplied readings and units, whereas `4/5` reflects accurate numeric grounding with minor interpretive phrasing.
+  3. **Dynamic Report Aggregation (`LlmEvalSummary`):** At the end of each run, `_write_report()` computes the arithmetic mean of all valid integer verdicts (`sum(scores) / len(scores)`) and writes `ai_tests/llm_eval_report.json`. On `pages/4_About.py`, `LlmEvalSummary` parses this artifact dynamically at page load or after an on-demand live verification run, keeping UI metrics synchronized with actual execution outcomes.
+
+---
+
+## Production Incident Post-Mortems & Engineering Lessons (Nov 2026)
+
+1. **Model Deprecation & Live Catalog Verification:**
+   - **Symptom:** Legacy model IDs (`gemini-2.5-flash` returning `HTTP 404 NOT_FOUND`; legacy Llama IDs removed from active Groq tiers) caused avoidable retry loops.
+   - **Fix:** Audited live provider catalogs (`models.list()`) and standardized on active 2026 models: `qwen/qwen3.8-27b` (with `openai/gpt-oss-20b` and `openai/gpt-oss-120b` fallbacks) on Groq, failing over to `gemini-3.5-flash` (`gemini-3.5-flash-lite`, `gemini-3.6-flash`, `gemini-3.8-flash`) via the native `google-genai` SDK.
+2. **Reasoning-Model Token Starvation (`max_tokens` Budgeting):**
+   - **Symptom:** Reasoning models (`qwen/qwen3.8-27b`, `openai/gpt-oss-20b`, `gemini-3.5-flash`) consume initial completion tokens on internal `<think>` chains before outputting JSON. Tight budgets (`max_tokens=256` or `800`) truncated payloads mid-JSON.
+   - **Fix:** Configured `max_tokens=2048` in `GroqProvider`, `MAX_COMPLETION_TOKENS=2500` in `GeminiOpenAiProvider`, and `max_tokens=1500` in `run_llm_eval.py`, stripping `<think>...</think>` blocks prior to validation.
+3. **Structured JSON Contract Enforcement (`output_format` + `response_schema`):**
+   - **Symptom:** Omitting `output_format` when `system_prompt_only=True` caused generic JSON mode to emit ad-hoc telemetry keys instead of the `{"answer": "..."}` schema.
+   - **Fix:** Unified `system_instructions`, `output_format`, and `anti_hallucination_rules` in `PromptTemplateLoader` and enforced Pydantic `response_schema` constrained decoding in `GeminiOpenAiProvider`.
+4. **Zero-Downtime Multi-Key Rotation Under `HTTP 429`:**
+   - **Symptom:** Burst evaluation workloads triggered free-tier `HTTP 429` rate limits on single keys.
+   - **Fix:** Set `max_retries=0` on underlying SDK clients and delegated retry/rotation to `GroqProvider` (`GROQ_API_KEY_1` <-> `GROQ_API_KEY_2`) and `FallbackAiProviderRouter` (-> Gemini), sustaining 100.0% scenario compliance (7/7) and 99/99 Pytest assertions.
+5. **In-Process Test Isolation in Deployed Cloud Runtimes (`st.secrets`):**
+   - **Symptom:** Running `pytest` inside a deployed Streamlit Cloud container failed 3 authentication unit tests because live `st.secrets` (`PLATFORM_ADMIN_USER`, `PLATFORM_ADMIN_PASS`) overrode `monkeypatch.setenv(...)`.
+   - **Fix:** Added an `autouse=True` fixture in `ai_tests/test_app_bootstrap.py` (`monkeypatch.setitem(st.__dict__, "secrets", {})`) so unit tests remain hermetically isolated both locally and when triggered live from the Cloud UI.

@@ -19,7 +19,7 @@ The platform integrates:
 - Deterministic asynchronous operational rule engines built on the OOP architecture in `main.py`.
 - Local disk-based emergency auditing and logging (`security_alerts.log`) featuring cooldown throttling and anti-log-injection protection.
 - Direct atomic schema insertions into the local SQLite database via the `CityRepository` class, dynamically bound to the `DATABASE_PATH` environment variable.
-- AI-assisted operational synthesis powered by a Context-Aware LLM via `GroqProvider` (querying the production `openai/gpt-oss-20b` model).
+- AI-assisted operational synthesis powered by a Context-Aware LLM via `FallbackAiProviderRouter` (querying `qwen/qwen3.8-27b` on Groq with multi-key rotation and automatic failover to `gemini-3.5-flash` via the native `google-genai` SDK).
 - Programmatic evaluation frameworks executed locally via `run_llm_eval.py` with structured JSON reporting.
 
 The core objective is to demonstrate how modern Generative AI pipelines can be safely integrated into civic governance applications without sacrificing operational determinism, local security, or code traceability.
@@ -69,9 +69,10 @@ Furthermore, the urban assistant performs dynamic live security context injectio
 
 # 5. Python MLOps Validation Suite
 
-To ensure the AI engine maintains linguistic alignment across the languages selected in the Streamlit interface, `run_llm_eval.py` evaluates scenarios using `llama-3.1-8b-instant` for generation and `llama-3.3-70b-versatile` for judging through the Groq gateway.
+To ensure the AI engine maintains linguistic alignment across the languages selected in the Streamlit interface, `run_llm_eval.py` evaluates scenarios using `qwen/qwen3.8-27b` (with automatic failover to `gemini-3.5-flash`) and compact JSON judging.
 
-The programmatic evaluator runs seven Cluj-Napoca urban scenarios through Groq. It
+The programmatic evaluator runs seven Cluj-Napoca urban scenarios through the Groq-to-Gemini router. It
 normalizes diacritics, verifies focal terms inside the `Assessment` section, applies
-inter-request delays, and retries rate-limited responses. The report preserves actual
-run outcomes; passing all scenarios is neither assumed nor guaranteed.
+adaptive pacing, and retries transient rate-limited responses. Each run computes two dynamic metrics without hardcoded values:
+- **Deterministic Scenario Compliance (`success_rate_percentage`):** Percentage of scenarios containing the expected telemetry term in `Assessment`.
+- **Semantic Faithfulness (`avg_faithfulness_score`):** Arithmetic mean of the `1–5` grounding scores returned by `LlmJudgeVerdict` and parsed dynamically on the **About** page via `LlmEvalSummary`.

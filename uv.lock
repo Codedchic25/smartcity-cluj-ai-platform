@@ -1627,7 +1627,9 @@ dependencies = [
     { name = "pydantic" },
     { name = "pydantic-settings" },
     { name = "pyjwt" },
+    { name = "pytest" },
     { name = "pytest-asyncio" },
+    { name = "pytest-json-report" },
     { name = "python-dotenv" },
     { name = "python-multipart" },
     { name = "reportlab" },
@@ -1647,8 +1649,6 @@ dependencies = [
 
 [package.dev-dependencies]
 dev = [
-    { name = "pytest" },
-    { name = "pytest-json-report" },
     { name = "ruff" },
 ]
 
@@ -1676,7 +1676,9 @@ requires-dist = [
     { name = "pydantic", specifier = ">=2.12" },
     { name = "pydantic-settings", specifier = ">=2.0" },
     { name = "pyjwt", specifier = ">=2.13" },
+    { name = "pytest", specifier = ">=8.0.0" },
     { name = "pytest-asyncio", specifier = ">=1.4.0" },
+    { name = "pytest-json-report", specifier = ">=1.5.0" },
     { name = "python-dotenv", specifier = ">=1.2" },
     { name = "python-multipart", specifier = ">=0.0.27" },
     { name = "reportlab", specifier = ">=5.0" },
@@ -1695,11 +1697,7 @@ requires-dist = [
 ]
 
 [package.metadata.requires-dev]
-dev = [
-    { name = "pytest", specifier = ">=8.0.0" },
-    { name = "pytest-json-report", specifier = ">=1.5.0" },
-    { name = "ruff", specifier = ">=0.3.0" },
-]
+dev = [{ name = "ruff", specifier = ">=0.3.0" }]
 
 [[package]]
 name = "smmap"

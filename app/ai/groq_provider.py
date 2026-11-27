@@ -60,7 +60,7 @@ except ImportError:
 class GroqProvider:
     """Manage secure communication with Groq Cloud inference endpoints."""
 
-    FALLBACK_MODELS: Final[tuple[str, ...]] = ("openai/gpt-oss-120b",)
+    FALLBACK_MODELS: Final[tuple[str, ...]] = ("openai/gpt-oss-20b", "openai/gpt-oss-120b")
 
     SUPPORTED_LANGUAGES: Final[dict[str, str]] = {
         "RO": "Romanian (Română)",
@@ -75,7 +75,7 @@ class GroqProvider:
     def __init__(
         self,
         api_key_env_var: str = "GROQ_API_KEY",
-        model_target: str = "openai/gpt-oss-20b",
+        model_target: str = "qwen/qwen3.8-27b",
     ) -> None:
         """Initialize the provider and collect available API credentials."""
         self._api_keys: tuple[str, ...] = self._collect_api_keys(api_key_env_var)

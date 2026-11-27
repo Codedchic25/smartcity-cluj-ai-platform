@@ -20,6 +20,7 @@ Thumbs.db
 .git/
 
 # Testing and Static Analysis caches
+# Testing and Static Analysis caches
 .pytest_cache/
 .ruff_cache/
 html_report/

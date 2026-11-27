@@ -49,8 +49,17 @@ This repository adheres to Semantic Versioning (`MAJOR.MINOR.PATCH`).
 - **Gemini Correction Retry Decision:** Evaluated and documented skipping generic
   iterative correction retries on Gemini to avoid doubling input token cost and adding
   latency, relying instead on multi-model fallback and deterministic guardrails.
-- **Expanded Regression Suite:** Increased the automated Pytest suite from **72** to
-  **97 passing tests** (`ai_tests/test_ai_guardrails.py`).
+- **Active Model Lifecycle & Native Gemini SDK (`google-genai`):** Migrated the primary
+  Groq routing chain to `qwen/qwen3.8-27b` (with `openai/gpt-oss-20b` and `120b` fallbacks
+  and multi-key rotation) and upgraded `GeminiOpenAiProvider` to the native `google-genai`
+  SDK (`gemini-3.5-flash` -> `gemini-3.8-flash`) with strict Pydantic `response_schema` decoding.
+- **Reasoning Token Budgeting & Dynamic Judge Metrics:** Expanded completion token limits
+  (`2048–2500`) to prevent `<think>` truncation and formalized dynamic calculation of
+  **Scenario Compliance** (`success_rate_percentage`) and **Average Faithfulness**
+  (`avg_faithfulness_score` via `LlmJudgeVerdict` and `LlmEvalSummary`) without hardcoded scores.
+- **Cloud Runtime Test Isolation & Regression Suite:** Isolated `st.secrets` via an
+  `autouse=True` fixture in `ai_tests/test_app_bootstrap.py` for hermetic in-process runs
+  on Streamlit Community Cloud, expanding the automated suite to **99 passing tests**.
 
 ---
 

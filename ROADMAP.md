@@ -8,10 +8,10 @@ microservices ecosystem.
 
 ## 📅 Phase 1: Decoupling, Cloud Migration & API Services (Q3 2026) — *In Progress*
 
-- **Always-On Cloud Hosting (Zero-Cost Deployment)**: The platform has been fully migrated
-  off commercial Railway infrastructure (eliminating pay-as-you-go billing bottlenecks) onto a
-  native, zero-cost cloud hosting platform. This ensures 100% uptime and unrestricted access
-  for recruiters and technical evaluators.
+- **Always-On Cloud Hosting & Live Quality Control Center (*Completed*)**: The platform has been
+  migrated onto Streamlit Community Cloud with Argon2id + HMAC-SHA256 session security, Pydantic v2
+  runtime contracts, multi-provider AI failover (`qwen/qwen3.8-27b` -> `gemini-3.5-flash`), and an
+  interactive **Systemic Quality & AI Compliance Control Center** on the `About` page.
 - **FastAPI Backend Migration**: Complete decoupling of business logic from the Streamlit
   presentation layer by introducing an asynchronous FastAPI backend with protected REST
   endpoints, leveraging strict dependency management via `uv` and `pyproject.toml`.
@@ -24,9 +24,10 @@ microservices ecosystem.
 - **MQTT Broker Integration**: Replacing the simulated ingestion pipeline in `seed_db.py` with
   a production MQTT broker (e.g., Eclipse Mosquitto) capable of ingesting encrypted live
   telemetry streams directly from physical field sensors.
-- **Semantic Firewall Expansion**: Integrating an advanced safety layer (such as `NeMo Guardrails`)
-  alongside the Groq API client and `openai/gpt-oss-20b` model to block complex context-escape
-  attempts and semantic manipulation against the urban assistant.
+- **Semantic Firewall Expansion**: Extending the existing deterministic Python guardrails (TF-IDF SOP
+  grounding, numeric sensor validation, and `LlmJudgeEvaluator`) with programmable guardrail rails
+  (such as `NeMo Guardrails`) across the `qwen/qwen3.8-27b -> gemini-3.5-flash` router to block complex
+  context-escape attempts.
 
 ## 📅 Phase 3: Scalability & Automated MLOps (Q1 2027)
 

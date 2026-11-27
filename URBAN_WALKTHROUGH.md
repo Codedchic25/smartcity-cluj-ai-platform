@@ -11,7 +11,7 @@ populates an empty database with the 7 demo monitoring stations in Cluj-Napoca, 
 thresholds and associated telemetry. Existing data is never overwritten, including across fresh
 Streamlit Community Cloud runtimes.
 
-1. Open a terminal in the project root: `smartcity-cluj-iot-platform`.
+1. Open a terminal in the project root: `smartcity-cluj-ai-platform`.
 2. For an empty database, seeding occurs automatically when the application starts. The standalone script remains
    available for manual population while preserving existing records:
    ```bash
@@ -50,7 +50,7 @@ Streamlit Community Cloud runtimes.
 
 1. Navigate to **`3_Analytics.py`**.
 2. **Classical ML Forecasting:** Select an urban parameter. A Linear Regression model or NumPy `polyfit` polynomial estimator queries historical SQLite records, computes the trend slope, and renders the upcoming predictive intervals on the Plotly chart without stale visual caching.
-3. **Operational Recommendation (Llama Engine):** At the bottom of the page, the contextual AI assistant is ready for queries. Upon submission, the pipeline retrieves dense context from the latest 5 log entries, injects it into the prompt template from `app/ai/prompts.yaml`, and invokes the production `openai/gpt-oss-20b` model to generate a tailored administrative recommendation. The output—stripped of internal `<think>` tags via regex—is securely persisted in `st.session_state` to survive UI auto-refresh cycles.
+3. **Operational Recommendation (Multi-Provider RAG Engine):** On the operational view, the contextual AI assistant synthesizes station telemetry, historical trend deltas, retrieved municipal SOP passages (`docs/cluj_urban_sop.md`), and the latest 5 lines from `security_alerts.log` into the validated `app/ai/prompts.yaml` template. Requests route through `FallbackAiProviderRouter` (`qwen/qwen3.8-27b` on Groq with multi-key rotation and automatic failover to `gemini-3.5-flash` via the native `google-genai` SDK). The output—stripped of internal `<think>` tags via regex and verified by numeric grounding checks—is persisted in `st.session_state`.
 
 ---
 
@@ -66,8 +66,21 @@ To verify application resilience in CI/CD pipelines prior to final deployment, m
    preservation of existing records, missing-sensor warnings across all three pages, translation
    integrity, session state checks, and safe seeder behavior. Results are written to
    `ai_tests/pytest_report.json`.
-2. **Programmatic Python Evaluation:**
+2. **Native Python RAG & Guardrail Evaluation:**
+   ```bash
+   uv run python ai_tests/run_guardrail_eval.py
+   ```
+   Executes the 7 deterministic RAG retrieval, sanitization, and numeric-grounding checks, writing `ai_tests/rag_guardrails_report.json`.
+3. **Live LLM & Judge Evaluation:**
    ```bash
    uv run python ai_tests/run_llm_eval.py
    ```
-   This command executes the 5 Cluj-Napoca operational scenarios, verifying semantic compliance of the AI assistant and writing the output report to `ai_tests/llm_eval_report.json`.
+   Executes all **7 Cluj-Napoca operational scenarios** through the Groq-to-Gemini router, computing dynamic **Scenario Compliance** (`success_rate_percentage`) and **Average Faithfulness** (`avg_faithfulness_score` via `LlmJudgeVerdict`) into `ai_tests/llm_eval_report.json`.
+
+---
+
+## 📊 Step 6: Systemic Quality & AI Compliance Control Center (`4_About.py`)
+
+1. Navigate to **`4_About.py`** in Streamlit.
+2. Inspect the live status cards dynamically parsed from `pytest_report.json`, `rag_guardrails_report.json`, and `llm_eval_report.json` via Pydantic v2 contracts.
+3. Optionally click **Run Live Architecture Verification** (and check **Include Live LLM Eval (uses API tokens)** for full end-to-end provider testing) to re-execute the verification suites on demand.

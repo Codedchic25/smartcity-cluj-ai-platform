@@ -84,11 +84,13 @@ To evaluate the non-deterministic generative component without disrupting classi
 
 ### Semantic Validation Matrix (7 Scenarios)
 The script executes seven Cluj-Napoca urban scenarios, generating with
-`llama-3.1-8b-instant` and judging with `llama-3.3-70b-versatile` via the Groq Cloud API.
+`qwen/qwen3.8-27b` (with automatic failover to `gemini-3.5-flash`) and compact JSON judging.
 The evaluation checks for focal terminology inside the `Assessment` section, normalizes
 diacritics, and reports actual provider errors. Requests use adaptive header-driven pacing (x-ratelimit-remaining-tokens / x-ratelimit-reset-tokens, 1.5s fallback) and a compact JSON judge contract (faithfulness: int, passed: bool) and bounded
 429/empty-payload retries. The process exits non-zero if any scenario fails; the report is
-written to `ai_tests/llm_eval_report.json`.
+written to `ai_tests/llm_eval_report.json`, dynamically recording both **Scenario Compliance**
+(`success_rate_percentage` from deterministic focal-term matching) and **Average Faithfulness**
+(`avg_faithfulness_score`, the arithmetic mean of `1–5` judge scores parsed on `pages/4_About.py` via `LlmEvalSummary`).
 
 ---
 
@@ -109,11 +111,11 @@ checks directly inside the application's Python runtime. Current results are sav
 Configure one or more Groq keys in Streamlit Secrets for live evaluation; local RAG checks require
 no API key.
 
-## 📊 Regression Suite Coverage (97 Core Tests)
+## 📊 Regression Suite Coverage (99 Tests)
 
-The automated Pytest suite (i_tests/) validates **97 passing core tests** (plus automated documentation sync checks) alongside the **7 deterministic Native Guardrails** (i_tests/run_guardrail_eval.py):
+The automated Pytest suite (ai_tests/) validates **99 passing tests** (plus automated documentation sync checks) alongside the **7 deterministic Native Guardrails** (ai_tests/run_guardrail_eval.py):
 
-- **Telemetry & Prompt Propagation:** Verifies default (system_prompt_only=False) and explicit (True) propagation across GroqProvider, GeminiOpenAiProvider, FallbackAiProviderRouter, and Streamlit caching (i_interface.py).
+- **Telemetry & Prompt Propagation:** Verifies default (system_prompt_only=False) and explicit (True) propagation across GroqProvider, GeminiOpenAiProvider, FallbackAiProviderRouter, and Streamlit caching (ai_interface.py).
 - **Gemini Fallback Ordering:** Confirms configured_model is always attempted first, followed by deduplicated fallback candidates without dropping any configured model.
 - **Structured Router Error Classification:** Tests recovery across typed exceptions (APIStatusError, TimeoutError, ConnectionError), HTTP status codes (429, 500, 502, 503), structured telemetry errors, and ensures numeric sensor readings (e.g., 503 µg/m³) are not misclassified as HTTP errors.
 - **Sensor–Value–Unit RAG Grounding:** Validates strict binding between sensor context, numerical values, and measurement units while preserving all 7 Native Guardrails.

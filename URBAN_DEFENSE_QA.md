@@ -24,15 +24,21 @@ This document centralizes architectural questions, engineering decisions, and tr
 
 ---
 
-## 🧠 Section 3: AI Security & MLOps Validation (`openai/gpt-oss-20b`)
+## 🧠 Section 3: AI Security & MLOps Validation (`qwen/qwen3.8-27b`)
 
 ### Q4: How does the AI processing pipeline enforce protection against Prompt Injection attacks?
 * **Defense**: Rather than relying on brittle string-filtering heuristics, the project enforces strict data isolation inside a clearly delimited prompt template.
 * **Technical Justification**: Incoming sensor telemetry is injected into clearly separated sections using the structured prompt template in `app/ai/prompts.yaml`. This prevents the LLM from confusing telemetry payloads with system instructions. Furthermore, setting a low temperature (`0.2`) in `groq_provider.py` constrains the model to remain deterministic and deliver concise technical recommendations, mitigating context-escape risks. A regex sanitization pass also strips internal `<think>...</think>` reasoning tags to ensure clean output.
 
-### Q5: Inside the test suite, you integrated a programmatic evaluation script named `run_llm_eval.py`. What does it validate, and how does it ensure Quality Assurance (QA)?
-* **Defense**: LLM outputs are probabilistic and can drift over time in cloud environments. The project treats the generative component like traditional software that must undergo automated testing.
-* **Technical Justification**: The `run_llm_eval.py` script evaluates **7 urban scenarios in Cluj-Napoca**, generating with `llama-3.1-8b-instant` and judging with `llama-3.3-70b-versatile` via the Groq gateway. It checks for whole-word focal term matches, normalizes diacritic differences, and scopes evaluation strictly to the `Assessment` section. The output JSON report records the actual outcome of each run; a passing score on a previous run does not guarantee success on subsequent evaluations.
+### Q5: Inside the test suite, you integrated a programmatic evaluation script named `run_llm_eval.py`. What does it validate, and how do it and the About dashboard separate compliance from faithfulness without hardcoding?
+* **Defense**: LLM outputs are probabilistic and can drift over time in cloud environments. Treating the generative layer like testable software requires both deterministic keyword checks and independent semantic auditing.
+* **Technical Justification**: `run_llm_eval.py` evaluates **7 urban scenarios in Cluj-Napoca** via `qwen/qwen3.8-27b` (failing over to `gemini-3.5-flash`) and produces two dynamic metrics in `ai_tests/llm_eval_report.json`:
+  1. **Deterministic Scenario Compliance (`success_rate_percentage`):** Verifies normalized whole-word presence of the focal telemetry term inside the `Assessment` section and computes the pass rate dynamically from live scenario outcomes.
+  2. **Semantic Faithfulness (`avg_faithfulness_score`):** `LlmJudgeEvaluator` audits each output strictly against the scenario's sensor readings and authorized `SensorThresholdMatrix`, returning a Pydantic-validated `1–5` score (`LlmJudgeVerdict`). `_write_report()` calculates the arithmetic mean across valid verdicts, and `LlmEvalSummary` renders it dynamically on `pages/4_About.py` without hardcoded numbers.
+
+### Q6 (AI Resilience): How does the router prevent HTTP 429 rate limits or reasoning-model token truncation from breaking live recommendations?
+* **Defense**: Relying on a single API key or small token budgets causes silent failures when reasoning models emit internal `<think>` chains before structured JSON.
+* **Technical Justification**: `FallbackAiProviderRouter` disables blind SDK retries (`max_retries=0`), rotates across configured `GROQ_API_KEY*` credentials and Groq candidate models (`qwen/qwen3.8-27b`, `openai/gpt-oss-20b`, `openai/gpt-oss-120b`), and fails over seamlessly to Google Gemini (`gemini-3.5-flash` -> `gemini-3.8-flash`) using the native `google-genai` SDK with strict Pydantic `response_schema` decoding and dedicated completion token budgets (`2048–2500` tokens).
 
 ---
 

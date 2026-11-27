@@ -12,7 +12,7 @@ This document lists the module structure and production-verified screenshots tha
 
 ### 🔬 Applied AI & Machine Learning Forecasts (Llama Engine)
 
-* **07. LLM Reasoning Trace:** Operational administrative recommendations generated through the active `openai/gpt-oss-20b` instance via `GroqProvider`.
+* **07. LLM Reasoning Trace:** Operational administrative recommendations generated through the active `qwen/qwen3.8-27b` instance via `GroqProvider`.
 * **08. Pearson Statistical Correlation Matrix:** Analytical heatmap on the `3_Analytics.py` page identifying linear dependencies across urban indicators.
 * **09. Time-Series Trend Charts:** Predictive Plotly subplots inside the Dashboard rendered with stable, modern formatting.
 * **10. Linear Temperature Prediction:** 5-step forward extrapolation automatically computed using a `LinearRegression` model or NumPy polynomials.

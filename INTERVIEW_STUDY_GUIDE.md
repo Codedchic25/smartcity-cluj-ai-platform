@@ -95,7 +95,7 @@ Authentication is engineered across two independent layers (Defense-in-Depth):
 
 ### AI Resilience & Multi-Provider Fallback (`app/ai/multi_provider.py`)
 1. **Context Construction (`ai_interface.py`):** `PromptRegistryLoader` validates and caches only `app/ai/prompts.yaml` through the immutable Pydantic v2 `PromptTemplateConfig`. It sends system instructions, output format, and anti-hallucination rules separately from the rendered user template containing the selected station, current telemetry, configured thresholds, active UI language (`RO`, `EN`, `IT`, `ES`, `HU`), recent station trend, retrieved SOP passages, and latest events from `security_alerts.log`.
-2. **Provider Routing (`FallbackAiProviderRouter`):** `GroqProvider` rotates `GROQ_API_KEY*` credentials and Groq models with SDK retries disabled. If Groq exhausts its keys/models or returns a 429/TPM error, `GeminiOpenAiProvider` uses the `openai` SDK with Google's OpenAI-compatible endpoint, `GEMINI_API_KEY`, and `gemini-2.5-flash` followed by `gemini-2.5-flash-lite`. Gemini output uses the same numeric grounding validation.
+2. **Provider Routing (`FallbackAiProviderRouter`):** `GroqProvider` prioritizes `qwen/qwen3.8-27b` (with `openai/gpt-oss-20b` and `openai/gpt-oss-120b` fallbacks) and rotates `GROQ_API_KEY*` credentials with SDK retries disabled. If Groq exhausts its keys/models or returns a 429/TPM error, `GeminiOpenAiProvider` fails over to the native `google-genai` SDK (`GEMINI_API_KEY`) using `gemini-3.5-flash` followed by `gemini-3.5-flash-lite`, `gemini-3.6-flash`, and `gemini-3.8-flash` with strict Pydantic `response_schema` decoding and numeric grounding validation.
 3. **Recommendation Cache:** `UrbanAiAssistantComponent` uses `@st.cache_data(ttl=300, show_spinner=False)` keyed by the rendered prompt, telemetry values, and active language. The request remains exclusive to the recommendation button; matching inputs reuse the cached answer for five minutes and reduce token consumption.
 4. **Response Sanitization:** Strips internal reasoning blocks (`<think>...</think>`) before rendering recommendations and stores the result in `st.session_state` per station.
 5. **Language & Markdown Alignment:** Aligns response body text with the active language (`RO`, `EN`, `IT`, `ES`, or `HU`) and places the bold English Assessment, Recommended Actions, and Data Limitations labels on separate lines as Markdown sections.
@@ -113,9 +113,9 @@ empty payloads allow up to two adaptive retries with 15/30-second backoff; exhau
 are not retried. Each scenario loads its authorized `SensorThresholdMatrix` and supplies
 `[AUTHORIZED OPERATIONAL THRESHOLDS]` in both the prompt and retrieved evidence.
 `LlmJudgeEvaluator` returns a Pydantic `LlmJudgeVerdict` for faithfulness, actionability, and
-hallucination detection; rate-limited judge calls are skipped cleanly. The JSON report stores
-the mean `avg_faithfulness_score`, which the About page shows with a zero default for legacy
-reports.
+hallucination detection; rate-limited judge calls are skipped cleanly. Each scenario thus produces two complementary dynamic metrics without hardcoded values:
+- **Deterministic Scenario Compliance (`matched_compliance`):** Checks normalized whole-word presence of the expected metric inside the `Assessment` section, computing `success_rate_percentage` dynamically (`passed / total * 100`).
+- **Semantic Faithfulness (`avg_faithfulness_score`):** Computes the arithmetic mean of all valid `1–5` judge scores (`sum(scores) / len(scores)`), which `LlmEvalSummary` parses dynamically on `pages/4_About.py` (defaulting to `0.0` only when legacy reports lack judge scores).
 
 ### Fast Architecture Verification (`pages/4_About.py`)
 

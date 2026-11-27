@@ -9,8 +9,18 @@ import time
 from collections.abc import Callable, Mapping
 from typing import Any, Final, Protocol
 
-from openai import APIStatusError, OpenAI, OpenAIError
+from openai import APIStatusError, OpenAIError
 from pydantic import ValidationError
+
+try:
+    from google import genai
+    from google.genai import types as genai_types
+
+    _GENAI_AVAILABLE = True
+except ImportError:
+    genai = None  # type: ignore[assignment]
+    genai_types = None  # type: ignore[assignment]
+    _GENAI_AVAILABLE = False
 
 try:
     import httpx
@@ -32,8 +42,8 @@ from app.ai.rag_pipeline import validate_grounded_answer
 LOGGER: Final[logging.Logger] = logging.getLogger(__name__)
 
 _EXPLICIT_FAILURE_PREFIXES: Final[tuple[str, ...]] = (
-    "❌",
-    "⚠️",
+    "\u274c",
+    "Ã¢Å¡Â Ã¯Â¸Â",
     "generic operational alert:",
     "subsystem failure:",
     "dependency constraint:",
@@ -276,28 +286,28 @@ class CompletionProvider(Protocol):
 
 
 class GeminiOpenAiProvider:
-    """Use Google's OpenAI-compatible Gemini endpoint with key/model fallback."""
+    """Use Google Gemini native SDK (with OpenAI-compatible client injection for tests)."""
 
     BASE_URL: Final[str] = "https://generativelanguage.googleapis.com/v1beta/openai/"
     FALLBACK_MODELS: Final[tuple[str, ...]] = (
-        "gemini-2.5-flash-lite",
-        "gemini-3-flash-preview",
-        "gemini-3.1-flash-lite",
-        "gemini-2.5-flash",
+        "gemini-3.5-flash-lite",
+        "gemini-3.5-flash",
+        "gemini-3.6-flash",
+        "gemini-3.8-flash",
     )
     REQUEST_TIMEOUT_SECONDS: Final[float] = 30.0
-    MAX_COMPLETION_TOKENS: Final[int] = 800
+    MAX_COMPLETION_TOKENS: Final[int] = 2500
 
     def __init__(
         self,
         api_key_env_var: str = "GEMINI_API_KEY",
-        model_target: str = "gemini-2.5-flash-lite",
+        model_target: str = "gemini-3.5-flash",
         client_factory: Callable[..., Any] | None = None,
     ) -> None:
         """Collect Gemini credentials without exposing them in provider state."""
         self._api_keys = GroqProvider._collect_api_keys(api_key_env_var)
         self._model_target = model_target
-        self._client_factory = client_factory or OpenAI
+        self._client_factory = client_factory
         self._last_token_usage: dict[str, int | None] | None = None
         self._last_error: dict[str, Any] | None = None
 
@@ -344,6 +354,26 @@ class GeminiOpenAiProvider:
         for field, value in counts.items():
             self._last_token_usage[field] = (self._last_token_usage.get(field, 0) or 0) + value
 
+    def _record_native_usage(self, response: Any) -> None:
+        """Accumulate token counts from a native google-genai response."""
+        usage = getattr(response, "usage_metadata", None)
+        if usage is None:
+            return
+        mapping = {
+            "prompt_tokens": getattr(usage, "prompt_token_count", None),
+            "completion_tokens": getattr(usage, "candidates_token_count", None),
+            "total_tokens": getattr(usage, "total_token_count", None),
+        }
+        counts = {
+            k: v for k, v in mapping.items() if isinstance(v, int) and not isinstance(v, bool)
+        }
+        if not counts:
+            return
+        if self._last_token_usage is None:
+            self._last_token_usage = {}
+        for field, value in counts.items():
+            self._last_token_usage[field] = (self._last_token_usage.get(field, 0) or 0) + value
+
     @staticmethod
     def _error_description(error: Exception) -> str:
         """Describe API errors without including request credentials or payloads."""
@@ -353,7 +383,7 @@ class GeminiOpenAiProvider:
             return type(error).__name__
         if isinstance(error, (ValidationError, ValueError, TypeError)):
             return str(error)[:300]
-        return type(error).__name__
+        return str(error)[:200] or type(error).__name__
 
     def _request_completion(
         self,
@@ -381,6 +411,44 @@ class GeminiOpenAiProvider:
                 raise
             LOGGER.info("Gemini rejected JSON response mode; retrying without it.")
             return client.chat.completions.create(**request)
+
+    def _request_native_completion(
+        self,
+        api_key: str,
+        model: str,
+        system_instruction: str,
+        user_prompt: str,
+        *,
+        temperature: float | None = None,
+        max_tokens: int | None = None,
+        enforce_answer_schema: bool = True,
+    ) -> str:
+        """Invoke the native google-genai SDK with JSON response formatting."""
+        if not _GENAI_AVAILABLE or genai is None or genai_types is None:
+            raise RuntimeError("google-genai SDK is not installed.")
+
+        client = genai.Client(api_key=api_key)
+        config_kwargs: dict[str, Any] = {
+            "system_instruction": system_instruction,
+            "temperature": 0.2 if temperature is None else temperature,
+            "max_output_tokens": self.MAX_COMPLETION_TOKENS if max_tokens is None else max_tokens,
+            "response_mime_type": "application/json",
+        }
+        if enforce_answer_schema:
+            config_kwargs["response_schema"] = {
+                "type": "OBJECT",
+                "properties": {"answer": {"type": "STRING"}},
+                "required": ["answer"],
+            }
+        config = genai_types.GenerateContentConfig(**config_kwargs)
+        response = client.models.generate_content(
+            model=model,
+            contents=user_prompt,
+            config=config,
+        )
+        self._record_native_usage(response)
+        text = getattr(response, "text", None)
+        return text if isinstance(text, str) else ""
 
     def generate_completion_with_telemetry(
         self,
@@ -454,23 +522,35 @@ class GeminiOpenAiProvider:
             model_unavailable = False
             for api_key in self._api_keys:
                 try:
-                    client = self._client_factory(
-                        api_key=api_key,
-                        base_url=self.BASE_URL,
-                        max_retries=0,
-                        timeout=self.REQUEST_TIMEOUT_SECONDS,
-                    )
-                    completion = self._request_completion(
-                        client,
-                        model,
-                        messages,
-                        temperature=temperature,
-                        max_tokens=max_tokens,
-                    )
-                    self._record_completion_usage(completion)
-                    choices = getattr(completion, "choices", None)
-                    message = getattr(choices[0], "message", None) if choices else None
-                    content = getattr(message, "content", None)
+                    if self._client_factory is not None:
+                        client = self._client_factory(
+                            api_key=api_key,
+                            base_url=self.BASE_URL,
+                            max_retries=0,
+                            timeout=self.REQUEST_TIMEOUT_SECONDS,
+                        )
+                        completion = self._request_completion(
+                            client,
+                            model,
+                            messages,
+                            temperature=temperature,
+                            max_tokens=max_tokens,
+                        )
+                        self._record_completion_usage(completion)
+                        choices = getattr(completion, "choices", None)
+                        message = getattr(choices[0], "message", None) if choices else None
+                        content = getattr(message, "content", None)
+                    else:
+                        content = self._request_native_completion(
+                            api_key=api_key,
+                            model=model,
+                            system_instruction=resolved_system_prompt,
+                            user_prompt=system_prompt_context,
+                            temperature=temperature,
+                            max_tokens=max_tokens,
+                            enforce_answer_schema=not raw_response,
+                        )
+
                     if not isinstance(content, str) or not content.strip():
                         raise ValueError("Gemini returned an empty completion.")
 
@@ -489,6 +569,12 @@ class GeminiOpenAiProvider:
                     last_error = exc
                     model_unavailable = True
                     break
+                except Exception as exc:
+                    last_error = exc
+                    err_lower = str(exc).casefold()
+                    if "400" in err_lower or "404" in err_lower or "not found" in err_lower:
+                        model_unavailable = True
+                        break
 
             if model_unavailable:
                 LOGGER.warning(
@@ -507,7 +593,7 @@ class GeminiOpenAiProvider:
                 "message": reason,
             }
         )
-        return f"❌ Gemini gateway failure: {reason}."
+        return f"\u274c Gemini gateway failure: {reason}."
 
 
 class FallbackAiProviderRouter:
@@ -518,8 +604,8 @@ class FallbackAiProviderRouter:
         groq_provider: CompletionProvider | None = None,
         gemini_provider: CompletionProvider | None = None,
         *,
-        groq_model_target: str = "openai/gpt-oss-20b",
-        gemini_model_target: str = "gemini-2.5-flash-lite",
+        groq_model_target: str = "qwen/qwen3.8-27b",
+        gemini_model_target: str = "gemini-3.5-flash",
     ) -> None:
         """Initialize injectable providers for production use and deterministic tests."""
         self._groq: CompletionProvider = groq_provider or GroqProvider(
@@ -555,14 +641,14 @@ class FallbackAiProviderRouter:
         status_code = _extract_status_code(error)
         error_name = type(error).__name__
         if status_code is not None:
-            return f"❌ {provider_label} gateway failure: HTTP {status_code} ({error_name})."
+            return f"Ã¢ÂÅ’ {provider_label} gateway failure: HTTP {status_code} ({error_name})."
         if isinstance(error, TimeoutError) or "timeout" in error_name.casefold():
-            return f"❌ {provider_label} gateway failure: request timed out ({error_name})."
+            return f"Ã¢ÂÅ’ {provider_label} gateway failure: request timed out ({error_name})."
         detail = str(error).strip()[:200]
         return (
-            f"❌ {provider_label} gateway failure: {error_name}: {detail}."
+            f"Ã¢ÂÅ’ {provider_label} gateway failure: {error_name}: {detail}."
             if detail
-            else f"❌ {provider_label} gateway failure: {error_name}."
+            else f"Ã¢ÂÅ’ {provider_label} gateway failure: {error_name}."
         )
 
     @staticmethod
@@ -688,7 +774,7 @@ class FallbackAiProviderRouter:
             return gemini_response
 
         return (
-            "❌ Multi-provider fallback failed. "
+            "\u274c Multi-provider fallback failed. "
             f"Groq: {str(groq_response)[:300]} Gemini: {str(gemini_response)[:300]}"
         )
 
@@ -723,7 +809,7 @@ class FallbackAiProviderRouter:
             if gemini_failed:
                 raw_gemini_error = gemini_telemetry.get("error") or str(gemini_response)[:300]
                 gemini_response = (
-                    "❌ Multi-provider fallback failed. "
+                    "\u274c Multi-provider fallback failed. "
                     f"Groq: {str(groq_response)[:300]} Gemini: {str(gemini_response)[:300]}"
                 )
                 telemetry["error"] = {

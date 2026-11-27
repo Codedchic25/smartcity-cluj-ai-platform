@@ -1,0 +1,4182 @@
+{
+    "created": 1795777529.5678022,
+    "duration": 11.091266393661499,
+    "exitcode": 0,
+    "root": "C:\\Users\\user\\Documents\\SmartCity-Audit",
+    "environment": {},
+    "summary": {
+        "passed": 99,
+        "total": 99,
+        "collected": 99
+    },
+    "collectors": [
+        {
+            "nodeid": "",
+            "outcome": "passed",
+            "result": [
+                {
+                    "nodeid": "ai_tests",
+                    "type": "Dir"
+                },
+                {
+                    "nodeid": "app",
+                    "type": "Package"
+                },
+                {
+                    "nodeid": "src",
+                    "type": "Dir"
+                }
+            ]
+        },
+        {
+            "nodeid": "ai_tests/test_ai_guardrails.py",
+            "outcome": "passed",
+            "result": [
+                {
+                    "nodeid": "ai_tests/test_ai_guardrails.py::test_groq_provider_uses_active_models_before_any_fallback",
+                    "type": "Function",
+                    "lineno": 43
+                },
+                {
+                    "nodeid": "ai_tests/test_ai_guardrails.py::test_gemini_openai_provider_uses_fallback_model_and_grounding",
+                    "type": "Function",
+                    "lineno": 55
+                },
+                {
+                    "nodeid": "ai_tests/test_ai_guardrails.py::test_fallback_router_uses_gemini_after_groq_rate_limit",
+                    "type": "Function",
+                    "lineno": 136
+                },
+                {
+                    "nodeid": "ai_tests/test_ai_guardrails.py::test_fallback_router_keeps_successful_groq_response",
+                    "type": "Function",
+                    "lineno": 204
+                },
+                {
+                    "nodeid": "ai_tests/test_ai_guardrails.py::test_ai_assistant_defaults_to_fallback_router",
+                    "type": "Function",
+                    "lineno": 244
+                },
+                {
+                    "nodeid": "ai_tests/test_ai_guardrails.py::test_prompt_registry_loads_compact_yaml_with_all_runtime_variables",
+                    "type": "Function",
+                    "lineno": 255
+                },
+                {
+                    "nodeid": "ai_tests/test_ai_guardrails.py::test_prompt_registry_reports_missing_required_yaml_fields",
+                    "type": "Function",
+                    "lineno": 289
+                },
+                {
+                    "nodeid": "ai_tests/test_ai_guardrails.py::test_groq_provider_rotates_keys_on_auth_rate_limit_and_server_errors[401]",
+                    "type": "Function",
+                    "lineno": 306
+                },
+                {
+                    "nodeid": "ai_tests/test_ai_guardrails.py::test_groq_provider_rotates_keys_on_auth_rate_limit_and_server_errors[429]",
+                    "type": "Function",
+                    "lineno": 306
+                },
+                {
+                    "nodeid": "ai_tests/test_ai_guardrails.py::test_groq_provider_rotates_keys_on_auth_rate_limit_and_server_errors[503]",
+                    "type": "Function",
+                    "lineno": 306
+                },
+                {
+                    "nodeid": "ai_tests/test_ai_guardrails.py::test_groq_provider_reports_latency_and_usage_tokens",
+                    "type": "Function",
+                    "lineno": 348
+                },
+                {
+                    "nodeid": "ai_tests/test_ai_guardrails.py::test_ai_recommendations_cache_matching_telemetry_and_language",
+                    "type": "Function",
+                    "lineno": 395
+                },
+                {
+                    "nodeid": "ai_tests/test_ai_guardrails.py::test_ai_completion_cache_preserves_generation_telemetry",
+                    "type": "Function",
+                    "lineno": 435
+                },
+                {
+                    "nodeid": "ai_tests/test_ai_guardrails.py::test_groq_provider_collects_lists_csv_secrets_and_environment_keys",
+                    "type": "Function",
+                    "lineno": 499
+                },
+                {
+                    "nodeid": "ai_tests/test_ai_guardrails.py::test_groq_provider_corrects_invalid_grounding_at_most_twice",
+                    "type": "Function",
+                    "lineno": 524
+                },
+                {
+                    "nodeid": "ai_tests/test_ai_guardrails.py::test_groq_provider_falls_back_from_json_mode_and_preserves_language_context",
+                    "type": "Function",
+                    "lineno": 559
+                },
+                {
+                    "nodeid": "ai_tests/test_ai_guardrails.py::test_groq_provider_accepts_a_judge_only_system_prompt",
+                    "type": "Function",
+                    "lineno": 613
+                },
+                {
+                    "nodeid": "ai_tests/test_ai_guardrails.py::test_groq_provider_returns_error_instead_of_null_after_model_failures",
+                    "type": "Function",
+                    "lineno": 644
+                },
+                {
+                    "nodeid": "ai_tests/test_ai_guardrails.py::test_format_answer_sections_does_not_split_mid_sentence",
+                    "type": "Function",
+                    "lineno": 665
+                },
+                {
+                    "nodeid": "ai_tests/test_ai_guardrails.py::test_llm_evaluator_parses_formatted_assessment_heading",
+                    "type": "Function",
+                    "lineno": 676
+                },
+                {
+                    "nodeid": "ai_tests/test_ai_guardrails.py::test_llm_evaluator_extracts_answer_from_json_response",
+                    "type": "Function",
+                    "lineno": 709
+                },
+                {
+                    "nodeid": "ai_tests/test_ai_guardrails.py::test_llm_judge_evaluator_validates_mocked_verdict",
+                    "type": "Function",
+                    "lineno": 742
+                },
+                {
+                    "nodeid": "ai_tests/test_ai_guardrails.py::test_llm_judge_falls_back_cleanly_on_rate_limit",
+                    "type": "Function",
+                    "lineno": 825
+                },
+                {
+                    "nodeid": "ai_tests/test_ai_guardrails.py::test_llm_evaluator_uses_adaptive_429_retries",
+                    "type": "Function",
+                    "lineno": 873
+                },
+                {
+                    "nodeid": "ai_tests/test_ai_guardrails.py::test_llm_evaluator_retries_empty_payload_with_adaptive_backoff",
+                    "type": "Function",
+                    "lineno": 909
+                },
+                {
+                    "nodeid": "ai_tests/test_ai_guardrails.py::test_llm_evaluator_does_not_retry_non_429_errors",
+                    "type": "Function",
+                    "lineno": 941
+                },
+                {
+                    "nodeid": "ai_tests/test_ai_guardrails.py::test_llm_evaluator_does_not_retry_exhausted_429_quota",
+                    "type": "Function",
+                    "lineno": 966
+                },
+                {
+                    "nodeid": "ai_tests/test_ai_guardrails.py::test_llm_evaluator_includes_authorized_station_thresholds",
+                    "type": "Function",
+                    "lineno": 991
+                },
+                {
+                    "nodeid": "ai_tests/test_ai_guardrails.py::test_llm_evaluator_passes_registry_system_prompt_separately",
+                    "type": "Function",
+                    "lineno": 1032
+                },
+                {
+                    "nodeid": "ai_tests/test_ai_guardrails.py::test_llm_evaluator_runs_sequentially_and_keeps_report_order",
+                    "type": "Function",
+                    "lineno": 1056
+                },
+                {
+                    "nodeid": "ai_tests/test_ai_guardrails.py::test_llm_evaluator_writes_report_when_a_scenario_raises",
+                    "type": "Function",
+                    "lineno": 1099
+                },
+                {
+                    "nodeid": "ai_tests/test_ai_guardrails.py::test_llm_report_averages_available_judge_faithfulness_scores",
+                    "type": "Function",
+                    "lineno": 1127
+                },
+                {
+                    "nodeid": "ai_tests/test_ai_guardrails.py::test_llm_evaluator_matches_romanian_traffic_inflection",
+                    "type": "Function",
+                    "lineno": 1147
+                },
+                {
+                    "nodeid": "ai_tests/test_ai_guardrails.py::test_hybrid_retrieval_uses_location_metadata_and_semantic_terms",
+                    "type": "Function",
+                    "lineno": 1159
+                },
+                {
+                    "nodeid": "ai_tests/test_ai_guardrails.py::test_sop_knowledge_retriever_returns_top_two_metric_passages",
+                    "type": "Function",
+                    "lineno": 1172
+                },
+                {
+                    "nodeid": "ai_tests/test_ai_guardrails.py::test_ai_telemetry_badge_formats_latency_and_token_counts",
+                    "type": "Function",
+                    "lineno": 1193
+                },
+                {
+                    "nodeid": "ai_tests/test_ai_guardrails.py::test_recent_telemetry_trend_uses_only_selected_station_history",
+                    "type": "Function",
+                    "lineno": 1209
+                },
+                {
+                    "nodeid": "ai_tests/test_ai_guardrails.py::test_sop_context_compaction_keeps_trigger_and_first_verification_step",
+                    "type": "Function",
+                    "lineno": 1270
+                },
+                {
+                    "nodeid": "ai_tests/test_ai_guardrails.py::test_response_grounding_adds_missing_station_readings_and_breaches",
+                    "type": "Function",
+                    "lineno": 1292
+                },
+                {
+                    "nodeid": "ai_tests/test_ai_guardrails.py::test_untrusted_input_is_sanitized_and_telemetry_is_bounded",
+                    "type": "Function",
+                    "lineno": 1352
+                },
+                {
+                    "nodeid": "ai_tests/test_ai_guardrails.py::test_answer_numbers_must_exist_in_retrieved_context",
+                    "type": "Function",
+                    "lineno": 1361
+                },
+                {
+                    "nodeid": "ai_tests/test_ai_guardrails.py::test_about_verification_runs_python_suites_and_updates_session_state",
+                    "type": "Function",
+                    "lineno": 1386
+                },
+                {
+                    "nodeid": "ai_tests/test_ai_guardrails.py::test_about_fast_verification_reuses_or_skips_live_llm[False]",
+                    "type": "Function",
+                    "lineno": 1451
+                },
+                {
+                    "nodeid": "ai_tests/test_ai_guardrails.py::test_about_fast_verification_reuses_or_skips_live_llm[True]",
+                    "type": "Function",
+                    "lineno": 1451
+                },
+                {
+                    "nodeid": "ai_tests/test_ai_guardrails.py::test_live_qa_executor_runs_strategies_concurrently",
+                    "type": "Function",
+                    "lineno": 1526
+                },
+                {
+                    "nodeid": "ai_tests/test_ai_guardrails.py::test_about_generates_missing_guardrail_report",
+                    "type": "Function",
+                    "lineno": 1552
+                },
+                {
+                    "nodeid": "ai_tests/test_ai_guardrails.py::test_groq_provider_telemetry_propagates_system_prompt_only[False]",
+                    "type": "Function",
+                    "lineno": 1573
+                },
+                {
+                    "nodeid": "ai_tests/test_ai_guardrails.py::test_groq_provider_telemetry_propagates_system_prompt_only[True]",
+                    "type": "Function",
+                    "lineno": 1573
+                },
+                {
+                    "nodeid": "ai_tests/test_ai_guardrails.py::test_gemini_openai_provider_telemetry_propagates_system_prompt_only[False]",
+                    "type": "Function",
+                    "lineno": 1620
+                },
+                {
+                    "nodeid": "ai_tests/test_ai_guardrails.py::test_gemini_openai_provider_telemetry_propagates_system_prompt_only[True]",
+                    "type": "Function",
+                    "lineno": 1620
+                },
+                {
+                    "nodeid": "ai_tests/test_ai_guardrails.py::test_fallback_router_telemetry_propagates_system_prompt_only_across_providers[False]",
+                    "type": "Function",
+                    "lineno": 1670
+                },
+                {
+                    "nodeid": "ai_tests/test_ai_guardrails.py::test_fallback_router_telemetry_propagates_system_prompt_only_across_providers[True]",
+                    "type": "Function",
+                    "lineno": 1670
+                },
+                {
+                    "nodeid": "ai_tests/test_ai_guardrails.py::test_cached_completion_and_ui_propagate_system_prompt_only",
+                    "type": "Function",
+                    "lineno": 1741
+                },
+                {
+                    "nodeid": "ai_tests/test_ai_guardrails.py::test_gemini_openai_provider_tries_configured_model_before_fallbacks",
+                    "type": "Function",
+                    "lineno": 1945
+                },
+                {
+                    "nodeid": "ai_tests/test_ai_guardrails.py::test_fallback_router_recovers_from_diverse_error_formats_and_exceptions[HTTP 429 Too Many Requests]",
+                    "type": "Function",
+                    "lineno": 2015
+                },
+                {
+                    "nodeid": "ai_tests/test_ai_guardrails.py::test_fallback_router_recovers_from_diverse_error_formats_and_exceptions[status_code=500 Internal Server Error]",
+                    "type": "Function",
+                    "lineno": 2015
+                },
+                {
+                    "nodeid": "ai_tests/test_ai_guardrails.py::test_fallback_router_recovers_from_diverse_error_formats_and_exceptions[503 Service Unavailable]",
+                    "type": "Function",
+                    "lineno": 2015
+                },
+                {
+                    "nodeid": "ai_tests/test_ai_guardrails.py::test_fallback_router_recovers_from_diverse_error_formats_and_exceptions[Request timed out after 30s]",
+                    "type": "Function",
+                    "lineno": 2015
+                },
+                {
+                    "nodeid": "ai_tests/test_ai_guardrails.py::test_fallback_router_recovers_from_diverse_error_formats_and_exceptions[RateLimitError: upstream quota exceeded]",
+                    "type": "Function",
+                    "lineno": 2015
+                },
+                {
+                    "nodeid": "ai_tests/test_ai_guardrails.py::test_fallback_router_recovers_from_diverse_error_formats_and_exceptions[   ]",
+                    "type": "Function",
+                    "lineno": 2015
+                },
+                {
+                    "nodeid": "ai_tests/test_ai_guardrails.py::test_fallback_router_recovers_from_diverse_error_formats_and_exceptions[primary_outcome6]",
+                    "type": "Function",
+                    "lineno": 2015
+                },
+                {
+                    "nodeid": "ai_tests/test_ai_guardrails.py::test_fallback_router_recovers_from_diverse_error_formats_and_exceptions[primary_outcome7]",
+                    "type": "Function",
+                    "lineno": 2015
+                },
+                {
+                    "nodeid": "ai_tests/test_ai_guardrails.py::test_fallback_router_recovers_from_diverse_error_formats_and_exceptions[primary_outcome8]",
+                    "type": "Function",
+                    "lineno": 2015
+                },
+                {
+                    "nodeid": "ai_tests/test_ai_guardrails.py::test_fallback_router_recovers_from_diverse_error_formats_and_exceptions[primary_outcome9]",
+                    "type": "Function",
+                    "lineno": 2015
+                },
+                {
+                    "nodeid": "ai_tests/test_ai_guardrails.py::test_fallback_router_recovers_from_diverse_error_formats_and_exceptions[primary_outcome10]",
+                    "type": "Function",
+                    "lineno": 2015
+                },
+                {
+                    "nodeid": "ai_tests/test_ai_guardrails.py::test_fallback_router_detects_structured_telemetry_and_provider_errors",
+                    "type": "Function",
+                    "lineno": 2082
+                },
+                {
+                    "nodeid": "ai_tests/test_ai_guardrails.py::test_fallback_router_does_not_misclassify_numeric_telemetry_as_errors",
+                    "type": "Function",
+                    "lineno": 2118
+                },
+                {
+                    "nodeid": "ai_tests/test_ai_guardrails.py::test_both_providers_failing_and_ui_error_consumption",
+                    "type": "Function",
+                    "lineno": 2149
+                },
+                {
+                    "nodeid": "ai_tests/test_ai_guardrails.py::test_validate_grounded_answer_enforces_sensor_unit_and_location_bindings",
+                    "type": "Function",
+                    "lineno": 2256
+                },
+                {
+                    "nodeid": "ai_tests/test_ai_guardrails.py::test_retrieve_and_format_preserve_per_station_and_alias_context",
+                    "type": "Function",
+                    "lineno": 2299
+                },
+                {
+                    "nodeid": "ai_tests/test_ai_guardrails.py::test_ensure_response_grounding_rejects_cross_sensor_bleeding_and_wrong_units",
+                    "type": "Function",
+                    "lineno": 2319
+                }
+            ]
+        },
+        {
+            "nodeid": "ai_tests/test_alerts_offline.py",
+            "outcome": "passed",
+            "result": [
+                {
+                    "nodeid": "ai_tests/test_alerts_offline.py::test_translation_matrix_integrity",
+                    "type": "Function",
+                    "lineno": 24
+                },
+                {
+                    "nodeid": "ai_tests/test_alerts_offline.py::test_repository_metric_evaluations[temperature-25.0-stable]",
+                    "type": "Function",
+                    "lineno": 45
+                },
+                {
+                    "nodeid": "ai_tests/test_alerts_offline.py::test_repository_metric_evaluations[temperature-35.0-critical]",
+                    "type": "Function",
+                    "lineno": 45
+                },
+                {
+                    "nodeid": "ai_tests/test_alerts_offline.py::test_repository_metric_evaluations[noise_level-50.0-stable]",
+                    "type": "Function",
+                    "lineno": 45
+                },
+                {
+                    "nodeid": "ai_tests/test_alerts_offline.py::test_repository_metric_evaluations[noise_level-85.0-critical]",
+                    "type": "Function",
+                    "lineno": 45
+                },
+                {
+                    "nodeid": "ai_tests/test_alerts_offline.py::test_repository_metric_evaluations[traffic_load-40.0-stable]",
+                    "type": "Function",
+                    "lineno": 45
+                },
+                {
+                    "nodeid": "ai_tests/test_alerts_offline.py::test_repository_metric_evaluations[traffic_load-90.0-critical]",
+                    "type": "Function",
+                    "lineno": 45
+                },
+                {
+                    "nodeid": "ai_tests/test_alerts_offline.py::test_repository_metric_evaluations[air_quality-30.0-stable]",
+                    "type": "Function",
+                    "lineno": 45
+                },
+                {
+                    "nodeid": "ai_tests/test_alerts_offline.py::test_repository_metric_evaluations[air_quality-120.0-critical]",
+                    "type": "Function",
+                    "lineno": 45
+                },
+                {
+                    "nodeid": "ai_tests/test_alerts_offline.py::test_session_security_token_falls_back_to_environment",
+                    "type": "Function",
+                    "lineno": 85
+                },
+                {
+                    "nodeid": "ai_tests/test_alerts_offline.py::test_session_auth_loads_spaced_dotenv_assignments_as_fallback",
+                    "type": "Function",
+                    "lineno": 103
+                },
+                {
+                    "nodeid": "ai_tests/test_alerts_offline.py::test_signed_session_token_lifecycle",
+                    "type": "Function",
+                    "lineno": 134
+                }
+            ]
+        },
+        {
+            "nodeid": "ai_tests/test_app_bootstrap.py",
+            "outcome": "passed",
+            "result": [
+                {
+                    "nodeid": "ai_tests/test_app_bootstrap.py::test_engine_initialization_seeds_empty_database_without_overwriting",
+                    "type": "Function",
+                    "lineno": 58
+                },
+                {
+                    "nodeid": "ai_tests/test_app_bootstrap.py::test_authentication_accepts_valid_credentials",
+                    "type": "Function",
+                    "lineno": 101
+                },
+                {
+                    "nodeid": "ai_tests/test_app_bootstrap.py::test_authentication_rejects_invalid_password",
+                    "type": "Function",
+                    "lineno": 115
+                },
+                {
+                    "nodeid": "ai_tests/test_app_bootstrap.py::test_authentication_rejects_invalid_username",
+                    "type": "Function",
+                    "lineno": 127
+                },
+                {
+                    "nodeid": "ai_tests/test_app_bootstrap.py::test_authentication_rejects_empty_password",
+                    "type": "Function",
+                    "lineno": 139
+                },
+                {
+                    "nodeid": "ai_tests/test_app_bootstrap.py::test_authentication_rejects_malformed_hash",
+                    "type": "Function",
+                    "lineno": 151
+                },
+                {
+                    "nodeid": "ai_tests/test_app_bootstrap.py::test_authentication_requires_configured_password_hash",
+                    "type": "Function",
+                    "lineno": 160
+                },
+                {
+                    "nodeid": "ai_tests/test_app_bootstrap.py::test_authentication_uses_default_admin_username",
+                    "type": "Function",
+                    "lineno": 170
+                },
+                {
+                    "nodeid": "ai_tests/test_app_bootstrap.py::test_dashboard_warns_when_active_sensor_is_missing",
+                    "type": "Function",
+                    "lineno": 190
+                },
+                {
+                    "nodeid": "ai_tests/test_app_bootstrap.py::test_settings_warns_when_active_sensor_is_missing",
+                    "type": "Function",
+                    "lineno": 205
+                },
+                {
+                    "nodeid": "ai_tests/test_app_bootstrap.py::test_analytics_warns_when_active_sensor_is_missing",
+                    "type": "Function",
+                    "lineno": 220
+                }
+            ]
+        },
+        {
+            "nodeid": "ai_tests/test_docs_sync.py",
+            "outcome": "passed",
+            "result": [
+                {
+                    "nodeid": "ai_tests/test_docs_sync.py::test_markdown_docs_reflect_latest_architecture_and_test_count",
+                    "type": "Function",
+                    "lineno": 7
+                },
+                {
+                    "nodeid": "ai_tests/test_docs_sync.py::test_root_markdown_files_are_in_english",
+                    "type": "Function",
+                    "lineno": 28
+                }
+            ]
+        },
+        {
+            "nodeid": "ai_tests/test_seed_db.py",
+            "outcome": "passed",
+            "result": [
+                {
+                    "nodeid": "ai_tests/test_seed_db.py::test_default_seed_preserves_existing_settings_and_telemetry",
+                    "type": "Function",
+                    "lineno": 12
+                },
+                {
+                    "nodeid": "ai_tests/test_seed_db.py::test_force_flag_resets_existing_data",
+                    "type": "Function",
+                    "lineno": 46
+                },
+                {
+                    "nodeid": "ai_tests/test_seed_db.py::test_seed_errors_propagate_from_library_function",
+                    "type": "Function",
+                    "lineno": 72
+                }
+            ]
+        },
+        {
+            "nodeid": "ai_tests",
+            "outcome": "passed",
+            "result": [
+                {
+                    "nodeid": "ai_tests/test_ai_guardrails.py",
+                    "type": "Module"
+                },
+                {
+                    "nodeid": "ai_tests/test_alerts_offline.py",
+                    "type": "Module"
+                },
+                {
+                    "nodeid": "ai_tests/test_app_bootstrap.py",
+                    "type": "Module"
+                },
+                {
+                    "nodeid": "ai_tests/test_docs_sync.py",
+                    "type": "Module"
+                },
+                {
+                    "nodeid": "ai_tests/test_seed_db.py",
+                    "type": "Module"
+                }
+            ]
+        },
+        {
+            "nodeid": "app/ai",
+            "outcome": "passed",
+            "result": []
+        },
+        {
+            "nodeid": "app/database",
+            "outcome": "passed",
+            "result": []
+        },
+        {
+            "nodeid": "app/services",
+            "outcome": "passed",
+            "result": []
+        },
+        {
+            "nodeid": "app",
+            "outcome": "passed",
+            "result": [
+                {
+                    "nodeid": "app/ai",
+                    "type": "Package"
+                },
+                {
+                    "nodeid": "app/database",
+                    "type": "Package"
+                },
+                {
+                    "nodeid": "app/services",
+                    "type": "Package"
+                }
+            ]
+        },
+        {
+            "nodeid": "src/utils",
+            "outcome": "passed",
+            "result": []
+        },
+        {
+            "nodeid": "src",
+            "outcome": "passed",
+            "result": [
+                {
+                    "nodeid": "src/utils",
+                    "type": "Dir"
+                }
+            ]
+        }
+    ],
+    "tests": [
+        {
+            "nodeid": "ai_tests/test_ai_guardrails.py::test_groq_provider_uses_active_models_before_any_fallback",
+            "lineno": 43,
+            "outcome": "passed",
+            "keywords": [
+                "test_groq_provider_uses_active_models_before_any_fallback",
+                "test_ai_guardrails.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0009588000830262899,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.011380999931134284,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.0007834999123588204,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_ai_guardrails.py::test_gemini_openai_provider_uses_fallback_model_and_grounding",
+            "lineno": 55,
+            "outcome": "passed",
+            "keywords": [
+                "test_gemini_openai_provider_uses_fallback_model_and_grounding",
+                "test_ai_guardrails.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0008071999764069915,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 2.7350696999346837,
+                "outcome": "passed",
+                "stderr": "2026-11-27 13:05:23.928 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n2026-11-27 13:05:23.928 Session state does not function when running a script without `streamlit run`\n"
+            },
+            "teardown": {
+                "duration": 0.0006911000236868858,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_ai_guardrails.py::test_fallback_router_uses_gemini_after_groq_rate_limit",
+            "lineno": 136,
+            "outcome": "passed",
+            "keywords": [
+                "test_fallback_router_uses_gemini_after_groq_rate_limit",
+                "test_ai_guardrails.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.00039119995199143887,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.0009926999919116497,
+                "outcome": "passed",
+                "log": [
+                    {
+                        "name": "app.ai.multi_provider",
+                        "msg": "Groq completion failed; trying the Gemini OpenAI-compatible fallback.",
+                        "args": null,
+                        "levelname": "WARNING",
+                        "levelno": 30,
+                        "pathname": "C:\\Users\\user\\Documents\\SmartCity-Audit\\app\\ai\\multi_provider.py",
+                        "filename": "multi_provider.py",
+                        "module": "multi_provider",
+                        "exc_info": null,
+                        "exc_text": null,
+                        "stack_info": null,
+                        "lineno": 800,
+                        "funcName": "generate_completion_with_telemetry",
+                        "created": 1795777523.928452,
+                        "msecs": 928.0,
+                        "relativeCreated": 6245.445966720581,
+                        "thread": 6492,
+                        "threadName": "MainThread",
+                        "processName": "MainProcess",
+                        "process": 4976,
+                        "taskName": null
+                    }
+                ]
+            },
+            "teardown": {
+                "duration": 0.00038139999378472567,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_ai_guardrails.py::test_fallback_router_keeps_successful_groq_response",
+            "lineno": 204,
+            "outcome": "passed",
+            "keywords": [
+                "test_fallback_router_keeps_successful_groq_response",
+                "test_ai_guardrails.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.00037379993591457605,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.00037210003938525915,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.0002997000701725483,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_ai_guardrails.py::test_ai_assistant_defaults_to_fallback_router",
+            "lineno": 244,
+            "outcome": "passed",
+            "keywords": [
+                "test_ai_assistant_defaults_to_fallback_router",
+                "test_ai_guardrails.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0005091000348329544,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 3.1131357999984175,
+                "outcome": "passed",
+                "stderr": "2026-11-27 13:05:25.138 No runtime found, using MemoryCacheStorageManager\n"
+            },
+            "teardown": {
+                "duration": 0.000618700054474175,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_ai_guardrails.py::test_prompt_registry_loads_compact_yaml_with_all_runtime_variables",
+            "lineno": 255,
+            "outcome": "passed",
+            "keywords": [
+                "test_prompt_registry_loads_compact_yaml_with_all_runtime_variables",
+                "test_ai_guardrails.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0003381000133231282,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.005566100007854402,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.00039489998016506433,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_ai_guardrails.py::test_prompt_registry_reports_missing_required_yaml_fields",
+            "lineno": 289,
+            "outcome": "passed",
+            "keywords": [
+                "test_prompt_registry_reports_missing_required_yaml_fields",
+                "test_ai_guardrails.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.007505199988372624,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.006035299971699715,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.0006360000697895885,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_ai_guardrails.py::test_groq_provider_rotates_keys_on_auth_rate_limit_and_server_errors[401]",
+            "lineno": 306,
+            "outcome": "passed",
+            "keywords": [
+                "test_groq_provider_rotates_keys_on_auth_rate_limit_and_server_errors[401]",
+                "parametrize",
+                "pytestmark",
+                "401",
+                "test_ai_guardrails.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0005356000037863851,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.0019841999746859074,
+                "outcome": "passed",
+                "stderr": "2026-11-27 13:05:27.081 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n",
+                "log": [
+                    {
+                        "name": "app.ai.groq_provider",
+                        "msg": "Groq key 1 failed with a retryable error; rotating credentials.",
+                        "args": null,
+                        "levelname": "WARNING",
+                        "levelno": 30,
+                        "pathname": "C:\\Users\\user\\Documents\\SmartCity-Audit\\app\\ai\\groq_provider.py",
+                        "filename": "groq_provider.py",
+                        "module": "groq_provider",
+                        "exc_info": null,
+                        "exc_text": null,
+                        "stack_info": null,
+                        "lineno": 627,
+                        "funcName": "generate_completion",
+                        "created": 1795777527.081197,
+                        "msecs": 81.0,
+                        "relativeCreated": 9398.190975189209,
+                        "thread": 6492,
+                        "threadName": "MainThread",
+                        "processName": "MainProcess",
+                        "process": 4976,
+                        "taskName": null
+                    }
+                ]
+            },
+            "teardown": {
+                "duration": 0.00036990002263337374,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_ai_guardrails.py::test_groq_provider_rotates_keys_on_auth_rate_limit_and_server_errors[429]",
+            "lineno": 306,
+            "outcome": "passed",
+            "keywords": [
+                "test_groq_provider_rotates_keys_on_auth_rate_limit_and_server_errors[429]",
+                "parametrize",
+                "pytestmark",
+                "429",
+                "test_ai_guardrails.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0005413999315351248,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.0010608999291434884,
+                "outcome": "passed",
+                "stderr": "2026-11-27 13:05:27.084 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n",
+                "log": [
+                    {
+                        "name": "app.ai.groq_provider",
+                        "msg": "Groq key 1 failed with a retryable error; rotating credentials.",
+                        "args": null,
+                        "levelname": "WARNING",
+                        "levelno": 30,
+                        "pathname": "C:\\Users\\user\\Documents\\SmartCity-Audit\\app\\ai\\groq_provider.py",
+                        "filename": "groq_provider.py",
+                        "module": "groq_provider",
+                        "exc_info": null,
+                        "exc_text": null,
+                        "stack_info": null,
+                        "lineno": 627,
+                        "funcName": "generate_completion",
+                        "created": 1795777527.0841954,
+                        "msecs": 84.0,
+                        "relativeCreated": 9401.18932723999,
+                        "thread": 6492,
+                        "threadName": "MainThread",
+                        "processName": "MainProcess",
+                        "process": 4976,
+                        "taskName": null
+                    }
+                ]
+            },
+            "teardown": {
+                "duration": 0.00032320001628249884,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_ai_guardrails.py::test_groq_provider_rotates_keys_on_auth_rate_limit_and_server_errors[503]",
+            "lineno": 306,
+            "outcome": "passed",
+            "keywords": [
+                "test_groq_provider_rotates_keys_on_auth_rate_limit_and_server_errors[503]",
+                "parametrize",
+                "pytestmark",
+                "503",
+                "test_ai_guardrails.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0005036999937146902,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.002082599909044802,
+                "outcome": "passed",
+                "stderr": "2026-11-27 13:05:27.087 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n",
+                "log": [
+                    {
+                        "name": "app.ai.groq_provider",
+                        "msg": "Groq key 1 failed with a retryable error; rotating credentials.",
+                        "args": null,
+                        "levelname": "WARNING",
+                        "levelno": 30,
+                        "pathname": "C:\\Users\\user\\Documents\\SmartCity-Audit\\app\\ai\\groq_provider.py",
+                        "filename": "groq_provider.py",
+                        "module": "groq_provider",
+                        "exc_info": null,
+                        "exc_text": null,
+                        "stack_info": null,
+                        "lineno": 627,
+                        "funcName": "generate_completion",
+                        "created": 1795777527.0876195,
+                        "msecs": 87.0,
+                        "relativeCreated": 9404.613494873047,
+                        "thread": 6492,
+                        "threadName": "MainThread",
+                        "processName": "MainProcess",
+                        "process": 4976,
+                        "taskName": null
+                    }
+                ]
+            },
+            "teardown": {
+                "duration": 0.0005024999845772982,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_ai_guardrails.py::test_groq_provider_reports_latency_and_usage_tokens",
+            "lineno": 348,
+            "outcome": "passed",
+            "keywords": [
+                "test_groq_provider_reports_latency_and_usage_tokens",
+                "test_ai_guardrails.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.00038050010334700346,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.0010102000087499619,
+                "outcome": "passed",
+                "stderr": "2026-11-27 13:05:27.090 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n"
+            },
+            "teardown": {
+                "duration": 0.0003565000370144844,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_ai_guardrails.py::test_ai_recommendations_cache_matching_telemetry_and_language",
+            "lineno": 395,
+            "outcome": "passed",
+            "keywords": [
+                "test_ai_recommendations_cache_matching_telemetry_and_language",
+                "test_ai_guardrails.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.00037420005537569523,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.002967100008390844,
+                "outcome": "passed",
+                "stderr": "2026-11-27 13:05:27.093 No runtime found, using MemoryCacheStorageManager\n"
+            },
+            "teardown": {
+                "duration": 0.0006140000186860561,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_ai_guardrails.py::test_ai_completion_cache_preserves_generation_telemetry",
+            "lineno": 435,
+            "outcome": "passed",
+            "keywords": [
+                "test_ai_completion_cache_preserves_generation_telemetry",
+                "test_ai_guardrails.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0003809999907389283,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.0012183000799268484,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.0002807000419124961,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_ai_guardrails.py::test_groq_provider_collects_lists_csv_secrets_and_environment_keys",
+            "lineno": 499,
+            "outcome": "passed",
+            "keywords": [
+                "test_groq_provider_collects_lists_csv_secrets_and_environment_keys",
+                "test_ai_guardrails.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0004293000092729926,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.0008599999127909541,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.0007591000758111477,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_ai_guardrails.py::test_groq_provider_corrects_invalid_grounding_at_most_twice",
+            "lineno": 524,
+            "outcome": "passed",
+            "keywords": [
+                "test_groq_provider_corrects_invalid_grounding_at_most_twice",
+                "test_ai_guardrails.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0006355000659823418,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.00798600004054606,
+                "outcome": "passed",
+                "stderr": "2026-11-27 13:05:27.105 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n"
+            },
+            "teardown": {
+                "duration": 0.0006627000402659178,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_ai_guardrails.py::test_groq_provider_falls_back_from_json_mode_and_preserves_language_context",
+            "lineno": 559,
+            "outcome": "passed",
+            "keywords": [
+                "test_groq_provider_falls_back_from_json_mode_and_preserves_language_context",
+                "test_ai_guardrails.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0005588000640273094,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.0013073000591248274,
+                "outcome": "passed",
+                "log": [
+                    {
+                        "name": "app.ai.groq_provider",
+                        "msg": "Groq model 'llama-3.3-70b-versatile' rejected JSON mode; retrying without it.",
+                        "args": null,
+                        "levelname": "WARNING",
+                        "levelno": 30,
+                        "pathname": "C:\\Users\\user\\Documents\\SmartCity-Audit\\app\\ai\\groq_provider.py",
+                        "filename": "groq_provider.py",
+                        "module": "groq_provider",
+                        "exc_info": null,
+                        "exc_text": null,
+                        "stack_info": null,
+                        "lineno": 319,
+                        "funcName": "_request_completion",
+                        "created": 1795777527.1156168,
+                        "msecs": 115.0,
+                        "relativeCreated": 9432.610750198364,
+                        "thread": 6492,
+                        "threadName": "MainThread",
+                        "processName": "MainProcess",
+                        "process": 4976,
+                        "taskName": null
+                    }
+                ]
+            },
+            "teardown": {
+                "duration": 0.0003541000187397003,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_ai_guardrails.py::test_groq_provider_accepts_a_judge_only_system_prompt",
+            "lineno": 613,
+            "outcome": "passed",
+            "keywords": [
+                "test_groq_provider_accepts_a_judge_only_system_prompt",
+                "test_ai_guardrails.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0007472999859601259,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.0016267000464722514,
+                "outcome": "passed",
+                "stderr": "2026-11-27 13:05:27.118 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n"
+            },
+            "teardown": {
+                "duration": 0.0004672000650316477,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_ai_guardrails.py::test_groq_provider_returns_error_instead_of_null_after_model_failures",
+            "lineno": 644,
+            "outcome": "passed",
+            "keywords": [
+                "test_groq_provider_returns_error_instead_of_null_after_model_failures",
+                "test_ai_guardrails.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.00039760000072419643,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.0008399999933317304,
+                "outcome": "passed",
+                "stderr": "2026-11-27 13:05:27.121 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n",
+                "log": [
+                    {
+                        "name": "app.ai.groq_provider",
+                        "msg": "Groq model 'qwen/qwen3.8-27b' is unavailable; trying the next model.",
+                        "args": null,
+                        "levelname": "WARNING",
+                        "levelno": 30,
+                        "pathname": "C:\\Users\\user\\Documents\\SmartCity-Audit\\app\\ai\\groq_provider.py",
+                        "filename": "groq_provider.py",
+                        "module": "groq_provider",
+                        "exc_info": null,
+                        "exc_text": null,
+                        "stack_info": null,
+                        "lineno": 619,
+                        "funcName": "generate_completion",
+                        "created": 1795777527.122566,
+                        "msecs": 122.0,
+                        "relativeCreated": 9439.559936523438,
+                        "thread": 6492,
+                        "threadName": "MainThread",
+                        "processName": "MainProcess",
+                        "process": 4976,
+                        "taskName": null
+                    },
+                    {
+                        "name": "app.ai.groq_provider",
+                        "msg": "Groq model 'openai/gpt-oss-20b' is unavailable; trying the next model.",
+                        "args": null,
+                        "levelname": "WARNING",
+                        "levelno": 30,
+                        "pathname": "C:\\Users\\user\\Documents\\SmartCity-Audit\\app\\ai\\groq_provider.py",
+                        "filename": "groq_provider.py",
+                        "module": "groq_provider",
+                        "exc_info": null,
+                        "exc_text": null,
+                        "stack_info": null,
+                        "lineno": 619,
+                        "funcName": "generate_completion",
+                        "created": 1795777527.122566,
+                        "msecs": 122.0,
+                        "relativeCreated": 9439.559936523438,
+                        "thread": 6492,
+                        "threadName": "MainThread",
+                        "processName": "MainProcess",
+                        "process": 4976,
+                        "taskName": null
+                    },
+                    {
+                        "name": "app.ai.groq_provider",
+                        "msg": "Groq model 'openai/gpt-oss-120b' is unavailable; trying the next model.",
+                        "args": null,
+                        "levelname": "WARNING",
+                        "levelno": 30,
+                        "pathname": "C:\\Users\\user\\Documents\\SmartCity-Audit\\app\\ai\\groq_provider.py",
+                        "filename": "groq_provider.py",
+                        "module": "groq_provider",
+                        "exc_info": null,
+                        "exc_text": null,
+                        "stack_info": null,
+                        "lineno": 619,
+                        "funcName": "generate_completion",
+                        "created": 1795777527.122566,
+                        "msecs": 122.0,
+                        "relativeCreated": 9439.559936523438,
+                        "thread": 6492,
+                        "threadName": "MainThread",
+                        "processName": "MainProcess",
+                        "process": 4976,
+                        "taskName": null
+                    }
+                ]
+            },
+            "teardown": {
+                "duration": 0.000380899989977479,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_ai_guardrails.py::test_format_answer_sections_does_not_split_mid_sentence",
+            "lineno": 665,
+            "outcome": "passed",
+            "keywords": [
+                "test_format_answer_sections_does_not_split_mid_sentence",
+                "test_ai_guardrails.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.000499499961733818,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.0002759000053629279,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.0003084999043494463,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_ai_guardrails.py::test_llm_evaluator_parses_formatted_assessment_heading",
+            "lineno": 676,
+            "outcome": "passed",
+            "keywords": [
+                "test_llm_evaluator_parses_formatted_assessment_heading",
+                "test_ai_guardrails.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0004013999132439494,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.012543800054118037,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.0003567000385373831,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_ai_guardrails.py::test_llm_evaluator_extracts_answer_from_json_response",
+            "lineno": 709,
+            "outcome": "passed",
+            "keywords": [
+                "test_llm_evaluator_extracts_answer_from_json_response",
+                "test_ai_guardrails.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.00043709995225071907,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.001339400070719421,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.0003206999972462654,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_ai_guardrails.py::test_llm_judge_evaluator_validates_mocked_verdict",
+            "lineno": 742,
+            "outcome": "passed",
+            "keywords": [
+                "test_llm_judge_evaluator_validates_mocked_verdict",
+                "test_ai_guardrails.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0003157000755891204,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.0017365999519824982,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.0005804999964311719,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_ai_guardrails.py::test_llm_judge_falls_back_cleanly_on_rate_limit",
+            "lineno": 825,
+            "outcome": "passed",
+            "keywords": [
+                "test_llm_judge_falls_back_cleanly_on_rate_limit",
+                "test_ai_guardrails.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0005447999574244022,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.016237300005741417,
+                "outcome": "passed",
+                "log": [
+                    {
+                        "name": "ai_tests.run_llm_eval",
+                        "msg": "LLM judge skipped for scenario 'Noise check' after rate limit.",
+                        "args": null,
+                        "levelname": "WARNING",
+                        "levelno": 30,
+                        "pathname": "C:\\Users\\user\\Documents\\SmartCity-Audit\\ai_tests\\run_llm_eval.py",
+                        "filename": "run_llm_eval.py",
+                        "module": "run_llm_eval",
+                        "exc_info": null,
+                        "exc_text": null,
+                        "stack_info": null,
+                        "lineno": 385,
+                        "funcName": "evaluate",
+                        "created": 1795777527.1631236,
+                        "msecs": 163.0,
+                        "relativeCreated": 9480.117559432983,
+                        "thread": 6492,
+                        "threadName": "MainThread",
+                        "processName": "MainProcess",
+                        "process": 4976,
+                        "taskName": null
+                    }
+                ]
+            },
+            "teardown": {
+                "duration": 0.0004689999623224139,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_ai_guardrails.py::test_llm_evaluator_uses_adaptive_429_retries",
+            "lineno": 873,
+            "outcome": "passed",
+            "keywords": [
+                "test_llm_evaluator_uses_adaptive_429_retries",
+                "test_ai_guardrails.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0004502000520005822,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.0014727000379934907,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.00044759991578757763,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_ai_guardrails.py::test_llm_evaluator_retries_empty_payload_with_adaptive_backoff",
+            "lineno": 909,
+            "outcome": "passed",
+            "keywords": [
+                "test_llm_evaluator_retries_empty_payload_with_adaptive_backoff",
+                "test_ai_guardrails.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0009327000007033348,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.0022494998993352056,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.0003649001009762287,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_ai_guardrails.py::test_llm_evaluator_does_not_retry_non_429_errors",
+            "lineno": 941,
+            "outcome": "passed",
+            "keywords": [
+                "test_llm_evaluator_does_not_retry_non_429_errors",
+                "test_ai_guardrails.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0003837000112980604,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.001232899958267808,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.00039359997026622295,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_ai_guardrails.py::test_llm_evaluator_does_not_retry_exhausted_429_quota",
+            "lineno": 966,
+            "outcome": "passed",
+            "keywords": [
+                "test_llm_evaluator_does_not_retry_exhausted_429_quota",
+                "test_ai_guardrails.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.000520200002938509,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.0012757000513374805,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.00036859989631921053,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_ai_guardrails.py::test_llm_evaluator_includes_authorized_station_thresholds",
+            "lineno": 991,
+            "outcome": "passed",
+            "keywords": [
+                "test_llm_evaluator_includes_authorized_station_thresholds",
+                "test_ai_guardrails.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0005784000968560576,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.0024766999995335937,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.0003201999934390187,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_ai_guardrails.py::test_llm_evaluator_passes_registry_system_prompt_separately",
+            "lineno": 1032,
+            "outcome": "passed",
+            "keywords": [
+                "test_llm_evaluator_passes_registry_system_prompt_separately",
+                "test_ai_guardrails.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.00035630003549158573,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.003927799989469349,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.0005221000174060464,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_ai_guardrails.py::test_llm_evaluator_runs_sequentially_and_keeps_report_order",
+            "lineno": 1056,
+            "outcome": "passed",
+            "keywords": [
+                "test_llm_evaluator_runs_sequentially_and_keeps_report_order",
+                "test_ai_guardrails.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0028728999895974994,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.021540499990805984,
+                "outcome": "passed",
+                "stdout": "LLM evaluation: 7/7 scenarios passed (100.0%).\nEvaluation report: C:\\Users\\user\\AppData\\Local\\Temp\\pytest-of-user\\pytest-187\\test_llm_evaluator_runs_sequen0\\llm_eval_report.json\n"
+            },
+            "teardown": {
+                "duration": 0.0005397999193519354,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_ai_guardrails.py::test_llm_evaluator_writes_report_when_a_scenario_raises",
+            "lineno": 1099,
+            "outcome": "passed",
+            "keywords": [
+                "test_llm_evaluator_writes_report_when_a_scenario_raises",
+                "test_ai_guardrails.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.001964199938811362,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.019768800004385412,
+                "outcome": "passed",
+                "stdout": "LLM evaluation: 6/7 scenarios passed (85.7%).\nFAILED: 1. Temperature Heatwave: Scenario execution failed: simulated scenario failure\nEvaluation report: C:\\Users\\user\\AppData\\Local\\Temp\\pytest-of-user\\pytest-187\\test_llm_evaluator_writes_repo0\\partial_report.json\n",
+                "log": [
+                    {
+                        "name": "ai_tests.run_llm_eval",
+                        "msg": "Evaluation failed for scenario '1. Temperature Heatwave'; recording it in the report.",
+                        "args": null,
+                        "levelname": "ERROR",
+                        "levelno": 40,
+                        "pathname": "C:\\Users\\user\\Documents\\SmartCity-Audit\\ai_tests\\run_llm_eval.py",
+                        "filename": "run_llm_eval.py",
+                        "module": "run_llm_eval",
+                        "exc_info": null,
+                        "exc_text": "Traceback (most recent call last):\n  File \"C:\\Users\\user\\Documents\\SmartCity-Audit\\ai_tests\\run_llm_eval.py\", line 1000, in execute_evaluation_suite\n    result = future.result()\n             ^^^^^^^^^^^^^^^\n  File \"C:\\Users\\user\\AppData\\Roaming\\uv\\python\\cpython-3.12-windows-x86_64-none\\Lib\\concurrent\\futures\\_base.py\", line 449, in result\n    return self.__get_result()\n           ^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\user\\AppData\\Roaming\\uv\\python\\cpython-3.12-windows-x86_64-none\\Lib\\concurrent\\futures\\_base.py\", line 401, in __get_result\n    raise self._exception\n  File \"C:\\Users\\user\\AppData\\Roaming\\uv\\python\\cpython-3.12-windows-x86_64-none\\Lib\\concurrent\\futures\\thread.py\", line 59, in run\n    result = self.fn(*self.args, **self.kwargs)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\user\\Documents\\SmartCity-Audit\\ai_tests\\test_ai_guardrails.py\", line 1111, in evaluate\n    raise RuntimeError(\"simulated scenario failure\")\nRuntimeError: simulated scenario failure",
+                        "stack_info": null,
+                        "lineno": 1002,
+                        "funcName": "execute_evaluation_suite",
+                        "created": 1795777527.2184877,
+                        "msecs": 218.0,
+                        "relativeCreated": 9535.481691360474,
+                        "thread": 6492,
+                        "threadName": "MainThread",
+                        "processName": "MainProcess",
+                        "process": 4976,
+                        "taskName": null
+                    }
+                ]
+            },
+            "teardown": {
+                "duration": 0.00051580008585006,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_ai_guardrails.py::test_llm_report_averages_available_judge_faithfulness_scores",
+            "lineno": 1127,
+            "outcome": "passed",
+            "keywords": [
+                "test_llm_report_averages_available_judge_faithfulness_scores",
+                "test_ai_guardrails.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0018016000976786017,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.010121900006197393,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.00036539998836815357,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_ai_guardrails.py::test_llm_evaluator_matches_romanian_traffic_inflection",
+            "lineno": 1147,
+            "outcome": "passed",
+            "keywords": [
+                "test_llm_evaluator_matches_romanian_traffic_inflection",
+                "test_ai_guardrails.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.000367300002835691,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.0010234999936074018,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.0005308999679982662,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_ai_guardrails.py::test_hybrid_retrieval_uses_location_metadata_and_semantic_terms",
+            "lineno": 1159,
+            "outcome": "passed",
+            "keywords": [
+                "test_hybrid_retrieval_uses_location_metadata_and_semantic_terms",
+                "test_ai_guardrails.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.00034220004454255104,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.0010471000568941236,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.0004267999902367592,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_ai_guardrails.py::test_sop_knowledge_retriever_returns_top_two_metric_passages",
+            "lineno": 1172,
+            "outcome": "passed",
+            "keywords": [
+                "test_sop_knowledge_retriever_returns_top_two_metric_passages",
+                "test_ai_guardrails.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0003093000268563628,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.014141200110316277,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.00032459991052746773,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_ai_guardrails.py::test_ai_telemetry_badge_formats_latency_and_token_counts",
+            "lineno": 1193,
+            "outcome": "passed",
+            "keywords": [
+                "test_ai_telemetry_badge_formats_latency_and_token_counts",
+                "test_ai_guardrails.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.00031869998201727867,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.000255199964158237,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.0002606000052765012,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_ai_guardrails.py::test_recent_telemetry_trend_uses_only_selected_station_history",
+            "lineno": 1209,
+            "outcome": "passed",
+            "keywords": [
+                "test_recent_telemetry_trend_uses_only_selected_station_history",
+                "test_ai_guardrails.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0017525000730529428,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.02482859999872744,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.0005113000515848398,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_ai_guardrails.py::test_sop_context_compaction_keeps_trigger_and_first_verification_step",
+            "lineno": 1270,
+            "outcome": "passed",
+            "keywords": [
+                "test_sop_context_compaction_keeps_trigger_and_first_verification_step",
+                "test_ai_guardrails.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0007896000752225518,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.0009476999985054135,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.0005065000150352716,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_ai_guardrails.py::test_response_grounding_adds_missing_station_readings_and_breaches",
+            "lineno": 1292,
+            "outcome": "passed",
+            "keywords": [
+                "test_response_grounding_adds_missing_station_readings_and_breaches",
+                "test_ai_guardrails.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.000340400030836463,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.002706600003875792,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.00034289993345737457,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_ai_guardrails.py::test_untrusted_input_is_sanitized_and_telemetry_is_bounded",
+            "lineno": 1352,
+            "outcome": "passed",
+            "keywords": [
+                "test_untrusted_input_is_sanitized_and_telemetry_is_bounded",
+                "test_ai_guardrails.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0003109000390395522,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.0003043999895453453,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.0003559999167919159,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_ai_guardrails.py::test_answer_numbers_must_exist_in_retrieved_context",
+            "lineno": 1361,
+            "outcome": "passed",
+            "keywords": [
+                "test_answer_numbers_must_exist_in_retrieved_context",
+                "test_ai_guardrails.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0003727999283000827,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.000978900003246963,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.0004325999179854989,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_ai_guardrails.py::test_about_verification_runs_python_suites_and_updates_session_state",
+            "lineno": 1386,
+            "outcome": "passed",
+            "keywords": [
+                "test_about_verification_runs_python_suites_and_updates_session_state",
+                "test_ai_guardrails.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0023309000534936786,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.017531399964354932,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.0004403000930324197,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_ai_guardrails.py::test_about_fast_verification_reuses_or_skips_live_llm[False]",
+            "lineno": 1451,
+            "outcome": "passed",
+            "keywords": [
+                "test_about_fast_verification_reuses_or_skips_live_llm[False]",
+                "parametrize",
+                "pytestmark",
+                "False",
+                "test_ai_guardrails.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0026632999069988728,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.011629999964497983,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.00038650003261864185,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_ai_guardrails.py::test_about_fast_verification_reuses_or_skips_live_llm[True]",
+            "lineno": 1451,
+            "outcome": "passed",
+            "keywords": [
+                "test_about_fast_verification_reuses_or_skips_live_llm[True]",
+                "parametrize",
+                "pytestmark",
+                "True",
+                "test_ai_guardrails.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.001797800068743527,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.013766000047326088,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.00036910001654177904,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_ai_guardrails.py::test_live_qa_executor_runs_strategies_concurrently",
+            "lineno": 1526,
+            "outcome": "passed",
+            "keywords": [
+                "test_live_qa_executor_runs_strategies_concurrently",
+                "test_ai_guardrails.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.00030670000705868006,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.0067986000794917345,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.0005973000079393387,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_ai_guardrails.py::test_about_generates_missing_guardrail_report",
+            "lineno": 1552,
+            "outcome": "passed",
+            "keywords": [
+                "test_about_generates_missing_guardrail_report",
+                "test_ai_guardrails.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.002193199936300516,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.011502900044433773,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.00037100003100931644,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_ai_guardrails.py::test_groq_provider_telemetry_propagates_system_prompt_only[False]",
+            "lineno": 1573,
+            "outcome": "passed",
+            "keywords": [
+                "test_groq_provider_telemetry_propagates_system_prompt_only[False]",
+                "parametrize",
+                "pytestmark",
+                "False",
+                "test_ai_guardrails.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.00041179999243468046,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.0010579000227153301,
+                "outcome": "passed",
+                "stderr": "2026-11-27 13:05:27.391 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n"
+            },
+            "teardown": {
+                "duration": 0.0005565000465139747,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_ai_guardrails.py::test_groq_provider_telemetry_propagates_system_prompt_only[True]",
+            "lineno": 1573,
+            "outcome": "passed",
+            "keywords": [
+                "test_groq_provider_telemetry_propagates_system_prompt_only[True]",
+                "parametrize",
+                "pytestmark",
+                "True",
+                "test_ai_guardrails.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0004251999780535698,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.0020581999560818076,
+                "outcome": "passed",
+                "stderr": "2026-11-27 13:05:27.394 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n"
+            },
+            "teardown": {
+                "duration": 0.000789899961091578,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_ai_guardrails.py::test_gemini_openai_provider_telemetry_propagates_system_prompt_only[False]",
+            "lineno": 1620,
+            "outcome": "passed",
+            "keywords": [
+                "test_gemini_openai_provider_telemetry_propagates_system_prompt_only[False]",
+                "parametrize",
+                "pytestmark",
+                "False",
+                "test_ai_guardrails.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0005596000701189041,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.0009624999947845936,
+                "outcome": "passed",
+                "stderr": "2026-11-27 13:05:27.399 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n"
+            },
+            "teardown": {
+                "duration": 0.0003225000109523535,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_ai_guardrails.py::test_gemini_openai_provider_telemetry_propagates_system_prompt_only[True]",
+            "lineno": 1620,
+            "outcome": "passed",
+            "keywords": [
+                "test_gemini_openai_provider_telemetry_propagates_system_prompt_only[True]",
+                "parametrize",
+                "pytestmark",
+                "True",
+                "test_ai_guardrails.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0004058999475091696,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.0009258999489247799,
+                "outcome": "passed",
+                "stderr": "2026-11-27 13:05:27.401 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n"
+            },
+            "teardown": {
+                "duration": 0.0009093000553548336,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_ai_guardrails.py::test_fallback_router_telemetry_propagates_system_prompt_only_across_providers[False]",
+            "lineno": 1670,
+            "outcome": "passed",
+            "keywords": [
+                "test_fallback_router_telemetry_propagates_system_prompt_only_across_providers[False]",
+                "parametrize",
+                "pytestmark",
+                "False",
+                "test_ai_guardrails.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0008295000297948718,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.0017506000585854053,
+                "outcome": "passed",
+                "stderr": "2026-11-27 13:05:27.403 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n2026-11-27 13:05:27.406 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n",
+                "log": [
+                    {
+                        "name": "app.ai.groq_provider",
+                        "msg": "Groq key 1 failed with a retryable error; rotating credentials.",
+                        "args": null,
+                        "levelname": "WARNING",
+                        "levelno": 30,
+                        "pathname": "C:\\Users\\user\\Documents\\SmartCity-Audit\\app\\ai\\groq_provider.py",
+                        "filename": "groq_provider.py",
+                        "module": "groq_provider",
+                        "exc_info": null,
+                        "exc_text": null,
+                        "stack_info": null,
+                        "lineno": 627,
+                        "funcName": "generate_completion",
+                        "created": 1795777527.406723,
+                        "msecs": 406.0,
+                        "relativeCreated": 9723.716974258423,
+                        "thread": 6492,
+                        "threadName": "MainThread",
+                        "processName": "MainProcess",
+                        "process": 4976,
+                        "taskName": null
+                    },
+                    {
+                        "name": "app.ai.groq_provider",
+                        "msg": "Groq key 1 failed with a retryable error; rotating credentials.",
+                        "args": null,
+                        "levelname": "WARNING",
+                        "levelno": 30,
+                        "pathname": "C:\\Users\\user\\Documents\\SmartCity-Audit\\app\\ai\\groq_provider.py",
+                        "filename": "groq_provider.py",
+                        "module": "groq_provider",
+                        "exc_info": null,
+                        "exc_text": null,
+                        "stack_info": null,
+                        "lineno": 627,
+                        "funcName": "generate_completion",
+                        "created": 1795777527.406723,
+                        "msecs": 406.0,
+                        "relativeCreated": 9723.716974258423,
+                        "thread": 6492,
+                        "threadName": "MainThread",
+                        "processName": "MainProcess",
+                        "process": 4976,
+                        "taskName": null
+                    },
+                    {
+                        "name": "app.ai.groq_provider",
+                        "msg": "Groq key 1 failed with a retryable error; rotating credentials.",
+                        "args": null,
+                        "levelname": "WARNING",
+                        "levelno": 30,
+                        "pathname": "C:\\Users\\user\\Documents\\SmartCity-Audit\\app\\ai\\groq_provider.py",
+                        "filename": "groq_provider.py",
+                        "module": "groq_provider",
+                        "exc_info": null,
+                        "exc_text": null,
+                        "stack_info": null,
+                        "lineno": 627,
+                        "funcName": "generate_completion",
+                        "created": 1795777527.406723,
+                        "msecs": 406.0,
+                        "relativeCreated": 9723.716974258423,
+                        "thread": 6492,
+                        "threadName": "MainThread",
+                        "processName": "MainProcess",
+                        "process": 4976,
+                        "taskName": null
+                    },
+                    {
+                        "name": "app.ai.multi_provider",
+                        "msg": "Groq completion failed; trying the Gemini OpenAI-compatible fallback.",
+                        "args": null,
+                        "levelname": "WARNING",
+                        "levelno": 30,
+                        "pathname": "C:\\Users\\user\\Documents\\SmartCity-Audit\\app\\ai\\multi_provider.py",
+                        "filename": "multi_provider.py",
+                        "module": "multi_provider",
+                        "exc_info": null,
+                        "exc_text": null,
+                        "stack_info": null,
+                        "lineno": 800,
+                        "funcName": "generate_completion_with_telemetry",
+                        "created": 1795777527.406723,
+                        "msecs": 406.0,
+                        "relativeCreated": 9723.716974258423,
+                        "thread": 6492,
+                        "threadName": "MainThread",
+                        "processName": "MainProcess",
+                        "process": 4976,
+                        "taskName": null
+                    }
+                ]
+            },
+            "teardown": {
+                "duration": 0.0003773999633267522,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_ai_guardrails.py::test_fallback_router_telemetry_propagates_system_prompt_only_across_providers[True]",
+            "lineno": 1670,
+            "outcome": "passed",
+            "keywords": [
+                "test_fallback_router_telemetry_propagates_system_prompt_only_across_providers[True]",
+                "parametrize",
+                "pytestmark",
+                "True",
+                "test_ai_guardrails.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.00042090006172657013,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.0025623999536037445,
+                "outcome": "passed",
+                "stderr": "2026-11-27 13:05:27.409 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n2026-11-27 13:05:27.409 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n",
+                "log": [
+                    {
+                        "name": "app.ai.groq_provider",
+                        "msg": "Groq key 1 failed with a retryable error; rotating credentials.",
+                        "args": null,
+                        "levelname": "WARNING",
+                        "levelno": 30,
+                        "pathname": "C:\\Users\\user\\Documents\\SmartCity-Audit\\app\\ai\\groq_provider.py",
+                        "filename": "groq_provider.py",
+                        "module": "groq_provider",
+                        "exc_info": null,
+                        "exc_text": null,
+                        "stack_info": null,
+                        "lineno": 627,
+                        "funcName": "generate_completion",
+                        "created": 1795777527.4093487,
+                        "msecs": 409.0,
+                        "relativeCreated": 9726.342678070068,
+                        "thread": 6492,
+                        "threadName": "MainThread",
+                        "processName": "MainProcess",
+                        "process": 4976,
+                        "taskName": null
+                    },
+                    {
+                        "name": "app.ai.groq_provider",
+                        "msg": "Groq key 1 failed with a retryable error; rotating credentials.",
+                        "args": null,
+                        "levelname": "WARNING",
+                        "levelno": 30,
+                        "pathname": "C:\\Users\\user\\Documents\\SmartCity-Audit\\app\\ai\\groq_provider.py",
+                        "filename": "groq_provider.py",
+                        "module": "groq_provider",
+                        "exc_info": null,
+                        "exc_text": null,
+                        "stack_info": null,
+                        "lineno": 627,
+                        "funcName": "generate_completion",
+                        "created": 1795777527.4093487,
+                        "msecs": 409.0,
+                        "relativeCreated": 9726.342678070068,
+                        "thread": 6492,
+                        "threadName": "MainThread",
+                        "processName": "MainProcess",
+                        "process": 4976,
+                        "taskName": null
+                    },
+                    {
+                        "name": "app.ai.groq_provider",
+                        "msg": "Groq key 1 failed with a retryable error; rotating credentials.",
+                        "args": null,
+                        "levelname": "WARNING",
+                        "levelno": 30,
+                        "pathname": "C:\\Users\\user\\Documents\\SmartCity-Audit\\app\\ai\\groq_provider.py",
+                        "filename": "groq_provider.py",
+                        "module": "groq_provider",
+                        "exc_info": null,
+                        "exc_text": null,
+                        "stack_info": null,
+                        "lineno": 627,
+                        "funcName": "generate_completion",
+                        "created": 1795777527.4093487,
+                        "msecs": 409.0,
+                        "relativeCreated": 9726.342678070068,
+                        "thread": 6492,
+                        "threadName": "MainThread",
+                        "processName": "MainProcess",
+                        "process": 4976,
+                        "taskName": null
+                    },
+                    {
+                        "name": "app.ai.multi_provider",
+                        "msg": "Groq completion failed; trying the Gemini OpenAI-compatible fallback.",
+                        "args": null,
+                        "levelname": "WARNING",
+                        "levelno": 30,
+                        "pathname": "C:\\Users\\user\\Documents\\SmartCity-Audit\\app\\ai\\multi_provider.py",
+                        "filename": "multi_provider.py",
+                        "module": "multi_provider",
+                        "exc_info": null,
+                        "exc_text": null,
+                        "stack_info": null,
+                        "lineno": 800,
+                        "funcName": "generate_completion_with_telemetry",
+                        "created": 1795777527.4093487,
+                        "msecs": 409.0,
+                        "relativeCreated": 9726.342678070068,
+                        "thread": 6492,
+                        "threadName": "MainThread",
+                        "processName": "MainProcess",
+                        "process": 4976,
+                        "taskName": null
+                    }
+                ]
+            },
+            "teardown": {
+                "duration": 0.0005253999261185527,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_ai_guardrails.py::test_cached_completion_and_ui_propagate_system_prompt_only",
+            "lineno": 1741,
+            "outcome": "passed",
+            "keywords": [
+                "test_cached_completion_and_ui_propagate_system_prompt_only",
+                "test_ai_guardrails.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.00051099993288517,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.012507000006735325,
+                "outcome": "passed",
+                "stderr": "2026-11-27 13:05:27.414 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n2026-11-27 13:05:27.417 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n"
+            },
+            "teardown": {
+                "duration": 0.00040010001976042986,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_ai_guardrails.py::test_gemini_openai_provider_tries_configured_model_before_fallbacks",
+            "lineno": 1945,
+            "outcome": "passed",
+            "keywords": [
+                "test_gemini_openai_provider_tries_configured_model_before_fallbacks",
+                "test_ai_guardrails.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0003483999753370881,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.002034400007687509,
+                "outcome": "passed",
+                "stderr": "2026-11-27 13:05:27.428 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n"
+            },
+            "teardown": {
+                "duration": 0.0004919000202789903,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_ai_guardrails.py::test_fallback_router_recovers_from_diverse_error_formats_and_exceptions[HTTP 429 Too Many Requests]",
+            "lineno": 2015,
+            "outcome": "passed",
+            "keywords": [
+                "test_fallback_router_recovers_from_diverse_error_formats_and_exceptions[HTTP 429 Too Many Requests]",
+                "parametrize",
+                "pytestmark",
+                "HTTP 429 Too Many Requests",
+                "test_ai_guardrails.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0007260000566020608,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.0006206999532878399,
+                "outcome": "passed",
+                "log": [
+                    {
+                        "name": "app.ai.multi_provider",
+                        "msg": "Groq completion failed; trying the Gemini OpenAI-compatible fallback.",
+                        "args": null,
+                        "levelname": "WARNING",
+                        "levelno": 30,
+                        "pathname": "C:\\Users\\user\\Documents\\SmartCity-Audit\\app\\ai\\multi_provider.py",
+                        "filename": "multi_provider.py",
+                        "module": "multi_provider",
+                        "exc_info": null,
+                        "exc_text": null,
+                        "stack_info": null,
+                        "lineno": 764,
+                        "funcName": "generate_completion",
+                        "created": 1795777527.4317973,
+                        "msecs": 431.0,
+                        "relativeCreated": 9748.791217803955,
+                        "thread": 6492,
+                        "threadName": "MainThread",
+                        "processName": "MainProcess",
+                        "process": 4976,
+                        "taskName": null
+                    },
+                    {
+                        "name": "app.ai.multi_provider",
+                        "msg": "Groq completion failed; trying the Gemini OpenAI-compatible fallback.",
+                        "args": null,
+                        "levelname": "WARNING",
+                        "levelno": 30,
+                        "pathname": "C:\\Users\\user\\Documents\\SmartCity-Audit\\app\\ai\\multi_provider.py",
+                        "filename": "multi_provider.py",
+                        "module": "multi_provider",
+                        "exc_info": null,
+                        "exc_text": null,
+                        "stack_info": null,
+                        "lineno": 800,
+                        "funcName": "generate_completion_with_telemetry",
+                        "created": 1795777527.4317973,
+                        "msecs": 431.0,
+                        "relativeCreated": 9748.791217803955,
+                        "thread": 6492,
+                        "threadName": "MainThread",
+                        "processName": "MainProcess",
+                        "process": 4976,
+                        "taskName": null
+                    }
+                ]
+            },
+            "teardown": {
+                "duration": 0.00030529999639838934,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_ai_guardrails.py::test_fallback_router_recovers_from_diverse_error_formats_and_exceptions[status_code=500 Internal Server Error]",
+            "lineno": 2015,
+            "outcome": "passed",
+            "keywords": [
+                "test_fallback_router_recovers_from_diverse_error_formats_and_exceptions[status_code=500 Internal Server Error]",
+                "parametrize",
+                "pytestmark",
+                "status_code=500 Internal Server Error",
+                "test_ai_guardrails.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.00036429997999221087,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.0005279000615701079,
+                "outcome": "passed",
+                "log": [
+                    {
+                        "name": "app.ai.multi_provider",
+                        "msg": "Groq completion failed; trying the Gemini OpenAI-compatible fallback.",
+                        "args": null,
+                        "levelname": "WARNING",
+                        "levelno": 30,
+                        "pathname": "C:\\Users\\user\\Documents\\SmartCity-Audit\\app\\ai\\multi_provider.py",
+                        "filename": "multi_provider.py",
+                        "module": "multi_provider",
+                        "exc_info": null,
+                        "exc_text": null,
+                        "stack_info": null,
+                        "lineno": 764,
+                        "funcName": "generate_completion",
+                        "created": 1795777527.4337933,
+                        "msecs": 433.0,
+                        "relativeCreated": 9750.787258148193,
+                        "thread": 6492,
+                        "threadName": "MainThread",
+                        "processName": "MainProcess",
+                        "process": 4976,
+                        "taskName": null
+                    },
+                    {
+                        "name": "app.ai.multi_provider",
+                        "msg": "Groq completion failed; trying the Gemini OpenAI-compatible fallback.",
+                        "args": null,
+                        "levelname": "WARNING",
+                        "levelno": 30,
+                        "pathname": "C:\\Users\\user\\Documents\\SmartCity-Audit\\app\\ai\\multi_provider.py",
+                        "filename": "multi_provider.py",
+                        "module": "multi_provider",
+                        "exc_info": null,
+                        "exc_text": null,
+                        "stack_info": null,
+                        "lineno": 800,
+                        "funcName": "generate_completion_with_telemetry",
+                        "created": 1795777527.4337933,
+                        "msecs": 433.0,
+                        "relativeCreated": 9750.787258148193,
+                        "thread": 6492,
+                        "threadName": "MainThread",
+                        "processName": "MainProcess",
+                        "process": 4976,
+                        "taskName": null
+                    }
+                ]
+            },
+            "teardown": {
+                "duration": 0.0003597999457269907,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_ai_guardrails.py::test_fallback_router_recovers_from_diverse_error_formats_and_exceptions[503 Service Unavailable]",
+            "lineno": 2015,
+            "outcome": "passed",
+            "keywords": [
+                "test_fallback_router_recovers_from_diverse_error_formats_and_exceptions[503 Service Unavailable]",
+                "parametrize",
+                "pytestmark",
+                "503 Service Unavailable",
+                "test_ai_guardrails.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0008142999140545726,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.0008125000167638063,
+                "outcome": "passed",
+                "log": [
+                    {
+                        "name": "app.ai.multi_provider",
+                        "msg": "Groq completion failed; trying the Gemini OpenAI-compatible fallback.",
+                        "args": null,
+                        "levelname": "WARNING",
+                        "levelno": 30,
+                        "pathname": "C:\\Users\\user\\Documents\\SmartCity-Audit\\app\\ai\\multi_provider.py",
+                        "filename": "multi_provider.py",
+                        "module": "multi_provider",
+                        "exc_info": null,
+                        "exc_text": null,
+                        "stack_info": null,
+                        "lineno": 764,
+                        "funcName": "generate_completion",
+                        "created": 1795777527.4357958,
+                        "msecs": 435.0,
+                        "relativeCreated": 9752.789735794067,
+                        "thread": 6492,
+                        "threadName": "MainThread",
+                        "processName": "MainProcess",
+                        "process": 4976,
+                        "taskName": null
+                    },
+                    {
+                        "name": "app.ai.multi_provider",
+                        "msg": "Groq completion failed; trying the Gemini OpenAI-compatible fallback.",
+                        "args": null,
+                        "levelname": "WARNING",
+                        "levelno": 30,
+                        "pathname": "C:\\Users\\user\\Documents\\SmartCity-Audit\\app\\ai\\multi_provider.py",
+                        "filename": "multi_provider.py",
+                        "module": "multi_provider",
+                        "exc_info": null,
+                        "exc_text": null,
+                        "stack_info": null,
+                        "lineno": 800,
+                        "funcName": "generate_completion_with_telemetry",
+                        "created": 1795777527.4375198,
+                        "msecs": 437.0,
+                        "relativeCreated": 9754.51374053955,
+                        "thread": 6492,
+                        "threadName": "MainThread",
+                        "processName": "MainProcess",
+                        "process": 4976,
+                        "taskName": null
+                    }
+                ]
+            },
+            "teardown": {
+                "duration": 0.00028799998108297586,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_ai_guardrails.py::test_fallback_router_recovers_from_diverse_error_formats_and_exceptions[Request timed out after 30s]",
+            "lineno": 2015,
+            "outcome": "passed",
+            "keywords": [
+                "test_fallback_router_recovers_from_diverse_error_formats_and_exceptions[Request timed out after 30s]",
+                "parametrize",
+                "pytestmark",
+                "Request timed out after 30s",
+                "test_ai_guardrails.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.00046570005360990763,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.0005916000809520483,
+                "outcome": "passed",
+                "log": [
+                    {
+                        "name": "app.ai.multi_provider",
+                        "msg": "Groq completion failed; trying the Gemini OpenAI-compatible fallback.",
+                        "args": null,
+                        "levelname": "WARNING",
+                        "levelno": 30,
+                        "pathname": "C:\\Users\\user\\Documents\\SmartCity-Audit\\app\\ai\\multi_provider.py",
+                        "filename": "multi_provider.py",
+                        "module": "multi_provider",
+                        "exc_info": null,
+                        "exc_text": null,
+                        "stack_info": null,
+                        "lineno": 764,
+                        "funcName": "generate_completion",
+                        "created": 1795777527.4385352,
+                        "msecs": 438.0,
+                        "relativeCreated": 9755.529165267944,
+                        "thread": 6492,
+                        "threadName": "MainThread",
+                        "processName": "MainProcess",
+                        "process": 4976,
+                        "taskName": null
+                    },
+                    {
+                        "name": "app.ai.multi_provider",
+                        "msg": "Groq completion failed; trying the Gemini OpenAI-compatible fallback.",
+                        "args": null,
+                        "levelname": "WARNING",
+                        "levelno": 30,
+                        "pathname": "C:\\Users\\user\\Documents\\SmartCity-Audit\\app\\ai\\multi_provider.py",
+                        "filename": "multi_provider.py",
+                        "module": "multi_provider",
+                        "exc_info": null,
+                        "exc_text": null,
+                        "stack_info": null,
+                        "lineno": 800,
+                        "funcName": "generate_completion_with_telemetry",
+                        "created": 1795777527.4385352,
+                        "msecs": 438.0,
+                        "relativeCreated": 9755.529165267944,
+                        "thread": 6492,
+                        "threadName": "MainThread",
+                        "processName": "MainProcess",
+                        "process": 4976,
+                        "taskName": null
+                    }
+                ]
+            },
+            "teardown": {
+                "duration": 0.00029740005265921354,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_ai_guardrails.py::test_fallback_router_recovers_from_diverse_error_formats_and_exceptions[RateLimitError: upstream quota exceeded]",
+            "lineno": 2015,
+            "outcome": "passed",
+            "keywords": [
+                "test_fallback_router_recovers_from_diverse_error_formats_and_exceptions[RateLimitError: upstream quota exceeded]",
+                "parametrize",
+                "pytestmark",
+                "RateLimitError: upstream quota exceeded",
+                "test_ai_guardrails.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0003944000927731395,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.0004950999282300472,
+                "outcome": "passed",
+                "log": [
+                    {
+                        "name": "app.ai.multi_provider",
+                        "msg": "Groq completion failed; trying the Gemini OpenAI-compatible fallback.",
+                        "args": null,
+                        "levelname": "WARNING",
+                        "levelno": 30,
+                        "pathname": "C:\\Users\\user\\Documents\\SmartCity-Audit\\app\\ai\\multi_provider.py",
+                        "filename": "multi_provider.py",
+                        "module": "multi_provider",
+                        "exc_info": null,
+                        "exc_text": null,
+                        "stack_info": null,
+                        "lineno": 764,
+                        "funcName": "generate_completion",
+                        "created": 1795777527.4410443,
+                        "msecs": 441.0,
+                        "relativeCreated": 9758.03828239441,
+                        "thread": 6492,
+                        "threadName": "MainThread",
+                        "processName": "MainProcess",
+                        "process": 4976,
+                        "taskName": null
+                    },
+                    {
+                        "name": "app.ai.multi_provider",
+                        "msg": "Groq completion failed; trying the Gemini OpenAI-compatible fallback.",
+                        "args": null,
+                        "levelname": "WARNING",
+                        "levelno": 30,
+                        "pathname": "C:\\Users\\user\\Documents\\SmartCity-Audit\\app\\ai\\multi_provider.py",
+                        "filename": "multi_provider.py",
+                        "module": "multi_provider",
+                        "exc_info": null,
+                        "exc_text": null,
+                        "stack_info": null,
+                        "lineno": 800,
+                        "funcName": "generate_completion_with_telemetry",
+                        "created": 1795777527.4410443,
+                        "msecs": 441.0,
+                        "relativeCreated": 9758.03828239441,
+                        "thread": 6492,
+                        "threadName": "MainThread",
+                        "processName": "MainProcess",
+                        "process": 4976,
+                        "taskName": null
+                    }
+                ]
+            },
+            "teardown": {
+                "duration": 0.00033840001560747623,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_ai_guardrails.py::test_fallback_router_recovers_from_diverse_error_formats_and_exceptions[   ]",
+            "lineno": 2015,
+            "outcome": "passed",
+            "keywords": [
+                "test_fallback_router_recovers_from_diverse_error_formats_and_exceptions[   ]",
+                "parametrize",
+                "pytestmark",
+                "   ",
+                "test_ai_guardrails.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0003928000805899501,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.00051249994430691,
+                "outcome": "passed",
+                "log": [
+                    {
+                        "name": "app.ai.multi_provider",
+                        "msg": "Groq completion failed; trying the Gemini OpenAI-compatible fallback.",
+                        "args": null,
+                        "levelname": "WARNING",
+                        "levelno": 30,
+                        "pathname": "C:\\Users\\user\\Documents\\SmartCity-Audit\\app\\ai\\multi_provider.py",
+                        "filename": "multi_provider.py",
+                        "module": "multi_provider",
+                        "exc_info": null,
+                        "exc_text": null,
+                        "stack_info": null,
+                        "lineno": 764,
+                        "funcName": "generate_completion",
+                        "created": 1795777527.4420412,
+                        "msecs": 442.0,
+                        "relativeCreated": 9759.035110473633,
+                        "thread": 6492,
+                        "threadName": "MainThread",
+                        "processName": "MainProcess",
+                        "process": 4976,
+                        "taskName": null
+                    },
+                    {
+                        "name": "app.ai.multi_provider",
+                        "msg": "Groq completion failed; trying the Gemini OpenAI-compatible fallback.",
+                        "args": null,
+                        "levelname": "WARNING",
+                        "levelno": 30,
+                        "pathname": "C:\\Users\\user\\Documents\\SmartCity-Audit\\app\\ai\\multi_provider.py",
+                        "filename": "multi_provider.py",
+                        "module": "multi_provider",
+                        "exc_info": null,
+                        "exc_text": null,
+                        "stack_info": null,
+                        "lineno": 800,
+                        "funcName": "generate_completion_with_telemetry",
+                        "created": 1795777527.4420412,
+                        "msecs": 442.0,
+                        "relativeCreated": 9759.035110473633,
+                        "thread": 6492,
+                        "threadName": "MainThread",
+                        "processName": "MainProcess",
+                        "process": 4976,
+                        "taskName": null
+                    }
+                ]
+            },
+            "teardown": {
+                "duration": 0.0002997000701725483,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_ai_guardrails.py::test_fallback_router_recovers_from_diverse_error_formats_and_exceptions[primary_outcome6]",
+            "lineno": 2015,
+            "outcome": "passed",
+            "keywords": [
+                "test_fallback_router_recovers_from_diverse_error_formats_and_exceptions[primary_outcome6]",
+                "parametrize",
+                "pytestmark",
+                "primary_outcome6",
+                "test_ai_guardrails.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0004662000574171543,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.0007037000032141805,
+                "outcome": "passed",
+                "log": [
+                    {
+                        "name": "app.ai.multi_provider",
+                        "msg": "Groq completion failed; trying the Gemini OpenAI-compatible fallback.",
+                        "args": null,
+                        "levelname": "WARNING",
+                        "levelno": 30,
+                        "pathname": "C:\\Users\\user\\Documents\\SmartCity-Audit\\app\\ai\\multi_provider.py",
+                        "filename": "multi_provider.py",
+                        "module": "multi_provider",
+                        "exc_info": null,
+                        "exc_text": null,
+                        "stack_info": null,
+                        "lineno": 764,
+                        "funcName": "generate_completion",
+                        "created": 1795777527.4448354,
+                        "msecs": 444.0,
+                        "relativeCreated": 9761.829376220703,
+                        "thread": 6492,
+                        "threadName": "MainThread",
+                        "processName": "MainProcess",
+                        "process": 4976,
+                        "taskName": null
+                    },
+                    {
+                        "name": "app.ai.multi_provider",
+                        "msg": "Groq completion failed; trying the Gemini OpenAI-compatible fallback.",
+                        "args": null,
+                        "levelname": "WARNING",
+                        "levelno": 30,
+                        "pathname": "C:\\Users\\user\\Documents\\SmartCity-Audit\\app\\ai\\multi_provider.py",
+                        "filename": "multi_provider.py",
+                        "module": "multi_provider",
+                        "exc_info": null,
+                        "exc_text": null,
+                        "stack_info": null,
+                        "lineno": 800,
+                        "funcName": "generate_completion_with_telemetry",
+                        "created": 1795777527.4448354,
+                        "msecs": 444.0,
+                        "relativeCreated": 9761.829376220703,
+                        "thread": 6492,
+                        "threadName": "MainThread",
+                        "processName": "MainProcess",
+                        "process": 4976,
+                        "taskName": null
+                    }
+                ]
+            },
+            "teardown": {
+                "duration": 0.0006291999015957117,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_ai_guardrails.py::test_fallback_router_recovers_from_diverse_error_formats_and_exceptions[primary_outcome7]",
+            "lineno": 2015,
+            "outcome": "passed",
+            "keywords": [
+                "test_fallback_router_recovers_from_diverse_error_formats_and_exceptions[primary_outcome7]",
+                "parametrize",
+                "pytestmark",
+                "primary_outcome7",
+                "test_ai_guardrails.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0006749000167474151,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.0006756000220775604,
+                "outcome": "passed",
+                "log": [
+                    {
+                        "name": "app.ai.multi_provider",
+                        "msg": "Groq completion failed; trying the Gemini OpenAI-compatible fallback.",
+                        "args": null,
+                        "levelname": "WARNING",
+                        "levelno": 30,
+                        "pathname": "C:\\Users\\user\\Documents\\SmartCity-Audit\\app\\ai\\multi_provider.py",
+                        "filename": "multi_provider.py",
+                        "module": "multi_provider",
+                        "exc_info": null,
+                        "exc_text": null,
+                        "stack_info": null,
+                        "lineno": 764,
+                        "funcName": "generate_completion",
+                        "created": 1795777527.4480295,
+                        "msecs": 448.0,
+                        "relativeCreated": 9765.023469924927,
+                        "thread": 6492,
+                        "threadName": "MainThread",
+                        "processName": "MainProcess",
+                        "process": 4976,
+                        "taskName": null
+                    },
+                    {
+                        "name": "app.ai.multi_provider",
+                        "msg": "Groq completion failed; trying the Gemini OpenAI-compatible fallback.",
+                        "args": null,
+                        "levelname": "WARNING",
+                        "levelno": 30,
+                        "pathname": "C:\\Users\\user\\Documents\\SmartCity-Audit\\app\\ai\\multi_provider.py",
+                        "filename": "multi_provider.py",
+                        "module": "multi_provider",
+                        "exc_info": null,
+                        "exc_text": null,
+                        "stack_info": null,
+                        "lineno": 800,
+                        "funcName": "generate_completion_with_telemetry",
+                        "created": 1795777527.4480295,
+                        "msecs": 448.0,
+                        "relativeCreated": 9765.023469924927,
+                        "thread": 6492,
+                        "threadName": "MainThread",
+                        "processName": "MainProcess",
+                        "process": 4976,
+                        "taskName": null
+                    }
+                ]
+            },
+            "teardown": {
+                "duration": 0.0005629999795928597,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_ai_guardrails.py::test_fallback_router_recovers_from_diverse_error_formats_and_exceptions[primary_outcome8]",
+            "lineno": 2015,
+            "outcome": "passed",
+            "keywords": [
+                "test_fallback_router_recovers_from_diverse_error_formats_and_exceptions[primary_outcome8]",
+                "parametrize",
+                "pytestmark",
+                "primary_outcome8",
+                "test_ai_guardrails.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.000417300034314394,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.0005285999504849315,
+                "outcome": "passed",
+                "log": [
+                    {
+                        "name": "app.ai.multi_provider",
+                        "msg": "Groq completion failed; trying the Gemini OpenAI-compatible fallback.",
+                        "args": null,
+                        "levelname": "WARNING",
+                        "levelno": 30,
+                        "pathname": "C:\\Users\\user\\Documents\\SmartCity-Audit\\app\\ai\\multi_provider.py",
+                        "filename": "multi_provider.py",
+                        "module": "multi_provider",
+                        "exc_info": null,
+                        "exc_text": null,
+                        "stack_info": null,
+                        "lineno": 764,
+                        "funcName": "generate_completion",
+                        "created": 1795777527.451037,
+                        "msecs": 451.0,
+                        "relativeCreated": 9768.030881881714,
+                        "thread": 6492,
+                        "threadName": "MainThread",
+                        "processName": "MainProcess",
+                        "process": 4976,
+                        "taskName": null
+                    },
+                    {
+                        "name": "app.ai.multi_provider",
+                        "msg": "Groq completion failed; trying the Gemini OpenAI-compatible fallback.",
+                        "args": null,
+                        "levelname": "WARNING",
+                        "levelno": 30,
+                        "pathname": "C:\\Users\\user\\Documents\\SmartCity-Audit\\app\\ai\\multi_provider.py",
+                        "filename": "multi_provider.py",
+                        "module": "multi_provider",
+                        "exc_info": null,
+                        "exc_text": null,
+                        "stack_info": null,
+                        "lineno": 800,
+                        "funcName": "generate_completion_with_telemetry",
+                        "created": 1795777527.451037,
+                        "msecs": 451.0,
+                        "relativeCreated": 9768.030881881714,
+                        "thread": 6492,
+                        "threadName": "MainThread",
+                        "processName": "MainProcess",
+                        "process": 4976,
+                        "taskName": null
+                    }
+                ]
+            },
+            "teardown": {
+                "duration": 0.0002715999726206064,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_ai_guardrails.py::test_fallback_router_recovers_from_diverse_error_formats_and_exceptions[primary_outcome9]",
+            "lineno": 2015,
+            "outcome": "passed",
+            "keywords": [
+                "test_fallback_router_recovers_from_diverse_error_formats_and_exceptions[primary_outcome9]",
+                "parametrize",
+                "pytestmark",
+                "primary_outcome9",
+                "test_ai_guardrails.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0005950999911874533,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.0011720999609678984,
+                "outcome": "passed",
+                "log": [
+                    {
+                        "name": "app.ai.multi_provider",
+                        "msg": "Groq completion failed; trying the Gemini OpenAI-compatible fallback.",
+                        "args": null,
+                        "levelname": "WARNING",
+                        "levelno": 30,
+                        "pathname": "C:\\Users\\user\\Documents\\SmartCity-Audit\\app\\ai\\multi_provider.py",
+                        "filename": "multi_provider.py",
+                        "module": "multi_provider",
+                        "exc_info": null,
+                        "exc_text": null,
+                        "stack_info": null,
+                        "lineno": 764,
+                        "funcName": "generate_completion",
+                        "created": 1795777527.4530387,
+                        "msecs": 453.0,
+                        "relativeCreated": 9770.03264427185,
+                        "thread": 6492,
+                        "threadName": "MainThread",
+                        "processName": "MainProcess",
+                        "process": 4976,
+                        "taskName": null
+                    },
+                    {
+                        "name": "app.ai.multi_provider",
+                        "msg": "Groq completion failed; trying the Gemini OpenAI-compatible fallback.",
+                        "args": null,
+                        "levelname": "WARNING",
+                        "levelno": 30,
+                        "pathname": "C:\\Users\\user\\Documents\\SmartCity-Audit\\app\\ai\\multi_provider.py",
+                        "filename": "multi_provider.py",
+                        "module": "multi_provider",
+                        "exc_info": null,
+                        "exc_text": null,
+                        "stack_info": null,
+                        "lineno": 800,
+                        "funcName": "generate_completion_with_telemetry",
+                        "created": 1795777527.4530387,
+                        "msecs": 453.0,
+                        "relativeCreated": 9770.03264427185,
+                        "thread": 6492,
+                        "threadName": "MainThread",
+                        "processName": "MainProcess",
+                        "process": 4976,
+                        "taskName": null
+                    }
+                ]
+            },
+            "teardown": {
+                "duration": 0.0005040999967604876,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_ai_guardrails.py::test_fallback_router_recovers_from_diverse_error_formats_and_exceptions[primary_outcome10]",
+            "lineno": 2015,
+            "outcome": "passed",
+            "keywords": [
+                "test_fallback_router_recovers_from_diverse_error_formats_and_exceptions[primary_outcome10]",
+                "parametrize",
+                "pytestmark",
+                "primary_outcome10",
+                "test_ai_guardrails.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0005356000037863851,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.0005738000618293881,
+                "outcome": "passed",
+                "log": [
+                    {
+                        "name": "app.ai.multi_provider",
+                        "msg": "Groq completion failed; trying the Gemini OpenAI-compatible fallback.",
+                        "args": null,
+                        "levelname": "WARNING",
+                        "levelno": 30,
+                        "pathname": "C:\\Users\\user\\Documents\\SmartCity-Audit\\app\\ai\\multi_provider.py",
+                        "filename": "multi_provider.py",
+                        "module": "multi_provider",
+                        "exc_info": null,
+                        "exc_text": null,
+                        "stack_info": null,
+                        "lineno": 764,
+                        "funcName": "generate_completion",
+                        "created": 1795777527.4569142,
+                        "msecs": 456.0,
+                        "relativeCreated": 9773.908138275146,
+                        "thread": 6492,
+                        "threadName": "MainThread",
+                        "processName": "MainProcess",
+                        "process": 4976,
+                        "taskName": null
+                    },
+                    {
+                        "name": "app.ai.multi_provider",
+                        "msg": "Groq completion failed; trying the Gemini OpenAI-compatible fallback.",
+                        "args": null,
+                        "levelname": "WARNING",
+                        "levelno": 30,
+                        "pathname": "C:\\Users\\user\\Documents\\SmartCity-Audit\\app\\ai\\multi_provider.py",
+                        "filename": "multi_provider.py",
+                        "module": "multi_provider",
+                        "exc_info": null,
+                        "exc_text": null,
+                        "stack_info": null,
+                        "lineno": 800,
+                        "funcName": "generate_completion_with_telemetry",
+                        "created": 1795777527.4569142,
+                        "msecs": 456.0,
+                        "relativeCreated": 9773.908138275146,
+                        "thread": 6492,
+                        "threadName": "MainThread",
+                        "processName": "MainProcess",
+                        "process": 4976,
+                        "taskName": null
+                    }
+                ]
+            },
+            "teardown": {
+                "duration": 0.0002984000602737069,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_ai_guardrails.py::test_fallback_router_detects_structured_telemetry_and_provider_errors",
+            "lineno": 2082,
+            "outcome": "passed",
+            "keywords": [
+                "test_fallback_router_detects_structured_telemetry_and_provider_errors",
+                "test_ai_guardrails.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0002666000509634614,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.0004946000408381224,
+                "outcome": "passed",
+                "log": [
+                    {
+                        "name": "app.ai.multi_provider",
+                        "msg": "Groq completion failed; trying the Gemini OpenAI-compatible fallback.",
+                        "args": null,
+                        "levelname": "WARNING",
+                        "levelno": 30,
+                        "pathname": "C:\\Users\\user\\Documents\\SmartCity-Audit\\app\\ai\\multi_provider.py",
+                        "filename": "multi_provider.py",
+                        "module": "multi_provider",
+                        "exc_info": null,
+                        "exc_text": null,
+                        "stack_info": null,
+                        "lineno": 764,
+                        "funcName": "generate_completion",
+                        "created": 1795777527.458926,
+                        "msecs": 458.0,
+                        "relativeCreated": 9775.919914245605,
+                        "thread": 6492,
+                        "threadName": "MainThread",
+                        "processName": "MainProcess",
+                        "process": 4976,
+                        "taskName": null
+                    },
+                    {
+                        "name": "app.ai.multi_provider",
+                        "msg": "Groq completion failed; trying the Gemini OpenAI-compatible fallback.",
+                        "args": null,
+                        "levelname": "WARNING",
+                        "levelno": 30,
+                        "pathname": "C:\\Users\\user\\Documents\\SmartCity-Audit\\app\\ai\\multi_provider.py",
+                        "filename": "multi_provider.py",
+                        "module": "multi_provider",
+                        "exc_info": null,
+                        "exc_text": null,
+                        "stack_info": null,
+                        "lineno": 800,
+                        "funcName": "generate_completion_with_telemetry",
+                        "created": 1795777527.458926,
+                        "msecs": 458.0,
+                        "relativeCreated": 9775.919914245605,
+                        "thread": 6492,
+                        "threadName": "MainThread",
+                        "processName": "MainProcess",
+                        "process": 4976,
+                        "taskName": null
+                    }
+                ]
+            },
+            "teardown": {
+                "duration": 0.00021580001339316368,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_ai_guardrails.py::test_fallback_router_does_not_misclassify_numeric_telemetry_as_errors",
+            "lineno": 2118,
+            "outcome": "passed",
+            "keywords": [
+                "test_fallback_router_does_not_misclassify_numeric_telemetry_as_errors",
+                "test_ai_guardrails.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.00029740005265921354,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.0003803999861702323,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.00039469997864216566,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_ai_guardrails.py::test_both_providers_failing_and_ui_error_consumption",
+            "lineno": 2149,
+            "outcome": "passed",
+            "keywords": [
+                "test_both_providers_failing_and_ui_error_consumption",
+                "test_ai_guardrails.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.000470499973744154,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.002601000014692545,
+                "outcome": "passed",
+                "log": [
+                    {
+                        "name": "app.ai.multi_provider",
+                        "msg": "Groq completion failed; trying the Gemini OpenAI-compatible fallback.",
+                        "args": null,
+                        "levelname": "WARNING",
+                        "levelno": 30,
+                        "pathname": "C:\\Users\\user\\Documents\\SmartCity-Audit\\app\\ai\\multi_provider.py",
+                        "filename": "multi_provider.py",
+                        "module": "multi_provider",
+                        "exc_info": null,
+                        "exc_text": null,
+                        "stack_info": null,
+                        "lineno": 800,
+                        "funcName": "generate_completion_with_telemetry",
+                        "created": 1795777527.4624717,
+                        "msecs": 462.0,
+                        "relativeCreated": 9779.465675354004,
+                        "thread": 6492,
+                        "threadName": "MainThread",
+                        "processName": "MainProcess",
+                        "process": 4976,
+                        "taskName": null
+                    }
+                ]
+            },
+            "teardown": {
+                "duration": 0.0005541000282391906,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_ai_guardrails.py::test_validate_grounded_answer_enforces_sensor_unit_and_location_bindings",
+            "lineno": 2256,
+            "outcome": "passed",
+            "keywords": [
+                "test_validate_grounded_answer_enforces_sensor_unit_and_location_bindings",
+                "test_ai_guardrails.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0003992000129073858,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.013488100026734173,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.00048649997916072607,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_ai_guardrails.py::test_retrieve_and_format_preserve_per_station_and_alias_context",
+            "lineno": 2299,
+            "outcome": "passed",
+            "keywords": [
+                "test_retrieve_and_format_preserve_per_station_and_alias_context",
+                "test_ai_guardrails.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.00034829997457563877,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.0008643999462947249,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.00043180002830922604,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_ai_guardrails.py::test_ensure_response_grounding_rejects_cross_sensor_bleeding_and_wrong_units",
+            "lineno": 2319,
+            "outcome": "passed",
+            "keywords": [
+                "test_ensure_response_grounding_rejects_cross_sensor_bleeding_and_wrong_units",
+                "test_ai_guardrails.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.00045080005656927824,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.0022746999748051167,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.00034380005672574043,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_alerts_offline.py::test_translation_matrix_integrity",
+            "lineno": 24,
+            "outcome": "passed",
+            "keywords": [
+                "test_translation_matrix_integrity",
+                "test_alerts_offline.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0004755000118166208,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.0004140000091865659,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.00035119999665766954,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_alerts_offline.py::test_repository_metric_evaluations[temperature-25.0-stable]",
+            "lineno": 45,
+            "outcome": "passed",
+            "keywords": [
+                "test_repository_metric_evaluations[temperature-25.0-stable]",
+                "parametrize",
+                "pytestmark",
+                "temperature-25.0-stable",
+                "test_alerts_offline.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.00044950004667043686,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.0002207000507041812,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.0002707999665290117,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_alerts_offline.py::test_repository_metric_evaluations[temperature-35.0-critical]",
+            "lineno": 45,
+            "outcome": "passed",
+            "keywords": [
+                "test_repository_metric_evaluations[temperature-35.0-critical]",
+                "parametrize",
+                "pytestmark",
+                "temperature-35.0-critical",
+                "test_alerts_offline.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0005642999894917011,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.000219699926674366,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.00036049995105713606,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_alerts_offline.py::test_repository_metric_evaluations[noise_level-50.0-stable]",
+            "lineno": 45,
+            "outcome": "passed",
+            "keywords": [
+                "test_repository_metric_evaluations[noise_level-50.0-stable]",
+                "parametrize",
+                "pytestmark",
+                "noise_level-50.0-stable",
+                "test_alerts_offline.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0005099000409245491,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.0002440999960526824,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.00036700000055134296,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_alerts_offline.py::test_repository_metric_evaluations[noise_level-85.0-critical]",
+            "lineno": 45,
+            "outcome": "passed",
+            "keywords": [
+                "test_repository_metric_evaluations[noise_level-85.0-critical]",
+                "parametrize",
+                "pytestmark",
+                "noise_level-85.0-critical",
+                "test_alerts_offline.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0007060000207275152,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.0003087999066337943,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.0003217000048607588,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_alerts_offline.py::test_repository_metric_evaluations[traffic_load-40.0-stable]",
+            "lineno": 45,
+            "outcome": "passed",
+            "keywords": [
+                "test_repository_metric_evaluations[traffic_load-40.0-stable]",
+                "parametrize",
+                "pytestmark",
+                "traffic_load-40.0-stable",
+                "test_alerts_offline.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0007476999890059233,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.00025939999613910913,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.00028280005790293217,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_alerts_offline.py::test_repository_metric_evaluations[traffic_load-90.0-critical]",
+            "lineno": 45,
+            "outcome": "passed",
+            "keywords": [
+                "test_repository_metric_evaluations[traffic_load-90.0-critical]",
+                "parametrize",
+                "pytestmark",
+                "traffic_load-90.0-critical",
+                "test_alerts_offline.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0004621000261977315,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.0002226999495178461,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.000394199974834919,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_alerts_offline.py::test_repository_metric_evaluations[air_quality-30.0-stable]",
+            "lineno": 45,
+            "outcome": "passed",
+            "keywords": [
+                "test_repository_metric_evaluations[air_quality-30.0-stable]",
+                "parametrize",
+                "pytestmark",
+                "air_quality-30.0-stable",
+                "test_alerts_offline.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.001021199976094067,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.00032679992727935314,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.0006254999898374081,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_alerts_offline.py::test_repository_metric_evaluations[air_quality-120.0-critical]",
+            "lineno": 45,
+            "outcome": "passed",
+            "keywords": [
+                "test_repository_metric_evaluations[air_quality-120.0-critical]",
+                "parametrize",
+                "pytestmark",
+                "air_quality-120.0-critical",
+                "test_alerts_offline.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0011691999388858676,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.00048370007425546646,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.0010229999898001552,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_alerts_offline.py::test_session_security_token_falls_back_to_environment",
+            "lineno": 85,
+            "outcome": "passed",
+            "keywords": [
+                "test_session_security_token_falls_back_to_environment",
+                "test_alerts_offline.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0010037000756710768,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.004649199894629419,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.0006358000682666898,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_alerts_offline.py::test_session_auth_loads_spaced_dotenv_assignments_as_fallback",
+            "lineno": 103,
+            "outcome": "passed",
+            "keywords": [
+                "test_session_auth_loads_spaced_dotenv_assignments_as_fallback",
+                "test_alerts_offline.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.002245199983008206,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.007231299998238683,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.0008205999620258808,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_alerts_offline.py::test_signed_session_token_lifecycle",
+            "lineno": 134,
+            "outcome": "passed",
+            "keywords": [
+                "test_signed_session_token_lifecycle",
+                "test_alerts_offline.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0012955000856891274,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.0029203000012785196,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.0003860999131575227,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_app_bootstrap.py::test_engine_initialization_seeds_empty_database_without_overwriting",
+            "lineno": 58,
+            "outcome": "passed",
+            "keywords": [
+                "test_engine_initialization_seeds_empty_database_without_overwriting",
+                "test_app_bootstrap.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.002000899985432625,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.09242619993165135,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.00044159998651593924,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_app_bootstrap.py::test_authentication_accepts_valid_credentials",
+            "lineno": 101,
+            "outcome": "passed",
+            "keywords": [
+                "test_authentication_accepts_valid_credentials",
+                "test_app_bootstrap.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0004464999074116349,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.12449179997202009,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.0004262999864295125,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_app_bootstrap.py::test_authentication_rejects_invalid_password",
+            "lineno": 115,
+            "outcome": "passed",
+            "keywords": [
+                "test_authentication_rejects_invalid_password",
+                "test_app_bootstrap.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0003961999900639057,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.1331586999585852,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.00038590002804994583,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_app_bootstrap.py::test_authentication_rejects_invalid_username",
+            "lineno": 127,
+            "outcome": "passed",
+            "keywords": [
+                "test_authentication_rejects_invalid_username",
+                "test_app_bootstrap.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.00039519998244941235,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.06559559993911535,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.0003968999953940511,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_app_bootstrap.py::test_authentication_rejects_empty_password",
+            "lineno": 139,
+            "outcome": "passed",
+            "keywords": [
+                "test_authentication_rejects_empty_password",
+                "test_app_bootstrap.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0004461000207811594,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.06589339999482036,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.0003795000957325101,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_app_bootstrap.py::test_authentication_rejects_malformed_hash",
+            "lineno": 151,
+            "outcome": "passed",
+            "keywords": [
+                "test_authentication_rejects_malformed_hash",
+                "test_app_bootstrap.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.00047279999125748873,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.00028170004952698946,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.0002975999377667904,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_app_bootstrap.py::test_authentication_requires_configured_password_hash",
+            "lineno": 160,
+            "outcome": "passed",
+            "keywords": [
+                "test_authentication_requires_configured_password_hash",
+                "test_app_bootstrap.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0004760000156238675,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.00041009997949004173,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.00030040007550269365,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_app_bootstrap.py::test_authentication_uses_default_admin_username",
+            "lineno": 170,
+            "outcome": "passed",
+            "keywords": [
+                "test_authentication_uses_default_admin_username",
+                "test_app_bootstrap.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0004685999592766166,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.12950999999884516,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.00043940008617937565,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_app_bootstrap.py::test_dashboard_warns_when_active_sensor_is_missing",
+            "lineno": 190,
+            "outcome": "passed",
+            "keywords": [
+                "test_dashboard_warns_when_active_sensor_is_missing",
+                "test_app_bootstrap.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.00041259999852627516,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 1.168261400074698,
+                "outcome": "passed",
+                "stderr": "2026-11-27 13:05:29.388 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n2026-11-27 13:05:29.395 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n"
+            },
+            "teardown": {
+                "duration": 0.0003853000234812498,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_app_bootstrap.py::test_settings_warns_when_active_sensor_is_missing",
+            "lineno": 205,
+            "outcome": "passed",
+            "keywords": [
+                "test_settings_warns_when_active_sensor_is_missing",
+                "test_app_bootstrap.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0004115999909117818,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.0042981000151485205,
+                "outcome": "passed",
+                "stderr": "2026-11-27 13:05:29.402 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n"
+            },
+            "teardown": {
+                "duration": 0.000803499948233366,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_app_bootstrap.py::test_analytics_warns_when_active_sensor_is_missing",
+            "lineno": 220,
+            "outcome": "passed",
+            "keywords": [
+                "test_analytics_warns_when_active_sensor_is_missing",
+                "test_app_bootstrap.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0004966999404132366,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.08816119993571192,
+                "outcome": "passed",
+                "stderr": "2026-11-27 13:05:29.492 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n"
+            },
+            "teardown": {
+                "duration": 0.000381199992261827,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_docs_sync.py::test_markdown_docs_reflect_latest_architecture_and_test_count",
+            "lineno": 7,
+            "outcome": "passed",
+            "keywords": [
+                "test_markdown_docs_reflect_latest_architecture_and_test_count",
+                "test_docs_sync.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.000542100053280592,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.0016566000413149595,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.00031569995917379856,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_docs_sync.py::test_root_markdown_files_are_in_english",
+            "lineno": 28,
+            "outcome": "passed",
+            "keywords": [
+                "test_root_markdown_files_are_in_english",
+                "test_docs_sync.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.0002987000625580549,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.006303100031800568,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.000291300006210804,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_seed_db.py::test_default_seed_preserves_existing_settings_and_telemetry",
+            "lineno": 12,
+            "outcome": "passed",
+            "keywords": [
+                "test_default_seed_preserves_existing_settings_and_telemetry",
+                "test_seed_db.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.002142900018952787,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.02451619994826615,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.00038810004480183125,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_seed_db.py::test_force_flag_resets_existing_data",
+            "lineno": 46,
+            "outcome": "passed",
+            "keywords": [
+                "test_force_flag_resets_existing_data",
+                "test_seed_db.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.002163600060157478,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.026776499929837883,
+                "outcome": "passed",
+                "log": [
+                    {
+                        "name": "SmartCity.Seeder",
+                        "msg": "Force seeding: deleting existing stations, settings, and telemetry.",
+                        "args": null,
+                        "levelname": "WARNING",
+                        "levelno": 30,
+                        "pathname": "C:\\Users\\user\\Documents\\SmartCity-Audit\\seed_db.py",
+                        "filename": "seed_db.py",
+                        "module": "seed_db",
+                        "exc_info": null,
+                        "exc_text": null,
+                        "stack_info": null,
+                        "lineno": 97,
+                        "funcName": "seed_relational_infrastructure",
+                        "created": 1795777529.554254,
+                        "msecs": 554.0,
+                        "relativeCreated": 11871.248006820679,
+                        "thread": 6492,
+                        "threadName": "MainThread",
+                        "processName": "MainProcess",
+                        "process": 4976,
+                        "taskName": null
+                    }
+                ]
+            },
+            "teardown": {
+                "duration": 0.0004889999981969595,
+                "outcome": "passed"
+            }
+        },
+        {
+            "nodeid": "ai_tests/test_seed_db.py::test_seed_errors_propagate_from_library_function",
+            "lineno": 72,
+            "outcome": "passed",
+            "keywords": [
+                "test_seed_errors_propagate_from_library_function",
+                "test_seed_db.py",
+                "ai_tests",
+                "SmartCity-Audit",
+                ""
+            ],
+            "setup": {
+                "duration": 0.002386199892498553,
+                "outcome": "passed"
+            },
+            "call": {
+                "duration": 0.0005390000296756625,
+                "outcome": "passed"
+            },
+            "teardown": {
+                "duration": 0.0003654999891296029,
+                "outcome": "passed"
+            }
+        }
+    ]
+}

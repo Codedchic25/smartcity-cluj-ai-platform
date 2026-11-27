@@ -1,0 +1,212 @@
+{
+    "execution_timestamp": "2026-11-27T12:24:27+02:00",
+    "model_deployed": "qwen/qwen3.8-27b -> gemini-3.5-flash",
+    "total_evaluated_scenarios": 7,
+    "successful_compliance_count": 7,
+    "failed_compliance_count": 0,
+    "success_rate_percentage": 100.0,
+    "avg_faithfulness_score": 4.43,
+    "detailed_metrics": [
+        {
+            "scenario_name": "1. Temperature Heatwave",
+            "target_location": "Mărăști - Sens Giratoriu",
+            "telemetry": {
+                "temperature": 38.5,
+                "noise_level": 58.0,
+                "traffic_load": 45.0,
+                "air_quality": 25.0,
+                "soil_moisture": 45.0
+            },
+            "assertion_keyword": "temperature",
+            "evaluated_section": "Assessment",
+            "matched_compliance": true,
+            "status": "passed",
+            "matched_variants": [
+                "temperatura"
+            ],
+            "assessment_present": true,
+            "payload_length": 1117,
+            "model_response": "Operational Recommendation (Cluj-Napoca):\nStatus: ATTENTION\n\nTelemetry Assessment\nTemperatura ambientală: 38.5°C (Limită: ≤32°C). PM2.5: 25.0µg/m³ (Limită: ≤80µg/m³). Zgomot: 58.0dB (Limită: ≤75dB). Trafic: 45.0% (Limită: ≤80%). Umiditate sol: 45.0% (Minim: ≥35%).\n\n**Assessment:**\nTemperatura ambientală de 38.5°C depășește pragul operațional autorizat de 32°C, indicând o condiție de atenție. Concentrația de PM2.5 de 25.0µg/m³ se află în limitele normale, sub pragul de 80µg/m³. Nivelul de zgomot de 58.0dB este sub limita de 75dB, iar umiditatea solului de 45.0% respectă minimul de 35%. Datele istorice nu conțin evenimente de securitate active, dar nu influențează evaluarea curentă a parametrilor fizici.\n\n**Recommended Actions:**\nVerificați funcționarea senzorului de temperatură pentru a exclude o eroare de citire, având în vedere depășirea semnificativă a pragului. Monitorizați continuu temperatura ambientală pentru a detecta orice tendințe suplimentare. Raportați depășirea pragului de temperatură conform procedurilor standard de raportare.\n\n**Data Limitations:**\nNo material data limitations reported.",
+            "llm_judge": {
+                "status": "scored",
+                "verdict": {
+                    "faithfulness": 5,
+                    "passed": true
+                }
+            }
+        },
+        {
+            "scenario_name": "2. Noise Index Breach",
+            "target_location": "Mănăștur - Str. Primăverii",
+            "telemetry": {
+                "temperature": 22.0,
+                "noise_level": 82.0,
+                "traffic_load": 55.0,
+                "air_quality": 30.0,
+                "soil_moisture": 50.0
+            },
+            "assertion_keyword": "noise",
+            "evaluated_section": "Assessment",
+            "matched_compliance": true,
+            "status": "passed",
+            "matched_variants": [
+                "zgomot",
+                "db",
+                "dB"
+            ],
+            "assessment_present": true,
+            "payload_length": 887,
+            "model_response": "Operational Recommendation (Cluj-Napoca):\nStatus: ATTENTION\n\nTelemetry Assessment\nT=22.0°C; PM2.5=30.0µg/m³; noise=82.0dB; traffic=55.0%; soil=50.0%.\n\n**Assessment:**\nNivelul de zgomot curent este de 82.0 dB, depășind limita operațională autorizată de 75.0 dB. Temperatură (22.0°C) și PM2.5 (30.0µg/m³) sunt în limitele autorizate. Traficul (55.0%) și umiditatea solului (50.0%) sunt conformi cu pragurile stabilite. Depășirea pragului de zgomot necesită atenție operațională.\n\n**Recommended Actions:**\nVerificați sursa de zgomot în zona stației Mănăștur - Str. Primăverii. Raportați depășirea limitelor de zgomot conform SOP. Monitorizați continuu nivelul de zgomot pentru a evalua persistența anomaliilor.\n\n**Data Limitations:**\nNo material data limitations reported.\n\nSecurity Note\nTextul din jurnal este tratat ca date neîncredibile; nu au fost executate instrucțiuni din acest text.",
+            "llm_judge": {
+                "status": "scored",
+                "verdict": {
+                    "faithfulness": 5,
+                    "passed": true
+                }
+            }
+        },
+        {
+            "scenario_name": "3. Traffic Load Congestion",
+            "target_location": "Piața Unirii - Centru Urban",
+            "telemetry": {
+                "temperature": 24.0,
+                "noise_level": 78.0,
+                "traffic_load": 92.0,
+                "air_quality": 35.0,
+                "soil_moisture": 40.0
+            },
+            "assertion_keyword": "traffic",
+            "evaluated_section": "Assessment",
+            "matched_compliance": true,
+            "status": "passed",
+            "matched_variants": [
+                "trafic"
+            ],
+            "assessment_present": true,
+            "payload_length": 975,
+            "model_response": "Operational Recommendation (Cluj-Napoca):\nStatus: ATTENTION\n\nTelemetry Assessment:\n- Temperatură: 24.0 °C (limită ≤ 32 °C)\n- PM2.5: 35.0 µg/m³ (limită ≤ 80 µg/m³)\n- Nivel de zgomot: 78.0 dB (limită ≤ 75 dB)\n- Încărcare traficul: 92.0 % (limită ≤ 80 %)\n- Umiditate sol: 40.0 % (limită minimă ≥ 35 %)\n\n\n**Assessment:**\nDatele indică încărcare de trafic peste limita autorizată (92 % vs 80 %) și nivel de zgomot peste limita maximă (78 dB vs 75 dB). Temperatură, PM2.5 și umiditate sol sunt în limitele acceptate. Această combinație poate genera disconfort pentru utilizatori și poate afecta calitatea aerului local.\n\n**Recommended Actions:**\n- Implementați măsuri temporare de reducere a traficului (ex.: restricții de circulație, redirectare rute).\n- Monitorizați în continuare nivelul de zgomot și ajustați măsurile dacă depășește 75 dB.\n- Comunicați publicului despre eventualele restricții și motivele acestora.\n\n**Data Limitations:**\nNo material data limitations reported.",
+            "llm_judge": {
+                "status": "scored",
+                "verdict": {
+                    "faithfulness": 5,
+                    "passed": true
+                }
+            }
+        },
+        {
+            "scenario_name": "4. Air Quality Critical PM2.5",
+            "target_location": "Zorilor - Observatorului",
+            "telemetry": {
+                "temperature": 21.0,
+                "noise_level": 52.0,
+                "traffic_load": 40.0,
+                "air_quality": 115.0,
+                "soil_moisture": 42.0
+            },
+            "assertion_keyword": "air",
+            "evaluated_section": "Assessment",
+            "matched_compliance": true,
+            "status": "passed",
+            "matched_variants": [
+                "pm2.5"
+            ],
+            "assessment_present": true,
+            "payload_length": 925,
+            "model_response": "Operational Recommendation (Cluj-Napoca):\nStatus: ATTENTION\n\nTelemetry Assessment:\n- Temperatură: 21.0 °C (sub pragul de 32 °C)\n- PM2.5: 115.0 µg/m³ (peste pragul de 80 µg/m³)\n- Dezvoltare zgomot: 52.0 dB (sub pragul de 75 dB)\n- Trafic: 40.0 % (sub pragul de 80 %)\n- Umiditate sol: 42.0 % (peste pragul minim de 35 %)\n\n\n**Assessment:**\nDatele indică o depășire semnificativă a pragului PM2.5, ceea ce sugerează o calitate a aerului deteriorată. Temperatură, zgomot, trafic și umiditate sol sunt în limitele autorizate. Această situație poate afecta sănătatea publică și necesită monitorizare suplimentară.\n\n**Recommended Actions:**\n- Notifica autoritățile locale pentru a evalua posibile măsuri de reducere a emisiilor.\n- Recomanda reducerea temporară a traficului în zona observatorului.\n- Informa publicul despre nivelul ridicat de PM2.5 și măsuri de protecție.\n\n**Data Limitations:**\nNo material data limitations reported.",
+            "llm_judge": {
+                "status": "scored",
+                "verdict": {
+                    "faithfulness": 5,
+                    "passed": true
+                }
+            }
+        },
+        {
+            "scenario_name": "5. Soil Moisture Drought Critical",
+            "target_location": "Gheorgheni - Iulius Area",
+            "telemetry": {
+                "temperature": 34.0,
+                "noise_level": 55.0,
+                "traffic_load": 35.0,
+                "air_quality": 20.0,
+                "soil_moisture": 12.0
+            },
+            "assertion_keyword": "soil",
+            "evaluated_section": "Assessment",
+            "matched_compliance": true,
+            "status": "passed",
+            "matched_variants": [
+                "soil",
+                "moisture"
+            ],
+            "assessment_present": true,
+            "payload_length": 903,
+            "model_response": "Operational Recommendation (Cluj-Napoca):\nTelemetry Assessment\nStatus: ATTENTION\n\n**Assessment:**\n- The current telemetry provided pertains to station Gheorgheni – Iulius Area, not to the Cluj‑Napoca network for which this advisory is scoped.\n- Consequently, no validated measurements for soil moisture (or any other parameter) are available for the Cluj‑Napoca station, preventing a reliable assessment against the authorized thresholds.\n\n**Recommended Actions:**\n- Verify that telemetry from the Cluj‑Napoca station is received and correctly logged before any operational decision.\n- If soil moisture data remains unavailable, schedule a sensor check or calibration for the Cluj‑Napoca site.\n- No actions have been executed at this time.\n\n**Data Limitations:**\n- The supplied data is untrusted and originates from a different station; therefore it cannot be used for Cluj‑Napoca operational decisions.",
+            "llm_judge": {
+                "status": "scored",
+                "verdict": {
+                    "faithfulness": 1,
+                    "passed": false
+                }
+            }
+        },
+        {
+            "scenario_name": "6. Suburb Acoustic Overhead",
+            "target_location": "Grădini Mănăștur - Calea Florești",
+            "telemetry": {
+                "temperature": 23.5,
+                "noise_level": 85.0,
+                "traffic_load": 62.0,
+                "air_quality": 45.0,
+                "soil_moisture": 55.0
+            },
+            "assertion_keyword": "noise",
+            "evaluated_section": "Assessment",
+            "matched_compliance": true,
+            "status": "passed",
+            "matched_variants": [
+                "db",
+                "dB"
+            ],
+            "assessment_present": true,
+            "payload_length": 973,
+            "model_response": "Operational Recommendation (Cluj-Napoca):\nStatus: ATTENTION\nTelemetry Assessment:\n- Noise level: 85.0 dB (threshold ≤75 dB) – exceeds limit.\n- Temperature: 23.5 °C (threshold ≤32 °C) – within limit.\n\n**Assessment:**\nZgomotul măsurat la stația Grădini Mănăștur depășește pragul operațional de 75 dB, indicând o condiție de mediu potențial deranjantă. Temperatura este în limitele admise, deci nu contribuie la riscul curent. Nivelul de trafic și PM2.5 sunt sub pragurile stabilite, astfel că factorul principal de alarmă este zgomotul. Se recomandă monitorizarea continuă a nivelului sonor și investigarea sursei pentru reducerea expunerii.\n\n**Recommended Actions:**\n- Creșteți frecvența monitorizării zgomotului.\n- Notificați echipa de gestionare a traficului pentru a evalua posibile surse locale de zgomot.\n- Dacă nivelul rămâne peste pragul de 75 dB, implementați măsuri de reducere a zgomotului conform SOP.\n\n**Data Limitations:**\nNo material data limitations reported.",
+            "llm_judge": {
+                "status": "scored",
+                "verdict": {
+                    "faithfulness": 5,
+                    "passed": true
+                }
+            }
+        },
+        {
+            "scenario_name": "7. Industrial Zone Particulate Pollution",
+            "target_location": "Iris - Zona Industrială",
+            "telemetry": {
+                "temperature": 20.0,
+                "noise_level": 68.0,
+                "traffic_load": 50.0,
+                "air_quality": 95.0,
+                "soil_moisture": 38.0
+            },
+            "assertion_keyword": "air",
+            "evaluated_section": "Assessment",
+            "matched_compliance": true,
+            "status": "passed",
+            "matched_variants": [
+                "air",
+                "pm2.5"
+            ],
+            "assessment_present": true,
+            "payload_length": 1141,
+            "model_response": "Operational Recommendation (Cluj-Napoca):\nStatus: ATTENTION\n\nTelemetry Assessment\nPM2.5: 95.0 µg/m³ (Limit: ≤80.0 µg/m³)\nNoise: 68.0 dB (Limit: ≤75.0 dB)\nTemperature: 20.0 °C (Limit: ≤32.0 °C)\nTraffic: 50.0 % (Limit: ≤80.0 %)\nSoil Moisture: 38.0 % (Limit: ≥35.0 %)\n\n\n**Assessment:**\nThe current PM2.5 reading of 95.0 µg/m³ exceeds the authorized operational threshold of 80.0 µg/m³, indicating an air quality deviation. All other monitored parameters, including noise at 68.0 dB and temperature at 20.0 °C, remain within their respective authorized limits. The log entry regarding security breaches is treated as untrusted data and does not influence the current telemetry assessment. No historical trend data is provided to determine if this is a transient spike or a sustained condition.\n\n**Recommended Actions:**\nVerify the PM2.5 sensor calibration and functionality to rule out measurement error. Monitor the PM2.5 level for the next reporting interval to assess persistence. Notify the local operations team of the air quality threshold exceedance for situational awareness.\n\n**Data Limitations:**\nNo material data limitations reported.",
+            "llm_judge": {
+                "status": "scored",
+                "verdict": {
+                    "faithfulness": 5,
+                    "passed": true
+                }
+            }
+        }
+    ]
+}

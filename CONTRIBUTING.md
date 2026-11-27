@@ -10,8 +10,8 @@ All environment operations must be performed exclusively using the high-speed `u
 
 1. **Clone and initialize the environment:**
    ```bash
-   git clone https://github.com/Codedchic25/smartcity-cluj-iot-platform.git
-   cd smartcity-cluj-iot-platform
+   git clone https://github.com/Codedchic25/smartcity-cluj-ai-platform.git
+   cd smartcity-cluj-ai-platform
    uv sync
    ```
 
@@ -39,7 +39,7 @@ The project enforces strict static analysis. Any code violating these rules will
 ## 🧪 Test Suite, Security & MLOps Integration
 
 * **Backend Regression Tests:** Whenever you add new features or update localization dictionaries, run the full test suite using `uv run pytest`. This executes all automated tests and automatically generates the structured metric report `ai_tests/pytest_report.json`.
-* **Semantic Validation:** Changes to `app/ai/prompts.yaml` require re-running `run_llm_eval.py` to verify alignment across critical urban profiles. The evaluator uses `llama-3.1-8b-instant` for generation and `llama-3.3-70b-versatile` for judging, and writes `ai_tests/llm_eval_report.json`.
+* **Semantic Validation:** Changes to `app/ai/prompts.yaml` require re-running `run_llm_eval.py` to verify alignment across critical urban profiles. The evaluator uses `qwen/qwen3.8-27b -> gemini-3.5-flash` for generation and compact JSON judging (`max_tokens=40`), and writes `ai_tests/llm_eval_report.json`.
 * **RAG & Guardrails:** Run `uv run python ai_tests/run_guardrail_eval.py` for the seven native filtering, sanitization, and numerical grounding checks. The report is written to `ai_tests/rag_guardrails_report.json`.
 * **Live LLM Evaluation:** Run `uv run python ai_tests/run_llm_eval.py` with a configured Groq API key. Results are recorded in `ai_tests/llm_eval_report.json`; do not assume prior runs guarantee a current passing score.
 

@@ -85,7 +85,7 @@ keys in public repositories, logs, screenshots, or documentation.
 
 ### 🚨 Issue: Sidebar or chat windows display error messages or rate-limit warnings
 * **Cause:** The external Groq Cloud API is experiencing a temporary network outage or timeout, or all configured API keys have expired.
-* **Fail-Safe Mechanism:** The application rotates through `GROQ_API_KEY`, `GROQ_API_KEY_1`, `GROQ_API_KEY_2` (or the comma-separated `GROQ_API_KEYS` list) upon receiving HTTP 401, 429, or 5xx responses. Keys can be configured in `.env` or Streamlit Cloud Secrets. If all keys are exhausted, the UI displays a controlled error message.
+* **Fail-Safe Mechanism:** The application rotates through `GROQ_API_KEY`, `GROQ_API_KEY_1`, `GROQ_API_KEY_2` (or the comma-separated `GROQ_API_KEYS` list) upon receiving HTTP 401, 429, or 5xx responses. Keys can be configured in `.env` or Streamlit Cloud Secrets. If all Groq keys or candidate models are exhausted, `FallbackAiProviderRouter` automatically fails over to Google Gemini (`gemini-3.5-flash` -> `gemini-3.5-flash-lite` -> `gemini-3.6-flash` -> `gemini-3.8-flash`) via `GEMINI_API_KEY`; only if both providers are unavailable does the UI display a controlled error message.
 * **Impact:** The rest of the platform remains **100% functional and locally isolated**. SQLite telemetry collection, NumPy Pearson correlation matrix rendering, Plotly chart generation, and cooldown-throttled alert logging in `security_alerts.log` continue running uninterrupted and completely offline.
 
 The Groq client is configured with `max_retries=0`, so the SDK does not wait
@@ -95,7 +95,7 @@ requires an explicit button click; identical prompt, telemetry, and language
 inputs reuse a cached result for up to 300 seconds, reducing repeated token use.
 
 ### 🚨 Issue: `Received an empty message context response` or `0.0%` LLM Scenario Compliance on reasoning models
-* **Cause:** Reasoning-capable models (such as `openai/gpt-oss-20b`, `openai/gpt-oss-120b`, `qwen3`, or `deepseek-r1`) allocate completion tokens to internal chain-of-thought reasoning before emitting the final JSON payload. If `max_tokens` is set too low (e.g., `800`), the model exhausts its token budget during internal reasoning and returns an empty `message.content` string (`""`), causing UI recommendations to appear blank and scenario evaluations to fail.
+* **Cause:** Reasoning-capable models (such as `qwen/qwen3.8-27b`, `openai/gpt-oss-20b`, `openai/gpt-oss-120b`, or `deepseek-r1`) allocate completion tokens to internal chain-of-thought reasoning before emitting the final JSON payload. If `max_tokens` is set too low (e.g., `800`), the model exhausts its token budget during internal reasoning and returns an empty `message.content` string (`""`), causing UI recommendations to appear blank and scenario evaluations to fail.
 * **Resolution:**
   1. Ensure `GroqProvider` (`app/ai/groq_provider.py`) dynamically allocates an expanded token budget (`max_tokens=2048`) for reasoning models while preserving `max_tokens=800` for standard instruction models (`llama-3.3-70b-versatile`, `llama-3.1-8b-instant`).
   2. Treat empty `message.content` responses as a retryable model failure so the gateway automatically falls back to the next candidate model in `FALLBACK_MODELS` instead of returning early.
@@ -124,4 +124,25 @@ in-process guardrails concurrently by default and does not call Groq. It reuses
 the latest LLM evaluation report or displays **Cached / Skipped (Fast Mode)**
 when no report exists. To use API tokens for a fresh LLM evaluation, select
 **Include Live LLM Eval (uses API tokens)** next to the button before
-starting verification. The live evaluator tries Groq first and may fall back to Gemini, using a fast 3-scenario sample (`max_scenarios=3`) with the non-reasoning `llama-3.1-8b-instant` judge in the UI (or `--scenarios N` in CLI) to avoid free-tier HTTP 429 TPM rate limits. If `python-dotenv` logs a parse warning at startup, ensure `.env` entries contain no spaces around `=` (e.g., `GROQ_API_KEY_1=gsk_...`).
+starting verification. The live evaluator tries Groq first and may fall back to Gemini, using a fast 3-scenario sample (`max_scenarios=3`) with the compact JSON judge (`qwen/qwen3.8-27b -> gemini-3.5-flash`) (or `--scenarios N` in CLI) to avoid free-tier HTTP 429 TPM rate limits. If `python-dotenv` logs a parse warning at startup, ensure `.env` entries contain no spaces around `=` (e.g., `GROQ_API_KEY_1=gsk_...`).
+
+
+---
+
+## Production Incident Post-Mortems & Engineering Lessons (Nov 2026)
+
+1. **Model Deprecation & Live Catalog Verification:**
+   - **Symptom:** Legacy model IDs (`gemini-2.5-flash` returning `HTTP 404 NOT_FOUND`; legacy Llama IDs removed from active Groq tiers) caused avoidable retry loops.
+   - **Fix:** Audited live provider catalogs (`models.list()`) and standardized on active 2026 models: `qwen/qwen3.8-27b` (with `openai/gpt-oss-20b` and `openai/gpt-oss-120b` fallbacks) on Groq, failing over to `gemini-3.5-flash` (`gemini-3.5-flash-lite`, `gemini-3.6-flash`, `gemini-3.8-flash`) via the native `google-genai` SDK.
+2. **Reasoning-Model Token Starvation (`max_tokens` Budgeting):**
+   - **Symptom:** Reasoning models (`qwen/qwen3.8-27b`, `openai/gpt-oss-20b`, `gemini-3.5-flash`) consume initial completion tokens on internal `<think>` chains before outputting JSON. Tight budgets (`max_tokens=256` or `800`) truncated payloads mid-JSON.
+   - **Fix:** Configured `max_tokens=2048` in `GroqProvider`, `MAX_COMPLETION_TOKENS=2500` in `GeminiOpenAiProvider`, and `max_tokens=1500` in `run_llm_eval.py`, stripping `<think>...</think>` blocks prior to validation.
+3. **Structured JSON Contract Enforcement (`output_format` + `response_schema`):**
+   - **Symptom:** Omitting `output_format` when `system_prompt_only=True` caused generic JSON mode to emit ad-hoc telemetry keys instead of the `{"answer": "..."}` schema.
+   - **Fix:** Unified `system_instructions`, `output_format`, and `anti_hallucination_rules` in `PromptTemplateLoader` and enforced Pydantic `response_schema` constrained decoding in `GeminiOpenAiProvider`.
+4. **Zero-Downtime Multi-Key Rotation Under `HTTP 429`:**
+   - **Symptom:** Burst evaluation workloads triggered free-tier `HTTP 429` rate limits on single keys.
+   - **Fix:** Set `max_retries=0` on underlying SDK clients and delegated retry/rotation to `GroqProvider` (`GROQ_API_KEY_1` <-> `GROQ_API_KEY_2`) and `FallbackAiProviderRouter` (-> Gemini), sustaining 100.0% scenario compliance (7/7) and 99/99 Pytest assertions.
+5. **In-Process Test Isolation in Deployed Cloud Runtimes (`st.secrets`):**
+   - **Symptom:** Running `pytest` inside a deployed Streamlit Cloud container failed 3 authentication unit tests because live `st.secrets` (`PLATFORM_ADMIN_USER`, `PLATFORM_ADMIN_PASS`) overrode `monkeypatch.setenv(...)`.
+   - **Fix:** Added an `autouse=True` fixture in `ai_tests/test_app_bootstrap.py` (`monkeypatch.setitem(st.__dict__, "secrets", {})`) so unit tests remain hermetically isolated both locally and when triggered live from the Cloud UI.

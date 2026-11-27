@@ -22,8 +22,8 @@ def test_markdown_docs_reflect_latest_architecture_and_test_count() -> None:
         assert keyword in architecture, f"Missing '{keyword}' in ARCHITECTURE.md"
         assert keyword in changelog, f"Missing '{keyword}' in CHANGELOG.md"
 
-    assert "97" in testing, "TESTING.md must document the 97 passing tests"
-    assert "97" in architecture, "ARCHITECTURE.md must document the 97 passing tests"
+    assert "99" in testing, "TESTING.md must document the 99 passing tests"
+    assert "99" in architecture, "ARCHITECTURE.md must document the 99 passing tests"
 
 
 def test_root_markdown_files_are_in_english() -> None:

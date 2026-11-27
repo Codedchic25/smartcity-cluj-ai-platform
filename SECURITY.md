@@ -26,7 +26,7 @@ The platform enforces a multi-layered local security architecture:
 
 ## 2. Credential & Urban Secret Management
 
-- **Private Key Isolation**: All sensitive credentials (`GROQ_API_KEY`) and administrative accounts are completely decoupled from source code and stored exclusively inside the local `.env` file (or Streamlit Cloud Secrets).
+- **Private Key Isolation**: All sensitive credentials (`GROQ_API_KEY*`, `GEMINI_API_KEY`, `SESSION_SECURITY_TOKEN`) and administrative accounts are completely decoupled from source code and stored exclusively inside the local `.env` file (or Streamlit Cloud Secrets).
 - **Argon2id Password Hashing:** Administrative passwords are stored as Argon2id encoded hashes and are never stored in plaintext.
 - **Production Secret Leak Prevention**: The `.env` file is explicitly excluded via `.gitignore` and `.dockerignore`. No production keys or certificates ever enter public version control (GitHub).
 - **Container Hardening**: Running the platform inside a Docker container isolates application processes from the Host OS. All non-essential ports are closed, exposing solely the standard communication port `8501` protected by Docker network directives.

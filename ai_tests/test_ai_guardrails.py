@@ -45,8 +45,9 @@ def test_groq_provider_uses_active_models_before_any_fallback() -> None:
     """Prefer current Groq production models and skip unavailable legacy Llama IDs."""
     provider = groq_provider.GroqProvider()
 
-    assert provider.configured_model == "openai/gpt-oss-20b"
+    assert provider.configured_model == "qwen/qwen3.8-27b"
     assert provider._candidate_models() == [
+        "qwen/qwen3.8-27b",
         "openai/gpt-oss-20b",
         "openai/gpt-oss-120b",
     ]
@@ -105,12 +106,12 @@ def test_gemini_openai_provider_uses_fallback_model_and_grounding(
     )
 
     assert response.startswith("**Assessment:**")
-    assert provider.configured_model == "gemini-2.5-flash-lite"
+    assert provider.configured_model == "gemini-3.5-flash"
     assert provider._candidate_models() == [
-        "gemini-2.5-flash-lite",
-        "gemini-3-flash-preview",
-        "gemini-3.1-flash-lite",
-        "gemini-2.5-flash",
+        "gemini-3.5-flash",
+        "gemini-3.5-flash-lite",
+        "gemini-3.6-flash",
+        "gemini-3.8-flash",
     ]
     assert client_options == [
         {
@@ -123,7 +124,7 @@ def test_gemini_openai_provider_uses_fallback_model_and_grounding(
     assert GeminiOpenAiProvider.BASE_URL == (
         "https://generativelanguage.googleapis.com/v1beta/openai/"
     )
-    assert requests[0]["model"] == "gemini-2.5-flash-lite"
+    assert requests[0]["model"] == "gemini-3.5-flash"
     assert requests[0]["messages"][0]["content"].startswith("YAML policy\n\n")
     assert "evidence-bound Smart City telemetry adviser" in requests[0]["messages"][0]["content"]
     assert requests[0]["response_format"] == {"type": "json_object"}
@@ -161,7 +162,7 @@ def test_fallback_router_uses_gemini_after_groq_rate_limit() -> None:
             }
 
     class WorkingGemini:
-        configured_model = "gemini-2.5-flash-lite"
+        configured_model = "gemini-3.5-flash-lite"
 
         def generate_completion(
             self,
@@ -198,7 +199,7 @@ def test_fallback_router_uses_gemini_after_groq_rate_limit() -> None:
     assert telemetry["prompt_tokens"] == 30
     assert telemetry["completion_tokens"] == 10
     assert telemetry["total_tokens"] == 40
-    assert router.configured_model == "groq-model -> gemini-2.5-flash-lite"
+    assert router.configured_model == "groq-model -> gemini-3.5-flash-lite"
 
 
 def test_fallback_router_keeps_successful_groq_response() -> None:
@@ -249,7 +250,7 @@ def test_ai_assistant_defaults_to_fallback_router() -> None:
     component = UrbanAiAssistantComponent(context_reader=SimpleNamespace())  # type: ignore[arg-type]
 
     assert isinstance(component._ai_provider, FallbackAiProviderRouter)
-    assert "gemini-2.5-flash-lite" in component._ai_cache_key
+    assert "gemini-3.5-flash" in component._ai_cache_key
 
 
 def test_prompt_registry_loads_compact_yaml_with_all_runtime_variables() -> None:
@@ -877,8 +878,8 @@ def test_llm_evaluator_uses_adaptive_429_retries(
     from ai_tests import run_llm_eval
 
     orchestrator = run_llm_eval.LlmEvaluationOrchestrator()
-    assert orchestrator.MODEL_TARGET == "openai/gpt-oss-20b"
-    assert orchestrator._judge_evaluator.JUDGE_MODEL == "openai/gpt-oss-20b"
+    assert orchestrator.MODEL_TARGET == "qwen/qwen3.8-27b"
+    assert orchestrator._judge_evaluator.JUDGE_MODEL == "qwen/qwen3.8-27b"
     monkeypatch.setattr(
         orchestrator,
         "_wait_for_request_slot",
@@ -1961,7 +1962,7 @@ def test_gemini_openai_provider_tries_configured_model_before_fallbacks(
         def create(**request: Any) -> SimpleNamespace:
             model = request["model"]
             attempted_models.append(model)
-            if model != "gemini-2.5-flash":
+            if model != "gemini-3.8-flash":
                 raise OpenAIError(f"{model} unavailable")
             return SimpleNamespace(
                 choices=[
@@ -1980,10 +1981,10 @@ def test_gemini_openai_provider_tries_configured_model_before_fallbacks(
     assert custom_provider.configured_model == "gemini-2.5-pro"
     assert custom_provider._candidate_models() == [
         "gemini-2.5-pro",
-        "gemini-2.5-flash-lite",
-        "gemini-3-flash-preview",
-        "gemini-3.1-flash-lite",
-        "gemini-2.5-flash",
+        "gemini-3.5-flash-lite",
+        "gemini-3.5-flash",
+        "gemini-3.6-flash",
+        "gemini-3.8-flash",
     ]
 
     response = custom_provider.generate_completion(
@@ -1993,22 +1994,22 @@ def test_gemini_openai_provider_tries_configured_model_before_fallbacks(
     assert response == "Temperature is 24 °C."
     assert attempted_models == [
         "gemini-2.5-pro",
-        "gemini-2.5-flash-lite",
-        "gemini-3-flash-preview",
-        "gemini-3.1-flash-lite",
-        "gemini-2.5-flash",
+        "gemini-3.5-flash-lite",
+        "gemini-3.5-flash",
+        "gemini-3.6-flash",
+        "gemini-3.8-flash",
     ]
 
     in_list_provider = GeminiOpenAiProvider(
-        model_target="gemini-2.5-flash",
+        model_target="gemini-3.8-flash",
         client_factory=client_factory,
     )
-    assert in_list_provider.configured_model == "gemini-2.5-flash"
+    assert in_list_provider.configured_model == "gemini-3.8-flash"
     assert in_list_provider._candidate_models() == [
-        "gemini-2.5-flash",
-        "gemini-2.5-flash-lite",
-        "gemini-3-flash-preview",
-        "gemini-3.1-flash-lite",
+        "gemini-3.8-flash",
+        "gemini-3.5-flash-lite",
+        "gemini-3.5-flash",
+        "gemini-3.6-flash",
     ]
 
 

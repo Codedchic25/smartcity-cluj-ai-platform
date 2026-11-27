@@ -91,6 +91,14 @@ def test_engine_initialization_seeds_empty_database_without_overwriting(
 # ---------------------------------------------------------------------------
 
 
+@pytest.fixture(autouse=True)
+def _isolate_streamlit_secrets(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Prevent deployed Streamlit Cloud secrets from overriding test env vars."""
+    import streamlit as st
+
+    monkeypatch.setitem(st.__dict__, "secrets", {})
+
+
 def test_authentication_accepts_valid_credentials(monkeypatch: pytest.MonkeyPatch) -> None:
     """Accept valid credentials using an Argon2id password hash."""
     password = "test-password"

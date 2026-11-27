@@ -251,7 +251,7 @@ class LlmJudgeProvider(Protocol):
 class LlmJudgeEvaluator:
     """Score each response against its scenario's authorized telemetry evidence."""
 
-    JUDGE_MODEL: Final[str] = "openai/gpt-oss-20b"
+    JUDGE_MODEL: Final[str] = "qwen/qwen3.8-27b"
 
     def __init__(
         self,
@@ -566,7 +566,7 @@ class LlmEvaluationOrchestrator:
     managing rate limit backoffs, and calculating multi-language text compliance.
     """
 
-    MODEL_TARGET: Final[str] = "openai/gpt-oss-20b"
+    MODEL_TARGET: Final[str] = "qwen/qwen3.8-27b"
     MAX_RETRIES: Final[int] = 3
     FALLBACK_REQUEST_INTERVAL_SECONDS: Final[float] = 4.5
     RATE_LIMIT_BACKOFF_SECONDS: Final[float] = 15.0
@@ -824,7 +824,7 @@ class LlmEvaluationOrchestrator:
                 system_prompt=self._loader.system_prompt,
                 system_prompt_only=True,
                 temperature=0.0,
-                max_tokens=256,
+                max_tokens=1500,
             )
             if not isinstance(response_text, str) or not response_text.strip():
                 raise RuntimeError("Empty provider payload returned (payload_length=0).")
